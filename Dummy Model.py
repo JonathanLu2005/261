@@ -25,10 +25,10 @@ Group = 10
 
 # Store time for each group
 TimeForEachDirection = {
-    "North": [],
-    "East": [],
-    "South": [],
-    "West": []
+    "North": [0],
+    "East": [0],
+    "South": [0],
+    "West": [0]
 }
 
 # Store queue for each group
@@ -47,9 +47,18 @@ CurrentCarsPassed = {
     "West": 0
 }
 
+# Remaining cars length
+RemainingCars = {
+    "North": 0,
+    "East": 0,
+    "South": 0,
+    "West": 0
+}
+
 # Run simulation for x many hours
 for x in range(0, HoursRanFor):
     SimulationLength = 60 * 60
+    #GreenPeriodWait = 0
 
     while SimulationLength > 0:
         GreenPeriodWait = 0
@@ -61,7 +70,7 @@ for x in range(0, HoursRanFor):
             CurrentCarsPassed[direction] += Group
             
             # Time is how long they've to wait for their green period + the vehicles in front of them
-            TimeForEachDirection[direction] = max(TimeForEachDirection[direction]) + GreenPeriodWait
+            TimeForEachDirection[direction].append(max(TimeForEachDirection[direction]) + GreenPeriodWait)
 
             # Increment for how long the next direction need to wait for
             GreenPeriodWait += TrafficLightDuration[direction]
@@ -70,3 +79,24 @@ for x in range(0, HoursRanFor):
         SimulationLength -= GreenPeriodWait
 
 # While loop allow us to manage time and queue, whilst the for loop allow us to manage how long the simulation runs for
+
+# Calculate remaining vehicles left to ensure VPH is met properly
+for direction in TrafficLightSequence:
+    RemainingCars[direction] = (VehiclePerHour[direction] * HoursRanFor) - CurrentCarsPassed[direction] 
+
+def PrintFormat(GivenHashmap):
+    for direction in TrafficLightSequence:
+        print(direction + ": " + str(GivenHashmap[direction]))
+    print("\n")
+
+print("Time for each direction")
+PrintFormat(TimeForEachDirection)
+
+print("Queue for each direction")
+PrintFormat(QueueForEachDirection)
+
+print("Current cars passed")
+PrintFormat(CurrentCarsPassed)
+
+print("Remaining cars left")
+PrintFormat(RemainingCars)
