@@ -3,10 +3,29 @@ from flask import Flask, render_template, request, jsonify
 # Create web app
 app = Flask(__name__)
 
+# Dummy database
+models = []
+
 # Model page
-@app.route("/", methods=["POST","GET"])
+@app.route("/", methods=["GET"])
 def modelPage():
     return render_template("modelPage.html")
+
+# Add model to model page
+@app.route('/addModel', methods=["POST"])
+def addModel():
+    modelData = request.json 
+
+    if not modelData or 'name' not in modelData: 
+        return jsonify({"Error": "Invalid Data"}), 400 
+    
+    newModel = {
+        "id": len(models) + 1,
+        "name": modelData["name"],
+    }
+
+    models.append(newModel)
+    return jsonify(newModel)
 
 # Junction page
 @app.route("/junctionPage", methods=["POST", "GET"])
