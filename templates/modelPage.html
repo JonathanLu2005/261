@@ -49,6 +49,145 @@ Your Models
                             <label for="simulationLength" class="form-label">Simulation Length</label>
                             <input type="number" class="form-control" id="simulationLength" name="simulationLength" required>
                         </div>
+
+                        <br><br>
+
+                        <div class="mb-3">
+                            <label for="simulationTime" class="form-label">Simulation Time</label>
+                            <input type="number" step="0.01" class="form-control" id="simulationTime" name="simulationTime" required>
+                        </div>
+                    </div>
+
+                    <!-- Northbound -->
+                    <div class="step d-none" id="step3">
+                        <div class="mb-3">
+                            <label for="northBoundNorth" class="form-label">Northbound North</label>
+                            <input type="number" class="form-control" id="northBoundNorth" name="northBoundNorth" required>
+                        </div>
+                        
+                        <br><br>
+
+                        <div class="mb-3">
+                            <label for="northBoundEast" class="form-label">Northbound East</label>
+                            <input type="number" class="form-control" id="northBoundEast" name="northBoundEast" required>
+                        </div>
+
+                        <br><br>
+
+                        <div class="mb-3">
+                            <label for="northBoundWest" class="form-label">Northbound West</label>
+                            <input type="number" class="form-control" id="northBoundWest" name="northBoundWest" required>
+                        </div>
+                    </div>
+
+                    <!-- Southbound -->
+                    <div class="step d-none" id="step4">
+                        <div class="mb-3">
+                            <label for="southBoundSouth" class="form-label">Southbound South</label>
+                            <input type="number" class="form-control" id="southBoundSouth" name="southBoundSouth" required>
+                        </div>
+                        
+                        <br><br>
+
+                        <div class="mb-3">
+                            <label for="southBoundEast" class="form-label">Southbound East</label>
+                            <input type="number" class="form-control" id="southBoundEast" name="southBoundEast" required>
+                        </div>
+
+                        <br><br>
+
+                        <div class="mb-3">
+                            <label for="southBoundWest" class="form-label">Southbound West</label>
+                            <input type="number" class="form-control" id="southBoundWest" name="southBoundWest" required>
+                        </div>
+                    </div>
+
+                    <!-- Westbound -->
+                    <div class="step d-none" id="step5">
+                        <div class="mb-3">
+                            <label for="westBoundWest" class="form-label">Westbound West</label>
+                            <input type="number" class="form-control" id="westBoundWest" name="westBoundWest" required>
+                        </div>
+
+                        <br><br>
+
+                        <div class="mb-3">
+                            <label for="westBoundNorth" class="form-label">Westbound North</label>
+                            <input type="number" class="form-control" id="westBoundNorth" name="westBoundNorth" required>
+                        </div>
+
+                        <br><br>
+
+                        <div class="mb-3">
+                            <label for="westBoundSouth" class="form-label">Westbound South</label>
+                            <input type="number" class="form-control" id="westBoundSouth" name="westBoundSouth" required>
+                        </div>
+                    </div>
+
+                    <!-- Eastbound -->
+                    <div class="step d-none" id="step6">
+                        <div class="mb-3">
+                            <label for="eastBoundEast" class="form-label">Eastbound East</label>
+                            <input type="number" class="form-control" id="eastBoundEast" name="eastBoundEast" required>
+                        </div>
+
+                        <br><br>
+
+                        <div class="mb-3">
+                            <label for="eastBoundNorth" class="form-label">Eastbound North</label>
+                            <input type="number" class="form-control" id="eastBoundNorth" name="eastBoundNorth" required>
+                        </div>
+
+                        <br><br>
+
+                        <div class="mb-3">
+                            <label for="eastBoundSouth" class="form-label">Eastbound South</label>
+                            <input type="number" class="form-control" id="eastBoundSouth" name="eastBoundSouth" required>
+                        </div>
+                    </div>
+
+                    <!-- Vehicle information -->
+                    <div class="step d-none" id="step7">
+                        <div class="mb-3">
+                            <label for="vehicleTopSpeed" class="form-label">Vehicle Top Speed</label>
+                            <input type="number" class="form-control" id="vehicleTopSpeed" name="vehicleTopSpeed" required>
+                        </div>
+
+                        <br><br>
+
+                        <div class="mb-3">
+                            <label for="vehicleReactionTime" class="form-label">Vehicle Reaction Time</label>
+                            <input type="number" class="form-control" id="vehicleReactionTime" name="vehicleReactionTime" required>
+                        </div>
+
+                        <br><br>
+
+                        <div class="mb-3">
+                            <label for="vehicleStationaryDistance" class="form-label">Vehicle Stationary Distance</label>
+                            <input type="number" class="form-control" id="vehicleStationaryDistance" name="vehicleStationaryDistance" required>
+                        </div>
+                    </div>
+
+                    <!-- Weighting -->
+                    <div class="step d-none" id="step8">
+                        <div class="mb-3">
+                            <label for="maxWaitTimeWeight" class="form-label">Maximum Wait Time Weight</label>
+                            <input type="number" step="0.01" class="form-control" id="maxWaitTimeWeight" name="maxWaitTimeWeight" required>
+                        </div>
+
+                        <br><br>
+
+                        <div class="mb-3">
+                            <label for="averageWaitTimeWeight" class="form-label">Average Wait Time Weight</label>
+                            <input type="number" step="0.01" class="form-control" id="averageWaitTimeWeight" name="averageWaitTimeWeight" required>
+                        </div>
+
+                        <br><br>
+
+                        <div class="mb-3">
+                            <label for="maxQueueLengthWeight" class="form-label">Maximum Queue Length Weight</label>
+                            <input type="number" step="0.01" class="form-control" id="maxQueueLengthWeight" name="maxQueueLengthWeight" required>
+                        </div>
                     </div>
                 </div>
 
