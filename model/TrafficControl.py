@@ -74,19 +74,39 @@ class TrafficControl:
         frequency of pedestrian crossings and their duration, etc. This function runs until the junction has 
         been simulated for the duration specified by the user.
     """
+
     def junctionTimeManager(self, env):
         endTime = self.lengthOfSim + env.now
+
+        if(self.hasPedestrianCrossings):
+            timeOfLastCrossing = env.now
+            timeInBetweenCrossings = 60 / self.crossingRequestsPerHour
+            
+            while env.now < endTime:
+                # Cycle through the traffic light sequence suggested by the user
+                for direction in self.trafficLightSequence:
+                    self.junctionEntrances[direction].signalGreen() # Signal Green to this direction
+                    print(f"Signal Green to {direction} at {env.now}")
+                    yield env.timeout(self.trafficLightGreenTimes[direction]) # Give the green light time corresopnding to this junction entrance 
+                    print(f"Signal Red to {direction} at {env.now}")
+                    self.junctionEntrances[direction].signalRed()   # Signal Red to this direction
+                    
+                # Pedestrian Crossing logic goes here
+                if(env.now - timeOfLastCrossing > timeInBetweenCrossings):
+                    print(f"Pedestrian Crossing Starting at {env.now}")
+                    yield env.timeout(self.crossingPedestrianTime)
+                    print(f"Pedestrian Crossing Ending at {env.now}")
+                    timeOfLastCrossing = env.now
         
-        while env.now < endTime:
-            # Cycle through the traffic light sequence suggested by the user
-            for direction in self.trafficLightSequence:
-                self.junctionEntrances[direction].signalGreen() # Signal Green to this direction
-                print(f"Signal Green to {direction} at {env.now}")
-                yield env.timeout(self.trafficLightGreenTimes[direction]) # Give the green light time corresopnding to this junction entrance 
-                print(f"Signal Red to {direction} at {env.now}")
-                self.junctionEntrances[direction].signalRed()   # Signal Red to this direction
-                # Pedestrian Crossing logic goes here...
-       
+        else:
+            while env.now < endTime:
+                # Cycle through the traffic light sequence suggested by the user
+                for direction in self.trafficLightSequence:
+                    self.junctionEntrances[direction].signalGreen() # Signal Green to this direction
+                    print(f"Signal Green to {direction} at {env.now}")
+                    yield env.timeout(self.trafficLightGreenTimes[direction]) # Give the green light time corresopnding to this junction entrance 
+                    print(f"Signal Red to {direction} at {env.now}")
+                    self.junctionEntrances[direction].signalRed()   # Signal Red to this direction
 
         # Fetch Results from junction entrances and set them.
 

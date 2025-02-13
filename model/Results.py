@@ -23,7 +23,7 @@ class Results:
         self.westAvgWaitingTime = trafficControlInstance.westAvgWaitingTime
         self.westTotalVehiclesPassed = trafficControlInstance.westTotalVehiclesPassed
 
-        self.print_results()
+        self.print_results() # Comment this out in production
 
     def print_results(self):
         print(f"North Junction: Max Waiting Time = {self.northMaxWaitingTime}, Max Queue Length = {self.northMaxQueueLength}, "
@@ -47,5 +47,25 @@ def runModel(sideLengthOfJunction, lengthOfSim, simulationSecondLength, carSpeed
 
     return Results(simulation)
 
+"""
+    Note to front-end developers, you simply need to call runModel() with all of its paramaters and it will return a Results object which you can pick
+    through to get the results gathered from the simulation. (Refer to the definition of the Results class above to know how to do this).
 
-runModel(15, 300, 1, 15, 3, 1, 2, 2, None, None, None, None, [Direction.North, Direction.East, Direction.South, Direction.West], [10,60,30,60])
+    Paramaters will be listed in the order they need to be inputted into runModel:
+
+    sideLengthOfJunction: The side length of the junction in meters.
+    lengthOfSim: The length of the simulation in seconds. For example, if the simulation is 1 hour, this would be 3600.
+    simulationSecondLength: N/A at the moment, doesn't currently do anything yet - may use later.
+    carSpeed: Speed of cars in km/h.
+    carLength: Length of cars in meters
+    carStationaryDistance: How far the cars are from each other in meters.
+    carReactionTime: The delay car behind takes to respond to the car's changes in speed.
+    numberOfGeneralLanes: Number of general lanes (excluding bus lanes and cycle lanes and currently left turn lanes),
+    generalVPH: An array of arrays holding the VPH values. It is a 2D array in the form of [[North Bound Traffic Exiting North, North Bound Traffic Exiting East, North Bound Traffic Exiting West], [East Bound Traffic Exiting East, East Bound Traffic Exiting South, East Bound Traffic Exiting North], [South Bound Traffic Exiting South, South Bound Traffic Exiting West, East Bound Traffic Exiting East], [West Bound Traffic Exiting West, West Bound Traffic Exiting North, West Bound Traffic Exiting South]]
+    hasPedestrianCrossings: True or False
+    crossingPedestrianTime: How long pedestrians crossings last for in seconds. This should be None when no crossings occur.
+    crossingRequestsPerHour: The number of pedestrain crossings occuring each hour. This should be None when no crossings occur
+    trafficLightSequence: Specify the sequence in which traffic lights should trigger. Example: [Direction.North, Direction.East, Direction.South, Direction.West].
+    trafficLightGreenTimes: The following times are in seconds: [Green light time for North Arm, Green light time for East Arm, Green light time for South Arm, Green light time for West arm]
+"""
+runModel(15, 3600, 1, 15, 3, 1, 2, 2, [[10,10,10], [10,10,10], [10,10,10], [10,10,10]], True, 20, 1, [Direction.North, Direction.East, Direction.South, Direction.West], [10,60,30,60])
