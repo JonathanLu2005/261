@@ -33,8 +33,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 modelsFolder.appendChild(modelCard);
 
                 modelForm.reset();
-                const modelModal = new bootstrap.Modal.getInstance(document.getElementById('addModelModal'));
-                modelModal.hide();
+                const modelModal = document.getElementById('addModelModal');
+                const modalInstance = bootstrap.Modal.getInstance(modelModal); // Retrieve the modal instance
+                if (modalInstance) {
+                    modalInstance.hide();
+                }
             } else {
                 console.error("Failed to add model:", await modelResponse.text());
             }
