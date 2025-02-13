@@ -1,3 +1,10 @@
+from TrafficControl import TrafficControl, Direction
+from JunctionEntrance import Lane
+
+from enum import Enum
+import simpy
+
+
 class CarState(Enum):
     NotStationaryNorLeading = 1
     NotStationaryButLeading = 2
@@ -7,27 +14,22 @@ class CarState(Enum):
     InsideJunction = 6
 
 class Car:
-    def __init__(distanceFromNextCar, distanceFromJunctionEntrance, turningExitCardinality, carState, pointerToCarAhead, junctionEntrancePointer, junctionEntranceLane):
+    def __init__(self, distanceFromNextCar : int, distanceFromJunctionEntrance : int, turningExitCardinality : Direction, timeOfQueueStart : int, carState : CarState, pointerToCarAhead, junctionEntranceLane : Lane):
         self.distanceFromNextCar = distanceFromNextCar
         self.distanceFromJunctionEntrance = distanceFromJunctionEntrance
         self.turningExitCardinality = turningExitCardinality
-        self.timeOfQueueStart = someTimeLibrary.getTimeStamp    # Get the time of the queue start
-        self.currentState = carState                            # Depending on if it spawns on the junction entrance, if it spawns being the leader, or if it spanws behind another car.
-        self.length = TrafficControl.carLength                  # Grab the static variable of car length
+        self.timeOfQueueStart = timeOfQueueStart
+        self.currentState = carState                            # Depending on if it spawns on the junction entrance, if it spawns being the leader, or if it spanws behind another car.       
         self.pointerToCarBehind = None                          # There are no cars behind the car that was just added to the lane. 
         self.pointerToCarAhead = pointerToCarAhead
-        self.currentStateOfCarAhead = pointerToCarAhead.currentState # Get this by fetching the pointer to the car ahead.
-        self.junctionEntrancePointer = junctionEntrancePointer  # Pointer pointing to the junction entrance which the car is in so it can communicate with it when it enters the junction
-        self.junctionEntranceLane = junctionEntranceLane        # Integer indicating to the junction entrance which lane the car is in to remove it late
-        
-        # Make a call to the carTimeManager to begin acting.
-
+        self.junctionEntranceLane = junctionEntranceLane        # Integer indicating to the junction entrance which lane the car is in to remove it later
     
     """
         Used to alert the trailing car of this car’s new state. Used in the carTimeManager function
     """
     def notifyCarBehind():
         #...
+        print("stub")
 
     """
         Called by a car entering the junction to inform its junction entrance to remove it from its lane and 
@@ -35,6 +37,7 @@ class Car:
     """
     def notifyJunctionEntrance():
         #...
+        print("stub")
     
     """
         Manages the flow of time and changes of state of a car. If a moving car is notified by the car ahead 
@@ -46,5 +49,16 @@ class Car:
         will send a notification to all heads of the lanes to begin moving which starts this cascading of 
         notifications to begin moving. (See state diagram for a deeper explanation)
     """
-    def carTimeManager():
-        #...
+    def carTimeManager(self, env):
+        pass
+
+        # For now cars don't do anything
+        # lastUpdate = env.now
+        # while True:
+        #     if(self.currentState == CarState.StationaryOnJunctionEntrance and self.junctionEntranceLane.isGreen):
+        #         self.junctionEntranceLane.leadingCarEnteringJunction(env.now - self.timeOfQueueStart)
+        #     elif(self.currentState == CarState.StationaryOnJunctionEntrance and not self.junctionEntranceLane.isGreen):
+        #         pass
+        #     elif(self.currentState == CarState.NotStationaryButLeading and self.junctionEntranceLane.isGreen):
+                
+
