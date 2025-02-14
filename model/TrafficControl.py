@@ -10,6 +10,7 @@ class Direction(IntEnum):
 
 class TrafficControl:
     # Can declare Static variables here.
+    simulationTimeUnit = 0.01    # If this is 1/10, then it will take 10 time units in the simulation to simulate one second.
     carspeed = None
     carLength = None
     carStationaryDistance = None
@@ -22,23 +23,22 @@ class TrafficControl:
 
     simulationComplete = False
 
-    def __init__(self, sideLengthOfJunction, lengthOfSim, simulationSecondLength, carSpeed, carLength, carStationaryDistance, carReactionTime, numberOfGeneralLanes, generalVPH, hasLeftTurnLanes, hasRightTurnLanes,  hasPedestrianCrossings, crossingPedestrianTime, crossingRequestsPerHour, trafficLightSequence, trafficLightGreenTimes):
+    def __init__(self, sideLengthOfJunction, lengthOfSim, simulationTimeUnit, carSpeed, carLength, carStationaryDistance, carReactionTime, numberOfGeneralLanes, generalVPH, hasLeftTurnLanes, hasRightTurnLanes,  hasPedestrianCrossings, crossingPedestrianTime, crossingRequestsPerHour, trafficLightSequence, trafficLightGreenTimes):
         self.sideLengthOfJunction = sideLengthOfJunction
-        self.lengthOfSim = lengthOfSim
-        self.simulationSecondLength = simulationSecondLength
-        TrafficControl.carSpeed = carSpeed
+        self.lengthOfSim = TrafficControl.convertSecondsToTimeUnits(lengthOfSim)
+        TrafficControl.carSpeed = carSpeed * 0.44704 * simulationTimeUnit # Multiplying by 0.44704 converts mph to meters per second. Multiplying by the simulation time unit means meters per time unit.
         TrafficControl.carLength = carLength
         TrafficControl.carStationaryDistance = carStationaryDistance
-        TrafficControl.carReactionTime = carReactionTime
+        TrafficControl.carReactionTime = TrafficControl.convertSecondsToTimeUnits(carReactionTime)
         TrafficControl.numberOfGeneralLanes = numberOfGeneralLanes
         TrafficControl.generalVPH = generalVPH
         TrafficControl.hasLeftTurnLanes = hasLeftTurnLanes
         TrafficControl.hasRightTurnLanes = hasRightTurnLanes
         self.hasPedestrianCrossings = hasPedestrianCrossings
-        self.crossingPedestrianTime = crossingPedestrianTime
+        self.crossingPedestrianTime = TrafficControl.convertSecondsToTimeUnits(crossingPedestrianTime)
         self.crossingRequestsPerHour = crossingRequestsPerHour
         self.trafficLightSequence = trafficLightSequence
-        self.trafficLightGreenTimes = trafficLightGreenTimes
+        self.trafficLightGreenTimes = [TrafficControl.convertSecondsToTimeUnits(greenLightTime) for greenLightTime in trafficLightGreenTimes]
         self.directions = [Direction.North, Direction.East, Direction.South, Direction.West]
         self.junctionEntrances = [JunctionEntrance(direction) for direction in self.directions]
         
@@ -64,7 +64,7 @@ class TrafficControl:
         self.westAvgWaitingTime = None
         self.westTotalVehiclesPassed = None
 
-        self.transferTime = 6 # Assume transfer time is 6 seconds constant for all cars for now.
+        self.transferTime = TrafficControl.convertSecondsToTimeUnits(6) # Assume transfer time is 6 seconds constant for all cars for now.
         
         print("Init Simpy Environment")
 
@@ -86,7 +86,7 @@ class TrafficControl:
 
         if(self.hasPedestrianCrossings):
             timeOfLastCrossing = env.now
-            timeInBetweenCrossings = (60*60 / self.crossingRequestsPerHour) - self.crossingPedestrianTime
+            timeInBetweenCrossings = (TrafficControl.convertSecondsToTimeUnits(60*60) / self.crossingRequestsPerHour) - self.crossingPedestrianTime
             
             while env.now < endTime:
                 # Cycle through the traffic light sequence suggested by the user
@@ -139,7 +139,23 @@ class TrafficControl:
 
         TrafficControl.simulationComplete = True
 
+    """
+        Takes the time such that the time unit meaning was a second in simulation time and returns the real portion of time with respect to simulationTimeUnit
+    """
+    @staticmethod
+    def convertSecondsToTimeUnits(seconds):
+        return seconds / TrafficControl.simulationTimeUnit
+        # For example, if we want to wait one hour: 3600 seconds, we have to take into acount how many time units make up a second in the simlulation.
+        # If our simulation time unit is 0.1, then we would need to wait 3600*10 = 36,000 time units.
 
+    """
+        The inverse operation of the function above
+    """
+    @staticmethod
+    def convertTimeUnitsToSeconds(timeUnits):
+        return timeUnits * TrafficControl.simulationTimeUnit
+        # For example, if we want to wait one hour: 3600 seconds, we have to take into acount how many time units make up a second in the simlulation.
+        # If our simulation time unit is 0.1, then we would need to wait 3600*10 = 36,000 time units.
 
 
 
@@ -226,11 +242,11 @@ class JunctionEntrance:
         for _ in range(0, TrafficControl.numberOfGeneralLanes):
             self.generalLanes.append(Lane(cardinalDirectionOfJunctionEntrance))
         self.timeUntilJunctionIsEmpty = 0   # The junction is initially empty when the junction is created
-        self.isGreen = False                # Assume traffis signal is red when the junction entrance is created
-        self.totalWaitingTime = 0           # Initially no cars have waitied
-        self.numberOfVehiclesPassed = 0     # Initially no vehicles have passed
-        self.maxWaitingTime = -1        # Maximum default value (which is the maximum time a car has waited. Set to -1 as a N/A value to show no cars have entered the junction yet).
-        self.maxQueueLength = -1        # Maximum default value (which is the maximum length a queue has been. Set to -1 as a N/A value to show no queues were formed yet.)
+        # self.isGreen = False                # Assume traffis signal is red when the junction entrance is created
+        # self.totalWaitingTime = 0           # Initially no cars have waitied
+        # self.numberOfVehiclesPassed = 0     # Initially no vehicles have passed
+        # self.maxWaitingTime = -1        # Maximum default value (which is the maximum time a car has waited. Set to -1 as a N/A value to show no cars have entered the junction yet).
+        # self.maxQueueLength = -1        # Maximum default value (which is the maximum length a queue has been. Set to -1 as a N/A value to show no queues were formed yet.)
 
     """
         Called by the TrafficControl object. It is a blocking function terminating only when the junction is 
@@ -254,7 +270,7 @@ class JunctionEntrance:
         maxWaitingTime = -1
         for lane in self.generalLanes:
             maxWaitingTime = max(maxWaitingTime, lane.maxWaitingTime)
-        return maxWaitingTime
+        return TrafficControl.convertTimeUnitsToSeconds(maxWaitingTime)
     
     def getMaxQueueLength(self):
         maxQueueLength = -1
@@ -268,7 +284,7 @@ class JunctionEntrance:
         for lane in self.generalLanes:
             totalWaitingTime += lane.totalWaitingTime
             totalNumberOfVehiclesPassed += lane.numberOfVehiclesPassed
-        return totalWaitingTime / totalNumberOfVehiclesPassed if totalNumberOfVehiclesPassed > 0 else -1
+        return TrafficControl.convertTimeUnitsToSeconds(totalWaitingTime) / totalNumberOfVehiclesPassed if totalNumberOfVehiclesPassed > 0 else -1
     
     def getTotalVehiclesPassed(self):
         totalNumberOfVehiclesPassed = 0
@@ -278,7 +294,7 @@ class JunctionEntrance:
 
     def carGenerator(self, env, possibleLanesToSpawn, vph, exitCardinality):
 
-        timeInBetweenVehicleSpawns = 60*60 / vph
+        timeInBetweenVehicleSpawns = TrafficControl.convertSecondsToTimeUnits(60*60) / vph
         
         while True and not TrafficControl.simulationComplete:
             print(f"Vehicle spawning at {env.now} in junction {self.cardinalDirectionOfJunctionEntrance}")
