@@ -1,5 +1,6 @@
 from enum import IntEnum
 import simpy
+import random
 
 class Direction(IntEnum):
     North = 0
@@ -15,10 +16,13 @@ class TrafficControl:
     carReactionTime = None
     numberOfGeneralLanes = None
     generalVPH = None
-    instance = None
+    hasLeftTurnLanes = None
+    hasRightTurnLanes = None
+
+
     simulationComplete = False
 
-    def __init__(self, sideLengthOfJunction, lengthOfSim, simulationSecondLength, carSpeed, carLength, carStationaryDistance, carReactionTime, numberOfGeneralLanes, generalVPH, hasPedestrianCrossings, crossingPedestrianTime, crossingRequestsPerHour, trafficLightSequence, trafficLightGreenTimes):
+    def __init__(self, sideLengthOfJunction, lengthOfSim, simulationSecondLength, carSpeed, carLength, carStationaryDistance, carReactionTime, numberOfGeneralLanes, generalVPH, hasLeftTurnLanes, hasRightTurnLanes,  hasPedestrianCrossings, crossingPedestrianTime, crossingRequestsPerHour, trafficLightSequence, trafficLightGreenTimes):
         self.sideLengthOfJunction = sideLengthOfJunction
         self.lengthOfSim = lengthOfSim
         self.simulationSecondLength = simulationSecondLength
@@ -28,13 +32,15 @@ class TrafficControl:
         TrafficControl.carReactionTime = carReactionTime
         TrafficControl.numberOfGeneralLanes = numberOfGeneralLanes
         TrafficControl.generalVPH = generalVPH
+        TrafficControl.hasLeftTurnLanes = hasLeftTurnLanes
+        TrafficControl.hasRightTurnLanes = hasRightTurnLanes
         self.hasPedestrianCrossings = hasPedestrianCrossings
         self.crossingPedestrianTime = crossingPedestrianTime
         self.crossingRequestsPerHour = crossingRequestsPerHour
         self.trafficLightSequence = trafficLightSequence
         self.trafficLightGreenTimes = trafficLightGreenTimes
         self.directions = [Direction.North, Direction.East, Direction.South, Direction.West]
-        self.junctionEntrances = [JunctionEntrance(direction, numberOfGeneralLanes) for direction in self.directions]
+        self.junctionEntrances = [JunctionEntrance(direction) for direction in self.directions]
         
         # The below variables are for result handling
 
@@ -66,7 +72,7 @@ class TrafficControl:
         env = simpy.Environment()
         env.process(self.junctionTimeManager(env))      # Add the junction time manager to the environment.
         for junctionEntrance in self.junctionEntrances: # Add all the junction entrance time managers to the environment.
-            env.process(junctionEntrance.junctionEntranceTimeManager(env))
+            junctionEntrance.junctionEntranceCarGeneratorSetup(env)
         env.run()   # Run the simulation
 
     """
@@ -80,7 +86,7 @@ class TrafficControl:
 
         if(self.hasPedestrianCrossings):
             timeOfLastCrossing = env.now
-            timeInBetweenCrossings = 60 / self.crossingRequestsPerHour
+            timeInBetweenCrossings = (60*60 / self.crossingRequestsPerHour) - self.crossingPedestrianTime
             
             while env.now < endTime:
                 # Cycle through the traffic light sequence suggested by the user
@@ -214,11 +220,11 @@ class Lane:
 #-------------------
 
 class JunctionEntrance:
-    def __init__(self, cardinalDirectionOfJunctionEntrance, numberOfLanes):
+    def __init__(self, cardinalDirectionOfJunctionEntrance):
         self.cardinalDirectionOfJunctionEntrance = cardinalDirectionOfJunctionEntrance
-        self.lanes = []                    # Linked lists of Cars according to number of lanes
-        for _ in range(0, numberOfLanes):
-            self.lanes.append(Lane(cardinalDirectionOfJunctionEntrance))
+        self.generalLanes = []              # Linked lists of Cars according to number of lanes. It should be noted that index 0 corresponds to the left most lane and the greatest index corresponds to the right most lane.
+        for _ in range(0, TrafficControl.numberOfGeneralLanes):
+            self.generalLanes.append(Lane(cardinalDirectionOfJunctionEntrance))
         self.timeUntilJunctionIsEmpty = 0   # The junction is initially empty when the junction is created
         self.isGreen = False                # Assume traffis signal is red when the junction entrance is created
         self.totalWaitingTime = 0           # Initially no cars have waitied
@@ -246,29 +252,38 @@ class JunctionEntrance:
     
     def getMaxWaitingTime(self):
         maxWaitingTime = -1
-        for lane in self.lanes:
+        for lane in self.generalLanes:
             maxWaitingTime = max(maxWaitingTime, lane.maxWaitingTime)
         return maxWaitingTime
     
     def getMaxQueueLength(self):
         maxQueueLength = -1
-        for lane in self.lanes:
+        for lane in self.generalLanes:
             maxQueueLength = max(maxQueueLength, lane.maxQueueLength)
         return maxQueueLength
     
     def getAvgWaitingTime(self):
         totalWaitingTime = 0
         totalNumberOfVehiclesPassed = 0
-        for lane in self.lanes:
+        for lane in self.generalLanes:
             totalWaitingTime += lane.totalWaitingTime
             totalNumberOfVehiclesPassed += lane.numberOfVehiclesPassed
         return totalWaitingTime / totalNumberOfVehiclesPassed if totalNumberOfVehiclesPassed > 0 else -1
     
     def getTotalVehiclesPassed(self):
         totalNumberOfVehiclesPassed = 0
-        for lane in self.lanes:
+        for lane in self.generalLanes:
             totalNumberOfVehiclesPassed += lane.numberOfVehiclesPassed
         return totalNumberOfVehiclesPassed
+
+    def carGenerator(self, env, possibleLanesToSpawn, vph, exitCardinality):
+
+        timeInBetweenVehicleSpawns = 60*60 / vph
+        
+        while True and not TrafficControl.simulationComplete:
+            print(f"Vehicle spawning at {env.now} in junction {self.cardinalDirectionOfJunctionEntrance}")
+            random.choice(possibleLanesToSpawn).addCar(exitCardinality, env)
+            yield env.timeout(timeInBetweenVehicleSpawns)
 
 
     """
@@ -276,13 +291,85 @@ class JunctionEntrance:
         the simulation. Calls the addCar function for however many cars need to be added over time and updates 
         maximumQueueLength if needed.
     """
-    def junctionEntranceTimeManager(self, env):
-        #Just add car to all lanes every 10 time units always bound to north
-        while True and not TrafficControl.simulationComplete:
-            for lane in self.lanes:
-                lane.addCar(Direction.North, env)
-            yield env.timeout(20)
+    def junctionEntranceCarGeneratorSetup(self, env):
+        # Reminder of the format of the vph: [[North Bound Traffic Exiting North, North Bound Traffic Exiting East, North Bound Traffic Exiting West], [East Bound Traffic Exiting East, East Bound Traffic Exiting South, East Bound Traffic Exiting North], [South Bound Traffic Exiting South, South Bound Traffic Exiting West, South Bound Traffic Exiting East], [West Bound Traffic Exiting West, West Bound Traffic Exiting North, West Bound Traffic Exiting South]]
+        
+        match self.cardinalDirectionOfJunctionEntrance:
+            case Direction.North:
+                # Corresponding Subarray: [North Bound Traffic Exiting North, North Bound Traffic Exiting East, North Bound Traffic Exiting West]
+                
+                # Going Left Generator (going left from facing north is west)
+                env.process(self.carGenerator(env, [self.generalLanes[0]], TrafficControl.generalVPH[Direction.North][2], Direction.West))
 
+                # Going Right Generator (going right from facing north is east)
+                env.process(self.carGenerator(env, [self.generalLanes[len(self.generalLanes) - 1]], TrafficControl.generalVPH[Direction.North][1], Direction.East))
+
+                # Going Straight Generator (going straight from facing north is north)
+                includeLeftMostLanes = 1 if TrafficControl.hasLeftTurnLanes else 0
+                includeRightMostLanes = len(self.generalLanes) - 1 if TrafficControl.hasRightTurnLanes else len(self.generalLanes)
+                straightLanes = []
+                
+                for i in range(includeLeftMostLanes, includeRightMostLanes):
+                    straightLanes.append(self.generalLanes[i])
+                
+                env.process(self.carGenerator(env, straightLanes, TrafficControl.generalVPH[Direction.North][0], Direction.North))
+
+            case Direction.East:
+                # Corresponding Subarray: [East Bound Traffic Exiting East, East Bound Traffic Exiting South, East Bound Traffic Exiting North]
+                
+                # Going Left Generator (going left from facing east is north)
+                env.process(self.carGenerator(env, [self.generalLanes[0]], TrafficControl.generalVPH[Direction.East][2], Direction.North))
+
+                # Going Right Generator (going right from facing east is south)
+                env.process(self.carGenerator(env, [self.generalLanes[len(self.generalLanes) - 1]], TrafficControl.generalVPH[Direction.East][1], Direction.South))
+
+                # Going Straight Generator (going straight from facing east is east)
+                includeLeftMostLanes = 1 if TrafficControl.hasLeftTurnLanes else 0
+                includeRightMostLanes = len(self.generalLanes) - 1 if TrafficControl.hasRightTurnLanes else len(self.generalLanes)
+                straightLanes = []
+                
+                for i in range(includeLeftMostLanes, includeRightMostLanes):
+                    straightLanes.append(self.generalLanes[i])
+                
+                env.process(self.carGenerator(env, straightLanes, TrafficControl.generalVPH[Direction.East][0], Direction.East))
+
+            case Direction.South:
+                # Corresponding Subarray: [South Bound Traffic Exiting South, South Bound Traffic Exiting West, South Bound Traffic Exiting East]
+                
+                # Going Left Generator (going left from facing south is east)
+                env.process(self.carGenerator(env, [self.generalLanes[0]], TrafficControl.generalVPH[Direction.South][2], Direction.East))
+
+                # Going Right Generator (going right from facing south is west)
+                env.process(self.carGenerator(env, [self.generalLanes[len(self.generalLanes) - 1]], TrafficControl.generalVPH[Direction.South][1], Direction.West))
+
+                # Going Straight Generator (going straight from facing south is south)
+                includeLeftMostLanes = 1 if TrafficControl.hasLeftTurnLanes else 0
+                includeRightMostLanes = len(self.generalLanes) - 1 if TrafficControl.hasRightTurnLanes else len(self.generalLanes)
+                straightLanes = []
+                
+                for i in range(includeLeftMostLanes, includeRightMostLanes):
+                    straightLanes.append(self.generalLanes[i])
+                
+                env.process(self.carGenerator(env, straightLanes, TrafficControl.generalVPH[Direction.South][0], Direction.South))
+
+            case Direction.West:
+                # Corresponding Subarray: [West Bound Traffic Exiting West, West Bound Traffic Exiting North, West Bound Traffic Exiting South]
+            
+                # Going Left Generator (going left from facing west is south)
+                env.process(self.carGenerator(env, [self.generalLanes[0]], TrafficControl.generalVPH[Direction.West][2], Direction.South))
+
+                # Going Right Generator (going right from facing west is north)
+                env.process(self.carGenerator(env, [self.generalLanes[len(self.generalLanes) - 1]], TrafficControl.generalVPH[Direction.West][1], Direction.North))
+
+                # Going Straight Generator (going straight from facing west is west)
+                includeLeftMostLanes = 1 if TrafficControl.hasLeftTurnLanes else 0
+                includeRightMostLanes = len(self.generalLanes) - 1 if TrafficControl.hasRightTurnLanes else len(self.generalLanes)
+                straightLanes = []
+                
+                for i in range(includeLeftMostLanes, includeRightMostLanes):
+                    straightLanes.append(self.generalLanes[i])
+                
+                env.process(self.carGenerator(env, straightLanes, TrafficControl.generalVPH[Direction.West][0], Direction.West))
 
 
 

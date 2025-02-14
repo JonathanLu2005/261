@@ -26,21 +26,21 @@ class Results:
         self.print_results() # Comment this out in production
 
     def print_results(self):
-        print(f"North Junction: Max Waiting Time = {self.northMaxWaitingTime}, Max Queue Length = {self.northMaxQueueLength}, "
+        print(f"North Bound Junction Entrance: Max Waiting Time = {self.northMaxWaitingTime}, Max Queue Length = {self.northMaxQueueLength}, "
               f"Avg Waiting Time = {self.northAvgWaitingTime}, Total Vehicles Passed = {self.northTotalVehiclesPassed}")
         
-        print(f"East Junction: Max Waiting Time = {self.eastMaxWaitingTime}, Max Queue Length = {self.eastMaxQueueLength}, "
+        print(f"East Bound Junction Entrance: Max Waiting Time = {self.eastMaxWaitingTime}, Max Queue Length = {self.eastMaxQueueLength}, "
               f"Avg Waiting Time = {self.eastAvgWaitingTime}, Total Vehicles Passed = {self.eastTotalVehiclesPassed}")
         
-        print(f"South Junction: Max Waiting Time = {self.southMaxWaitingTime}, Max Queue Length = {self.southMaxQueueLength}, "
+        print(f"South Bound Junction Entrance: Max Waiting Time = {self.southMaxWaitingTime}, Max Queue Length = {self.southMaxQueueLength}, "
               f"Avg Waiting Time = {self.southAvgWaitingTime}, Total Vehicles Passed = {self.southTotalVehiclesPassed}")
         
-        print(f"West Junction: Max Waiting Time = {self.westMaxWaitingTime}, Max Queue Length = {self.westMaxQueueLength}, "
+        print(f"West Bound Junction Entrance: Max Waiting Time = {self.westMaxWaitingTime}, Max Queue Length = {self.westMaxQueueLength}, "
               f"Avg Waiting Time = {self.westAvgWaitingTime}, Total Vehicles Passed = {self.westTotalVehiclesPassed}")
 
 # This is the function that the front-end calls to get results of a simulation
-def runModel(sideLengthOfJunction, lengthOfSim, simulationSecondLength, carSpeed, carLength, carStationaryDistance, carReactionTime, numberOfGeneralLanes, generalVPH, hasPedestrianCrossings, crossingPedestrianTime, crossingRequestsPerHour, trafficLightSequence, trafficLightGreenTimes):
-    simulation = TrafficControl(sideLengthOfJunction, lengthOfSim, simulationSecondLength, carSpeed, carLength, carStationaryDistance, carReactionTime, numberOfGeneralLanes, generalVPH, hasPedestrianCrossings, crossingPedestrianTime, crossingRequestsPerHour, trafficLightSequence, trafficLightGreenTimes)
+def runModel(sideLengthOfJunction, lengthOfSim, simulationSecondLength, carSpeed, carLength, carStationaryDistance, carReactionTime, numberOfGeneralLanes, generalVPH, hasLeftTurnLanes, hasRightTurnLanes, hasPedestrianCrossings, crossingPedestrianTime, crossingRequestsPerHour, trafficLightSequence, trafficLightGreenTimes):
+    simulation = TrafficControl(sideLengthOfJunction, lengthOfSim, simulationSecondLength, carSpeed, carLength, carStationaryDistance, carReactionTime, numberOfGeneralLanes, generalVPH, hasLeftTurnLanes, hasRightTurnLanes,  hasPedestrianCrossings, crossingPedestrianTime, crossingRequestsPerHour, trafficLightSequence, trafficLightGreenTimes)
     
     while not simulation.simulationComplete:
         time.sleep(0.5)
@@ -60,12 +60,14 @@ def runModel(sideLengthOfJunction, lengthOfSim, simulationSecondLength, carSpeed
     carLength: Length of cars in meters
     carStationaryDistance: How far the cars are from each other in meters.
     carReactionTime: The delay car behind takes to respond to the car's changes in speed.
-    numberOfGeneralLanes: Number of general lanes (excluding bus lanes and cycle lanes and currently left turn lanes),
-    generalVPH: An array of arrays holding the VPH values. It is a 2D array in the form of [[North Bound Traffic Exiting North, North Bound Traffic Exiting East, North Bound Traffic Exiting West], [East Bound Traffic Exiting East, East Bound Traffic Exiting South, East Bound Traffic Exiting North], [South Bound Traffic Exiting South, South Bound Traffic Exiting West, East Bound Traffic Exiting East], [West Bound Traffic Exiting West, West Bound Traffic Exiting North, West Bound Traffic Exiting South]]
-    hasPedestrianCrossings: True or False
+    numberOfGeneralLanes: Number of general lanes (excluding bus lanes and cycle lanes and currently left turn lanes). Must be at least 2.
+    generalVPH: An array of arrays holding the VPH values. It is a 2D array in the form of [[North Bound Traffic Exiting North, North Bound Traffic Exiting East, North Bound Traffic Exiting West], [East Bound Traffic Exiting East, East Bound Traffic Exiting South, East Bound Traffic Exiting North], [South Bound Traffic Exiting South, South Bound Traffic Exiting West, South Bound Traffic Exiting East], [West Bound Traffic Exiting West, West Bound Traffic Exiting North, West Bound Traffic Exiting South]]
+    hasLeftTurnLanes: True or False. If both the junction has both left turn and right turn exclusive lanes, the number of general lanes must be at least 3. 
+    hasRightTurnLanes: True or False. If both the junction has both left turn and right turn exclusive lanes, the number of general lanes must be at least 3.
+    hasPedestrianCrossings: True or False.
     crossingPedestrianTime: How long pedestrians crossings last for in seconds. This should be None when no crossings occur.
     crossingRequestsPerHour: The number of pedestrain crossings occuring each hour. This should be None when no crossings occur
     trafficLightSequence: Specify the sequence in which traffic lights should trigger. Example: [Direction.North, Direction.East, Direction.South, Direction.West].
     trafficLightGreenTimes: The following times are in seconds: [Green light time for North Arm, Green light time for East Arm, Green light time for South Arm, Green light time for West arm]
 """
-runModel(15, 3600, 1, 15, 3, 1, 2, 2, [[10,10,10], [10,10,10], [10,10,10], [10,10,10]], True, 20, 1, [Direction.North, Direction.East, Direction.South, Direction.West], [10,60,30,60])
+runModel(15, 3600, 1, 15, 3, 1, 2, 2, [[10,10,10], [10,10,10], [10,10,10], [10,10,10]], False, False, True, 60, 1, [Direction.North, Direction.East, Direction.South, Direction.West], [60,60,60,60])
