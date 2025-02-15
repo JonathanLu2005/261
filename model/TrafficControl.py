@@ -11,7 +11,8 @@ class Direction(IntEnum):
 class TrafficControl:
     # Can declare Static variables here.
     simulationTimeUnit = 0.01    # If this is 1/10, then it will take 10 time units in the simulation to simulate one second.
-    carspeed = None
+    #carspeed = None
+    carspeed = 15
     carLength = None
     carStationaryDistance = None
     carReactionTime = None
@@ -70,10 +71,10 @@ class TrafficControl:
 
         # Init simpy environment
         env = simpy.Environment()
-        env.process(self.junctionTimeManager(env))      # Add the junction time manager to the environment.
+        wholeSimulationProcess = env.process(self.junctionTimeManager(env))      # Add the junction time manager to the environment.
         for junctionEntrance in self.junctionEntrances: # Add all the junction entrance time managers to the environment.
             junctionEntrance.junctionEntranceCarGeneratorSetup(env)
-        env.run()   # Run the simulation
+        env.run(until=wholeSimulationProcess)   # Run the simulation
 
     """
         A function which runs constantly to handle the sequencing of traffic lights, the occurrences and 
@@ -115,7 +116,7 @@ class TrafficControl:
                     self.junctionEntrances[direction].signalRed()   # Signal Red to this direction
 
         # Fetch Results from junction entrances and set them.
-
+        print("Simulation Finished, fetching results")
         self.northMaxWaitingTime = self.junctionEntrances[Direction.North].getMaxWaitingTime()
         self.northMaxQueueLength = self.junctionEntrances[Direction.North].getMaxQueueLength()
         self.northAvgWaitingTime = self.junctionEntrances[Direction.North].getAvgWaitingTime()
@@ -138,6 +139,11 @@ class TrafficControl:
 
 
         TrafficControl.simulationComplete = True
+        print("End of simulation, results are recorded")
+        
+        return 
+
+
 
     """
         Takes the time such that the time unit meaning was a second in simulation time and returns the real portion of time with respect to simulationTimeUnit
@@ -180,7 +186,7 @@ class Lane:
         self.leadingCar : Car = None
         self.trailingCar : Car = None
         self.numberOfCarsPresent = 0
-        self.totalWaitingTime = 0       # Initially no cars have waitied
+        self.totalWaitingTime = 0       # Initially no cars have waited
         self.numberOfVehiclesPassed = 0 # Initially no vehicles have passed
         self.maxWaitingTime = -1        # Maximum default value (which is the maximum time a car has waited. Set to -1 as a N/A value to show no cars have entered the junction yet).
         self.maxQueueLength = -1        # Maximum default value (which is the maximum length a queue has been. Set to -1 as a N/A value to show no queues were formed yet.)
@@ -189,6 +195,15 @@ class Lane:
 
     def getNumberOfCars(self):
         return self.numberOfCarsPresent
+
+    def switchGreenLight(self):
+        self.isGreen = not(self.isGreen)
+
+    def getLeadingCar(self):
+        return self.leadingCar
+
+    def getTrailingCar(self):
+        return self.trailingCar
     
     def addCar(self, turningExitCardinality, env):
         if(self.numberOfCarsPresent == 0):
@@ -213,12 +228,12 @@ class Lane:
         self.totalWaitingTime += waitingTime
         self.maxWaitingTime = max(self.maxWaitingTime, waitingTime)
 
-        if(self.numberOfCars == 1):
+        if(self.numberOfCarsPresent == 0):
             self.leadingCar = None
             self.trailingCar = None
         else:
             self.leadingCar = self.leadingCar.pointerToCarBehind
-            # Notify this car that it is now leading?
+            self.leadingCar.setCurrentState(CarState.NotStationaryButLeading)
 
 
 
@@ -232,7 +247,7 @@ class Lane:
 
 
 #-------------------
-# JUNCION ENTRANCE
+# JUNCTION ENTRANCE
 #-------------------
 
 class JunctionEntrance:
@@ -242,7 +257,7 @@ class JunctionEntrance:
         for _ in range(0, TrafficControl.numberOfGeneralLanes):
             self.generalLanes.append(Lane(cardinalDirectionOfJunctionEntrance))
         self.timeUntilJunctionIsEmpty = 0   # The junction is initially empty when the junction is created
-        # self.isGreen = False                # Assume traffis signal is red when the junction entrance is created
+        # self.isGreen = False                # Assume traffic signal is red when the junction entrance is created
         # self.totalWaitingTime = 0           # Initially no cars have waitied
         # self.numberOfVehiclesPassed = 0     # Initially no vehicles have passed
         # self.maxWaitingTime = -1        # Maximum default value (which is the maximum time a car has waited. Set to -1 as a N/A value to show no cars have entered the junction yet).
@@ -256,6 +271,9 @@ class JunctionEntrance:
     """
     def signalRed(self):
         #...
+        for lane in self.generalLanes:
+            # Change the lane to have isGreen = False
+            lane.switchGreenLight()
         print(f"Junction Entrance {self.cardinalDirectionOfJunctionEntrance} recieved red signal")
     
     """
@@ -264,6 +282,10 @@ class JunctionEntrance:
     """
     def signalGreen(self):
         #...
+        for lane in self.generalLanes:
+            # Change the lane to have isGreen = True 
+            lane.switchGreenLight()
+
         print(f"Junction Entrance {self.cardinalDirectionOfJunctionEntrance} recieved green signal")
     
     def getMaxWaitingTime(self):
@@ -417,26 +439,40 @@ class Car:
         self.distanceFromJunctionEntrance = distanceFromJunctionEntrance
         self.turningExitCardinality = turningExitCardinality
         self.timeOfQueueStart = timeOfQueueStart
-        self.currentState = carState                            # Depending on if it spawns on the junction entrance, if it spawns being the leader, or if it spanws behind another car.       
+        self.currentState = carState                            # Depending on if it spawns on the junction entrance, if it spawns being the leader, or if it spawns behind another car.       
         self.pointerToCarBehind = None                          # There are no cars behind the car that was just added to the lane. 
         self.pointerToCarAhead = pointerToCarAhead
         self.junctionEntranceLane = junctionEntranceLane        # Integer indicating to the junction entrance which lane the car is in to remove it later
         self.junctionEntrance = junctionEntrance
     
+
+    def setCurrentState(self, newState):
+        self.currentState = newState
+
+    def getCurrentState(self):
+        return self.currentState
+
     """
         Used to alert the trailing car of this car’s new state. Used in the carTimeManager function
     """
-    def notifyCarBehind():
-        #...
-        print("stub")
+    def notifyCarBehind(self, newState):
+        # already changed state of this car, then notify the car behind. 
+        self.pointerToCarBehind.setCurrentState(newState)
+
 
     """
         Called by a car entering the junction to inform its junction entrance to remove it from its lane and 
         update variables like maximumWaitingTime (this car then notifies its trailing car that it is leading)
     """
-    def notifyJunctionEntrance():
+    def notifyJunctionEntrance(self):
         #...
         print("stub")
+
+
+
+    def moveForwards(self, env):
+        # calculate how much further forwards this car can move per timestep, and decrement the distance to the JunctionEntrance by that amount:
+        self.distanceFromJunctionEntrance -= TrafficControl.carspeed * TrafficControl.simulationTimeUnit
     
     """
         Manages the flow of time and changes of state of a car. If a moving car is notified by the car ahead 
@@ -449,15 +485,52 @@ class Car:
         notifications to begin moving. (See state diagram for a deeper explanation)
     """
     def carTimeManager(self, env):
-        yield env.timeout(1)
+        #yield env.timeout(1)
+        while True:
+            yield env.timeout(1)
+            if (self.currentState == CarState.StationaryOnJunctionEntrance):
+                if (self.junctionEntranceLane.isGreen):
+                    self.currentState = CarState.InsideJunction
+                    self.junctionEntranceLane.leadingCarEnteringJunction(env.now - self.timeOfQueueStart) # must ensure to delete the car object from the simulation and memory if possible so that it doesnt keep running this code
+                    #self.notifyCarBehind(CarState.NotStationaryButLeading)
+                else:
+                    if (self.pointerToCarBehind!= None):
+                        if (self.pointerToCarBehind.getCurrentState() == CarState.NotStationaryNorLeading):
+                            notifyCarBehind(CarState.StationaryButNotLeading)
+                    pass # stay still
 
-        # For now cars don't do anything
-        # lastUpdate = env.now
-        # while True:
-        #     if(self.currentState == CarState.StationaryOnJunctionEntrance and self.junctionEntranceLane.isGreen):
-        #         self.junctionEntranceLane.leadingCarEnteringJunction(env.now - self.timeOfQueueStart)
-        #     elif(self.currentState == CarState.StationaryOnJunctionEntrance and not self.junctionEntranceLane.isGreen):
-        #         pass
-        #     elif(self.currentState == CarState.NotStationaryButLeading and self.junctionEntranceLane.isGreen):
-                
+            elif (self.currentState == CarState.NotStationaryButLeading):
+                if (self.distanceFromJunctionEntrance <=0):
+                    if (self.junctionEntranceLane.isGreen):
+                        self.currentState = CarState.InsideJunction
+                        self.junctionEntranceLane.leadingCarEnteringJunction(env.now - self.timeOfQueueStart) # must ensure to delete the car object from the simulation and memory if possible so that it doesnt keep running this code
+                        #self.notifyCarBehind(CarState.NotStationaryButLeading)
+                    else:
+                        self.currentState = CarState.StationaryOnJunctionEntrance
+                else:
+                    self.moveForwards(env)
+            
+            elif (self.currentState == CarState.NotStationaryNorLeading):
+                if (self.pointerToCarBehind != None):
+                    if (self.pointerToCarBehind.getCurrentState() == CarState.StationaryButLeading):
+                        notifyCarBehind(CarState.NotStationaryNorLeading)
+                self.moveForwards(env)
+
+            elif (self.currentState == CarState.StationaryButNotLeading):
+                if (self.pointerToCarBehind != None):
+                    if (self.pointerToCarBehind.getCurrentState() == CarState.NotStationaryNorLeading):
+                        notifyCarBehind(CarState.StationaryButNotLeading)
+                pass
+
+            elif (self.currentState == CarState.InsideJunction):
+                print(f"Car at {self.junctionEntranceLane.junctionEntrance} entered the junction and is being removed now at time {env.now}")
+                # Break references in order to delete this object afterwards 
+                if self.pointerToCarBehind:
+                    self.pointerToCarBehind.pointerToCarAhead = None  # Remove backward reference
+                self.pointerToCarAhead = None  # Remove forward reference
+                self.pointerToCarBehind = None  # Remove backward reference
+                # Remove from junction entrance lane
+                self.junctionEntranceLane = None
+                self.junctionEntrance = None
+                return
 
