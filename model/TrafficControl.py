@@ -457,7 +457,15 @@ class Car:
     """
     def notifyCarBehind(self, newState):
         # already changed state of this car, then notify the car behind. 
-        self.pointerToCarBehind.setCurrentState(newState)
+        if self.pointerToCarBehind is not None:
+            self.pointerToCarBehind.setCurrentState(newState)
+        # need to pass behind the correct signals:
+        if newState == CarState.StationaryAndLeading or newState == CarState.StationaryOnJunctionEntrance:
+            self.pointerToCarBehind.notifyCarBehind(CarState.StationaryButNotLeading)
+        
+        elif newState == CarState.NotStationaryButLeading:
+            self.pointerToCarBehind.notifyCarBehind(CarState.NotStationaryNorLeading)
+            
 
 
     """
@@ -472,7 +480,8 @@ class Car:
 
     def moveForwards(self, env):
         # calculate how much further forwards this car can move per timestep, and decrement the distance to the JunctionEntrance by that amount:
-        self.distanceFromJunctionEntrance -= TrafficControl.carspeed * TrafficControl.simulationTimeUnit
+        self.distanceFromJunctionEntrance = max (self.distanceFromJunctionEntrance - TrafficControl.carspeed * TrafficControl.simulationTimeUnit,0)
+        
     
     """
         Manages the flow of time and changes of state of a car. If a moving car is notified by the car ahead 
@@ -488,25 +497,30 @@ class Car:
         #yield env.timeout(1)
         while True:
             yield env.timeout(1)
+            #print(self.currentState.name)
             if (self.currentState == CarState.StationaryOnJunctionEntrance):
                 if (self.junctionEntranceLane.isGreen):
                     self.currentState = CarState.InsideJunction
                     self.junctionEntranceLane.leadingCarEnteringJunction(env.now - self.timeOfQueueStart) # must ensure to delete the car object from the simulation and memory if possible so that it doesnt keep running this code
-                    #self.notifyCarBehind(CarState.NotStationaryButLeading)
+                    if (self.pointerToCarBehind != None):
+                        self.notifyCarBehind(CarState.NotStationaryButLeading)
                 else:
                     if (self.pointerToCarBehind!= None):
                         if (self.pointerToCarBehind.getCurrentState() == CarState.NotStationaryNorLeading):
-                            notifyCarBehind(CarState.StationaryButNotLeading)
-                    pass # stay still
+                            self.notifyCarBehind(CarState.StationaryButNotLeading)
+
 
             elif (self.currentState == CarState.NotStationaryButLeading):
                 if (self.distanceFromJunctionEntrance <=0):
                     if (self.junctionEntranceLane.isGreen):
                         self.currentState = CarState.InsideJunction
                         self.junctionEntranceLane.leadingCarEnteringJunction(env.now - self.timeOfQueueStart) # must ensure to delete the car object from the simulation and memory if possible so that it doesnt keep running this code
-                        #self.notifyCarBehind(CarState.NotStationaryButLeading)
+                        if (self.pointerToCarBehind != None):
+                            self.notifyCarBehind(CarState.NotStationaryButLeading)
                     else:
                         self.currentState = CarState.StationaryOnJunctionEntrance
+                        if (self.pointerToCarBehind != None):
+                            self.notifyCarBehind(CarState.NotStationaryNorLeading)
                 else:
                     self.moveForwards(env)
             
@@ -515,6 +529,7 @@ class Car:
                     if (self.pointerToCarBehind.getCurrentState() == CarState.StationaryButLeading):
                         notifyCarBehind(CarState.NotStationaryNorLeading)
                 self.moveForwards(env)
+                pass
 
             elif (self.currentState == CarState.StationaryButNotLeading):
                 if (self.pointerToCarBehind != None):
@@ -532,5 +547,6 @@ class Car:
                 # Remove from junction entrance lane
                 self.junctionEntranceLane = None
                 self.junctionEntrance = None
+                yield env.timeout(1e9)  # Let the garbage collector clean up
                 return
 

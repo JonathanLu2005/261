@@ -72,21 +72,3 @@ def runModel(sideLengthOfJunction, lengthOfSim, simulationSecondLength, carSpeed
 """
 resultsObject = runModel(15, 3600, 1, 15, 3, 1, 2, 3, [[10,10,10], [10,10,10], [10,10,10], [10,10,10]], False, False, True, 60, 1, [Direction.North, Direction.East, Direction.South, Direction.West], [60,60,60,60])
 
-print(resultsObject.northMaxWaitingTime)
-print(resultsObject.northMaxQueueLength)
-print(resultsObject.northAvgWaitingTime)
-
-print(resultsObject.eastMaxWaitingTime)
-print(resultsObject.eastMaxQueueLength)
-print(resultsObject.eastAvgWaitingTime)
-
-
-print(resultsObject.southMaxWaitingTime)
-print(resultsObject.southMaxQueueLength)
-print(resultsObject.southAvgWaitingTime)
-
-print(resultsObject.westMaxWaitingTime)
-print(resultsObject.westMaxQueueLength)
-print(resultsObject.westAvgWaitingTime)
-
-
