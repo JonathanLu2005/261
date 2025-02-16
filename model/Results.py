@@ -70,5 +70,5 @@ def runModel(sideLengthOfJunction, lengthOfSim, simulationSecondLength, carSpeed
     trafficLightSequence: Specify the sequence in which traffic lights should trigger. Example: [Direction.North, Direction.East, Direction.South, Direction.West].
     trafficLightGreenTimes: The following times are in seconds: [Green light time for North Arm, Green light time for East Arm, Green light time for South Arm, Green light time for West arm]
 """
-resultsObject = runModel(15, 3600, 1, 15, 3, 1, 2, 3, [[10,10,10], [10,10,10], [10,10,10], [10,10,10]], False, False, True, 60, 1, [Direction.North, Direction.East, Direction.South, Direction.West], [60,60,60,60])
+resultsObject = runModel(15, 360, 1, 15, 3, 1, 2, 1, [[0,0,60], [0,0,60], [0,0,60], [0,0,60]], False, False, True, 60, 1, [Direction.North, Direction.East, Direction.South, Direction.West], [60,60,60,60])
 

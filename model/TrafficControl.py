@@ -11,8 +11,7 @@ class Direction(IntEnum):
 class TrafficControl:
     # Can declare Static variables here.
     simulationTimeUnit = 0.01    # If this is 1/10, then it will take 10 time units in the simulation to simulate one second.
-    #carspeed = None
-    carspeed = 15
+    carSpeed = None
     carLength = None
     carStationaryDistance = None
     carReactionTime = None
@@ -27,7 +26,7 @@ class TrafficControl:
     def __init__(self, sideLengthOfJunction, lengthOfSim, simulationTimeUnit, carSpeed, carLength, carStationaryDistance, carReactionTime, numberOfGeneralLanes, generalVPH, hasLeftTurnLanes, hasRightTurnLanes,  hasPedestrianCrossings, crossingPedestrianTime, crossingRequestsPerHour, trafficLightSequence, trafficLightGreenTimes):
         self.sideLengthOfJunction = sideLengthOfJunction
         self.lengthOfSim = TrafficControl.convertSecondsToTimeUnits(lengthOfSim)
-        TrafficControl.carSpeed = carSpeed * 0.44704 * simulationTimeUnit # Multiplying by 0.44704 converts mph to meters per second. Multiplying by the simulation time unit means meters per time unit.
+        TrafficControl.carSpeed = carSpeed * 0.44704 * simulationTimeUnit # Multiplying by 0.44704 converts miles per hour to meters per second. Multiplying by the simulation time unit means meters per time unit.
         TrafficControl.carLength = carLength
         TrafficControl.carStationaryDistance = carStationaryDistance
         TrafficControl.carReactionTime = TrafficControl.convertSecondsToTimeUnits(carReactionTime)
@@ -116,7 +115,8 @@ class TrafficControl:
                     self.junctionEntrances[direction].signalRed()   # Signal Red to this direction
 
         # Fetch Results from junction entrances and set them.
-        print("Simulation Finished, fetching results")
+        
+        print("Sim ended, fetching results")
         self.northMaxWaitingTime = self.junctionEntrances[Direction.North].getMaxWaitingTime()
         self.northMaxQueueLength = self.junctionEntrances[Direction.North].getMaxQueueLength()
         self.northAvgWaitingTime = self.junctionEntrances[Direction.North].getAvgWaitingTime()
@@ -138,9 +138,7 @@ class TrafficControl:
         self.westTotalVehiclesPassed = self.junctionEntrances[Direction.West].getTotalVehiclesPassed()
 
 
-        TrafficControl.simulationComplete = True
-        print("End of simulation, results are recorded")
-        
+        TrafficControl.simulationComplete = True   
         return 
 
 
@@ -234,6 +232,7 @@ class Lane:
         else:
             self.leadingCar = self.leadingCar.pointerToCarBehind
             self.leadingCar.setCurrentState(CarState.NotStationaryButLeading)
+        print(f"Car Entering Junction from {self.junctionEntrance}")
 
 
 
@@ -315,13 +314,13 @@ class JunctionEntrance:
         return totalNumberOfVehiclesPassed
 
     def carGenerator(self, env, possibleLanesToSpawn, vph, exitCardinality):
-
-        timeInBetweenVehicleSpawns = TrafficControl.convertSecondsToTimeUnits(60*60) / vph
+        if (vph>0):
+            timeInBetweenVehicleSpawns = TrafficControl.convertSecondsToTimeUnits(60*60) / vph
         
-        while True and not TrafficControl.simulationComplete:
-            print(f"Vehicle spawning at {env.now} in junction {self.cardinalDirectionOfJunctionEntrance}")
-            random.choice(possibleLanesToSpawn).addCar(exitCardinality, env)
-            yield env.timeout(timeInBetweenVehicleSpawns)
+            while True and not TrafficControl.simulationComplete:
+                print(f"Vehicle spawning at {env.now} in junction {self.cardinalDirectionOfJunctionEntrance}")
+                random.choice(possibleLanesToSpawn).addCar(exitCardinality, env)
+                yield env.timeout(timeInBetweenVehicleSpawns)
 
 
     """
@@ -331,7 +330,7 @@ class JunctionEntrance:
     """
     def junctionEntranceCarGeneratorSetup(self, env):
         # Reminder of the format of the vph: [[North Bound Traffic Exiting North, North Bound Traffic Exiting East, North Bound Traffic Exiting West], [East Bound Traffic Exiting East, East Bound Traffic Exiting South, East Bound Traffic Exiting North], [South Bound Traffic Exiting South, South Bound Traffic Exiting West, South Bound Traffic Exiting East], [West Bound Traffic Exiting West, West Bound Traffic Exiting North, West Bound Traffic Exiting South]]
-        
+
         match self.cardinalDirectionOfJunctionEntrance:
             case Direction.North:
                 # Corresponding Subarray: [North Bound Traffic Exiting North, North Bound Traffic Exiting East, North Bound Traffic Exiting West]
@@ -480,7 +479,7 @@ class Car:
 
     def moveForwards(self, env):
         # calculate how much further forwards this car can move per timestep, and decrement the distance to the JunctionEntrance by that amount:
-        self.distanceFromJunctionEntrance = max (self.distanceFromJunctionEntrance - TrafficControl.carspeed * TrafficControl.simulationTimeUnit,0)
+        self.distanceFromJunctionEntrance = max(self.distanceFromJunctionEntrance - (TrafficControl.carSpeed * TrafficControl.simulationTimeUnit),0)
         
     
     """
@@ -494,9 +493,7 @@ class Car:
         notifications to begin moving. (See state diagram for a deeper explanation)
     """
     def carTimeManager(self, env):
-        #yield env.timeout(1)
         while True:
-            yield env.timeout(1)
             #print(self.currentState.name)
             if (self.currentState == CarState.StationaryOnJunctionEntrance):
                 if (self.junctionEntranceLane.isGreen):
@@ -526,8 +523,8 @@ class Car:
             
             elif (self.currentState == CarState.NotStationaryNorLeading):
                 if (self.pointerToCarBehind != None):
-                    if (self.pointerToCarBehind.getCurrentState() == CarState.StationaryButLeading):
-                        notifyCarBehind(CarState.NotStationaryNorLeading)
+                    if (self.pointerToCarBehind.getCurrentState() == CarState.StationaryButNotLeading):
+                        self.notifyCarBehind(CarState.NotStationaryNorLeading)
                 self.moveForwards(env)
                 pass
 
@@ -549,4 +546,4 @@ class Car:
                 self.junctionEntrance = None
                 yield env.timeout(1e9)  # Let the garbage collector clean up
                 return
-
+            yield env.timeout(1)
