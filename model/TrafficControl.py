@@ -26,7 +26,7 @@ class TrafficControl:
     def __init__(self, sideLengthOfJunction, lengthOfSim, simulationTimeUnit, carSpeed, carLength, carStationaryDistance, carReactionTime, numberOfGeneralLanes, generalVPH, hasLeftTurnLanes, hasRightTurnLanes,  hasPedestrianCrossings, crossingPedestrianTime, crossingRequestsPerHour, trafficLightSequence, trafficLightGreenTimes):
         self.sideLengthOfJunction = sideLengthOfJunction
         self.lengthOfSim = TrafficControl.convertSecondsToTimeUnits(lengthOfSim)
-        TrafficControl.carSpeed = carSpeed * 0.44704 * simulationTimeUnit # Multiplying by 0.44704 converts miles per hour to meters per second. Multiplying by the simulation time unit means meters per time unit.
+        TrafficControl.carSpeed = carSpeed * 0.44704 * TrafficControl.simulationTimeUnit # Multiplying by 0.44704 converts miles per hour to meters per second. Multiplying by the simulation time unit means meters per time unit.
         TrafficControl.carLength = carLength
         TrafficControl.carStationaryDistance = carStationaryDistance
         TrafficControl.carReactionTime = TrafficControl.convertSecondsToTimeUnits(carReactionTime)
