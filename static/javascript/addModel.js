@@ -1,8 +1,36 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
     const modelForm = document.getElementById("addModelForm");
     const modelsFolder = document.getElementById("modelsFolder");
 
-    // Form submission
+    // Function to render models
+    const renderModels = (models) => {
+        // Clear existing models
+        modelsFolder.innerHTML = "";
+
+        // Render each model
+        models.forEach((model) => {
+            const modelCard = document.createElement("div");
+            modelCard.className = "col";
+            modelCard.innerHTML = `
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">${model.name}</h5>
+                    </div>
+                </div>`;
+            modelsFolder.appendChild(modelCard);
+        });
+    };
+
+    // Fetch and display models on page load
+    try {
+        const response = await fetch("/api/models");
+        const models = await response.json();
+        renderModels(models);
+    } catch (error) {
+        console.error("Error fetching models:", error);
+    }
+
+    // Handle form submission
     modelForm.addEventListener("submit", async (event) => {
         event.preventDefault();
 
@@ -10,7 +38,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const modelData = Object.fromEntries(modelFormData);
 
         try {
-            // Send to backend
             const response = await fetch("/addModel", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -19,22 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (response.ok) {
                 const updatedModels = await response.json();
-
-                // Clear existing models
-                modelsFolder.innerHTML = "";
-
-                // Add updated models
-                updatedModels.forEach((model) => {
-                    const modelCard = document.createElement("div");
-                    modelCard.className = "col";
-                    modelCard.innerHTML = `
-                        <div class="card h-100">
-                            <div class="card-body">
-                                <h5 class="card-title">${model.name}</h5>
-                            </div>
-                        </div>`;
-                    modelsFolder.appendChild(modelCard);
-                });
+                renderModels(updatedModels);
 
                 // Reset form and close modal
                 modelForm.reset();
@@ -51,4 +63,5 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 });
+
 

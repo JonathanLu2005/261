@@ -7,22 +7,20 @@ app = Flask(__name__)
 # Model page
 @app.route("/", methods=["GET"])
 def modelPage():
-    CurrentModels = []
+    return render_template("modelPage.html")
 
+# Show models to frontend
+@app.route("/api/models", methods=["GET"])
+def getAllModels():
     AllModels = retrieveAllModelNames()
 
-    if AllModels == []:
-        return render_template("modelPage.html")
-    
-    print(AllModels)
+    if not AllModels:
+        return jsonify([])
 
-    for ModelID, ModelName in AllModels:
-        Model = {
-            "id": ModelID,
-            "name": ModelName
-        }
-        CurrentModels.append(Model)
-
+    CurrentModels = [
+        {"id": ModelID, "name": ModelName}
+        for ModelID, ModelName in AllModels
+    ]
     return jsonify(CurrentModels)
 
 # Add model to model page
@@ -46,15 +44,10 @@ def addModel():
         else:
             ModelInformation.append(int(value))
 
-    insertModelTrafficFlowData(ModelInformation[0], ModelInformation[1],
-                               ModelInformation[2], ModelInformation[3], ModelInformation[4],
-                               ModelInformation[5], ModelInformation[6], ModelInformation[7],
-                               ModelInformation[8], ModelInformation[9], ModelInformation[10],
-                               ModelInformation[11], ModelInformation[12], ModelInformation[13],
-                               ModelInformation[14], ModelInformation[15], ModelInformation[16],
-                               ModelInformation[17], ModelInformation[18], ModelInformation[19])
+    insertModelTrafficFlowData(*ModelInformation)
 
-    return redirect(url_for('modelPage'))
+    # Return updated model list
+    return getAllModels()
 
 # Junction page
 @app.route("/junctionPage", methods=["POST", "GET"])
