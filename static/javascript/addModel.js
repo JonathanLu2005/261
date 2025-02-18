@@ -11,38 +11,44 @@ document.addEventListener("DOMContentLoaded", () => {
 
         try {
             // Send to backend
-
-            const modelResponse = await fetch("/addModel", {
+            const response = await fetch("/addModel", {
                 method: "POST",
-                headers: {"Content-Type": "application/json"},
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(modelData),
             });
 
-            if (modelResponse.ok) {
-                const newModel = await modelResponse.json();
+            if (response.ok) {
+                const updatedModels = await response.json();
 
-                // Add to model page
-                const modelCard = document.createElement('div');
-                modelCard.className = 'col';
-                modelCard.innerHTML = `
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <h5 class="card-title">${newModel.name}</h5>
-                        </div>
-                    </div>`;
-                modelsFolder.appendChild(modelCard);
+                // Clear existing models
+                modelsFolder.innerHTML = "";
 
+                // Add updated models
+                updatedModels.forEach((model) => {
+                    const modelCard = document.createElement("div");
+                    modelCard.className = "col";
+                    modelCard.innerHTML = `
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">${model.name}</h5>
+                            </div>
+                        </div>`;
+                    modelsFolder.appendChild(modelCard);
+                });
+
+                // Reset form and close modal
                 modelForm.reset();
-                const modelModal = document.getElementById('addModelModal');
-                const modalInstance = bootstrap.Modal.getInstance(modelModal); // Retrieve the modal instance
+                const modelModal = document.getElementById("addModelModal");
+                const modalInstance = bootstrap.Modal.getInstance(modelModal);
                 if (modalInstance) {
                     modalInstance.hide();
                 }
             } else {
-                console.error("Failed to add model:", await modelResponse.text());
+                console.error("Failed to add model:", await response.text());
             }
         } catch (error) {
             console.error("Error:", error);
         }
     });
 });
+

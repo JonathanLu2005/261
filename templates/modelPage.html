@@ -44,9 +44,22 @@ Your Models
 
                             <input type="text" class="form-control" id="modelName" name="name" placeholder="Model Name" required>
                         </div>
+
+                        <br>
+
+                        <div class="mb-3">
+                            <label for="simulationTime" class="form-label">
+                                Please provide your Simulation Time (how long it'll run for in minutes)
+                            </label>
+
+                            <input type="number" step="0.01" class="form-control" id="simulationTime" 
+                            name="simulationTime" placeholder="Simulation Time" required>
+                        </div>
                     </div>
 
                     <!-- Simulation length -->
+
+                    <!--
                     <div class="step d-none" id="step2">
                         <div class="mb-3">
                             <label for="simulationTime" class="form-label">
@@ -68,9 +81,10 @@ Your Models
                             placeholder="Simulation Second Length" required>
                         </div>
                     </div>
+                    -->
 
                     <!-- Northbound -->
-                    <div class="step d-none" id="step3">
+                    <div class="step d-none" id="step2">
                         <p>Please provide the Vehicles Per Hour heading Northbound</p>
 
                         <br>
@@ -108,7 +122,7 @@ Your Models
                     </div>
 
                     <!-- Southbound -->
-                    <div class="step d-none" id="step4">
+                    <div class="step d-none" id="step3">
                         <p>Please provide the Vehicles Per Hour heading Southbound</p>
 
                         <br>
@@ -146,7 +160,7 @@ Your Models
                     </div>
 
                     <!-- Westbound -->
-                    <div class="step d-none" id="step5">
+                    <div class="step d-none" id="step4">
                         <p>Please provide the Vehicles Per Hour heading Westbound</p>
 
                         <br>
@@ -184,7 +198,7 @@ Your Models
                     </div>
 
                     <!-- Eastbound -->
-                    <div class="step d-none" id="step6">
+                    <div class="step d-none" id="step5">
                         <p>Please provide the Vehicles Per Hour heading Eastbound</p>
 
                         <br>
@@ -222,7 +236,7 @@ Your Models
                     </div>
 
                     <!-- Vehicle information -->
-                    <div class="step d-none" id="step7">
+                    <div class="step d-none" id="step6">
                         <p>Please provide information about the Vehicles</p>
 
                         <br>
@@ -260,7 +274,7 @@ Your Models
                     </div>
 
                     <!-- Weighting -->
-                    <div class="step d-none" id="step8">
+                    <div class="step d-none" id="step7">
                         <p>The junctions will be ranked by Maximum Wait Time, Average Wait Time, and Maximum Queue Length from each direction.</p>
                         <p>Please provide the weighting for each factor, otherwise an equal split is assumed.</p>
 

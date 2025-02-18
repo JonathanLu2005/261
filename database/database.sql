@@ -1,51 +1,101 @@
 -- Model Table
-CREATE TABLE IF NOT EXISTS ModelTrafficFlow (
+CREATE TABLE IF NOT EXISTS modeltrafficflow (
     -- Main model info
-    ModelID SERIAL PRIMARY KEY,
-    ModelName VARCHAR(100) UNIQUE NOT NULL,
+    modelid SERIAL PRIMARY KEY,
+    modelname VARCHAR(100) UNIQUE NOT NULL,
 
     -- How long simulation runs for
-    SimulationTime INTEGER UNIQUE NOT NULL,
-    SimulationSecondLength FLOAT NOT NULL,
+    simulationtime INTEGER NOT NULL,
+    --SimulationSecondLength FLOAT NOT NULL,
 
     -- Total VPH from each direction
-    NorthboundVPHTotal INTEGER NOT NULL,
-    SouthboundVPHTotal INTEGER NOT NULL,
-    EastboundVPHTotal INTEGER NOT NULL,
-    WestboundVPHTotal INTEGER NOT NULL,
+    northboundvphtotal INTEGER NOT NULL,
+    southboundvphtotal INTEGER NOT NULL,
+    eastboundvphtotal INTEGER NOT NULL,
+    westboundvphtotal INTEGER NOT NULL,
 
     -- Northbound broken down
-    NorthboundNorthVPH INTEGER NOT NULL,
-    NorthboundEastVPH INTEGER NOT NULL,
-    NorthboundWestVPH INTEGER NOT NULL,
+    northboundnorthvph INTEGER NOT NULL,
+    northboundeastvph INTEGER NOT NULL,
+    northboundwestvph INTEGER NOT NULL,
 
     -- Southbound broken down
-    SouthboundSouthVPH INTEGER NOT NULL,
-    SouthboundEastVPH INTEGER NOT NULL,
-    SouthboundWestVPH INTEGER NOT NULL, 
+    southboundsouthvph INTEGER NOT NULL,
+    southboundeastvph INTEGER NOT NULL,
+    southboundwestvph INTEGER NOT NULL, 
 
     -- Eastbound broken down
-    EastboundEastVPH INTEGER NOT NULL,
-    EastboundNorthVPH INTEGER NOT NULL,
-    EastboundSouthVPH INTEGER NOT NULL,
+    eastboundeastvph INTEGER NOT NULL,
+    eastboundnorthvph INTEGER NOT NULL,
+    eastboundsouthvph INTEGER NOT NULL,
 
     -- Westbound broken down
-    WestboundWestVPH INTEGER NOT NULL,
-    WestboundNorthVPH INTEGER NOT NULL,
-    WestboundSouthVPH INTEGER NOT NULL,
+    westboundwestvph INTEGER NOT NULL,
+    westboundnorthvph INTEGER NOT NULL,
+    westboundsouthvph INTEGER NOT NULL,
 
     -- Vehicle top speed
-    VehicleTopSpeed INTEGER NOT NULL,
+    vehicletopspeed INTEGER NOT NULL,
 
     -- Vehicle reaction time and stationary distance
-    VehicleReactionTime INTEGER NOT NULL,
-    VehicleStationaryDistance INTEGER NOT NULL,
+    vehiclereactiontime INTEGER NOT NULL,
+    vehiclestationarydistance INTEGER NOT NULL,
 
     -- Weightings for results
-    MaximumWaitTimeWeight FLOAT NOT NULL DEFAULT 0.33,
-    AverageWaitTimeWeight FLOAT NOT NULL DEFAULT 0.33,
-    MaximumQueueLengthWeight FLOAT NOT NULL DEFAULT 0.33
+    maximumwaittimeweight FLOAT NOT NULL DEFAULT 0.33,
+    averagewaittimeweight FLOAT NOT NULL DEFAULT 0.33,
+    maximumqueuelengthweight FLOAT NOT NULL DEFAULT 0.33
 );
+
+-- Model - Add data
+CREATE OR REPLACE FUNCTION insertModelTrafficFlow(InputModelName VARCHAR, InputSimulationTime INTEGER,
+
+                                                InputNorthboundNorth INTEGER, InputNorthboundEast INTEGER, InputNorthboundWest INTEGER, 
+                                                InputSouthboundSouth INTEGER, InputSouthboundEast INTEGER, InputSouthboundWest INTEGER,
+                                                InputEastboundEast INTEGER, InputEastboundNorth INTEGER, InputEastboundSouth INTEGER,
+                                                InputWestboundWest INTEGER, InputWestboundNorth INTEGER, InputWestboundSouth INTEGER,
+
+                                                InputVehicleTopSpeed INTEGER, InputVehicleReactionTime INTEGER, InputVehicleStationaryDistance INTEGER,
+                                               
+                                                InputMaximumWaitTimeWeight FLOAT, InputAverageWaitTimeWeight FLOAT, InputMaximumQueueLengthWeight FLOAT)
+                                                RETURNS VOID AS $$
+BEGIN
+    INSERT INTO modeltrafficflow (modelname, simulationtime,
+                                northboundvphtotal, southboundvphtotal, eastboundvphtotal, westboundvphtotal,
+
+                                northboundnorthvph, northboundeastvph, northboundwestvph, 
+                                southboundsouthvph, southboundeastvph, southboundwestvph,
+                                eastboundeastvph, eastboundnorthvph, eastboundsouthvph,
+                                westboundwestvph, westboundnorthvph, westboundsouthvph,
+
+                                vehicletopspeed, vehiclereactiontime, vehiclestationarydistance,
+
+                                maximumwaittimeweight, averagewaittimeweight, maximumqueuelengthweight)
+    VALUES(InputModelName, InputSimulationTime,
+
+    InputNorthboundNorth + InputNorthboundEast + InputNorthboundWest,
+    InputSouthboundSouth + InputSouthboundEast + InputSouthboundWest,
+    InputEastboundEast + InputEastboundNorth + InputEastboundSouth,
+    InputWestboundWest + InputWestboundNorth + InputWestboundSouth,
+
+    InputNorthboundNorth, InputNorthboundEast, InputNorthboundWest,
+    InputSouthboundSouth, InputSouthboundEast, InputSouthboundWest,
+    InputEastboundEast, InputEastboundNorth, InputEastboundSouth,
+    InputWestboundWest, InputWestboundNorth, InputWestboundSouth,
+
+    InputVehicleTopSpeed, InputVehicleReactionTime, InputVehicleStationaryDistance,
+
+    InputMaximumWaitTimeWeight, InputAverageWaitTimeWeight, InputMaximumQueueLengthWeight);
+END;
+$$ LANGUAGE plpgsql;
+
+-- Model - Retrieve data 
+CREATE OR REPLACE FUNCTION retrieveAllModelNames() RETURNS TABLE(modelid INTEGER, modelname VARCHAR) AS $$
+BEGIN 
+    RETURN QUERY
+    SELECT modeltrafficflow.modelid, modeltrafficflow.modelname FROM modeltrafficflow;
+END;
+$$ LANGUAGE plpgsql;
 
 -- Junction Configuration Table
 CREATE TABLE IF NOT EXISTS JunctionConfigurations (

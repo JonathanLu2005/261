@@ -24,6 +24,7 @@ def getDatabaseConnection():
     except Exception as e:
         print(f"Error during database connection: {e}")
         return None, None
+
     
 # Function to close the connection and cursor
 def closeDatabaseConnection(connection, cursor):
@@ -34,7 +35,6 @@ def closeDatabaseConnection(connection, cursor):
             connection.close()
     except Exception as e:
         print(f"Error closing the connection: {e}")
-
 
 # Function to fetch all tables from the database
 def fetchAllTables():
@@ -64,4 +64,64 @@ def fetchAllTables():
 
     finally:
         # Ensure the connection is closed properly
+        closeDatabaseConnection(connection, cursor)
+
+# Insert model traffic flow data
+def insertModelTrafficFlowData(InputModelName, InputSimulationTime,
+                            InputNorthboundNorth, InputNorthboundEast, InputNorthboundWest, 
+                            InputSouthboundSouth, InputSouthboundEast, InputSouthboundWest,
+                            InputEastboundEast, InputEastboundNorth, InputEastboundSouth,
+                            InputWestboundWest, InputWestboundNorth, InputWestboundSouth,
+                            InputVehicleTopSpeed, InputVehicleReactionTime, InputVehicleStationaryDistance,
+                            InputMaximumWaitTimeWeight, InputAverageWaitTimeWeight, InputMaximumQueueLengthWeight):
+    connection, cursor = getDatabaseConnection()
+
+    if connection is None or cursor is None:
+        print("Failed to connect to the database.")
+        return []
+    
+    try:
+        cursor.execute("""
+            SELECT insertModelTrafficFlow(%s, %s,
+            %s, %s, %s,
+            %s, %s, %s,
+            %s, %s, %s,
+            %s, %s, %s,
+            %s, %s, %s,
+            %s, %s, %s)
+            """, (
+            InputModelName, InputSimulationTime,
+            InputNorthboundNorth, InputNorthboundEast, InputNorthboundWest, 
+            InputSouthboundSouth, InputSouthboundEast, InputSouthboundWest,
+            InputEastboundEast, InputEastboundNorth, InputEastboundSouth,
+            InputWestboundWest, InputWestboundNorth, InputWestboundSouth,
+            InputVehicleTopSpeed, InputVehicleReactionTime, InputVehicleStationaryDistance,
+            InputMaximumWaitTimeWeight, InputAverageWaitTimeWeight, InputMaximumQueueLengthWeight
+        ))
+
+        connection.commit()
+    except Exception as e:
+        print(f"Error: {e}")
+        connection.rollback()
+    finally:
+        closeDatabaseConnection(connection, cursor)
+
+# Retrieve all model names
+def retrieveAllModelNames():
+    connection, cursor = getDatabaseConnection()
+
+    if connection is None or cursor is None:
+        print("Failed to connect to the database.")
+        return []
+    
+    try:
+        cursor.execute("SELECT * FROM retrieveAllModelNames();")
+
+        allModelInformation = cursor.fetchall()
+
+        return allModelInformation
+    except Exception as e:
+        print(f"Error: {e}")
+        return []
+    finally:
         closeDatabaseConnection(connection, cursor)
