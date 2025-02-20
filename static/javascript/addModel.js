@@ -1,67 +1,38 @@
-document.addEventListener("DOMContentLoaded", async () => {
-    const modelForm = document.getElementById("addModelForm");
-    const modelsFolder = document.getElementById("modelsFolder");
+// static/javascript/modalNavigation.js
 
-    // Function to render models
-    const renderModels = (models) => {
-        // Clear existing models
-        modelsFolder.innerHTML = "";
-
-        // Render each model
-        models.forEach((model) => {
-            const modelCard = document.createElement("div");
-            modelCard.className = "col";
-            modelCard.innerHTML = `
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h5 class="card-title">${model.name}</h5>
-                    </div>
-                </div>`;
-            modelsFolder.appendChild(modelCard);
-        });
-    };
-
-    // Fetch and display models on page load
-    try {
-        const response = await fetch("/api/models");
-        const models = await response.json();
-        renderModels(models);
-    } catch (error) {
-        console.error("Error fetching models:", error);
+document.addEventListener("DOMContentLoaded", () => {
+    const steps = Array.from(document.querySelectorAll(".step"));
+    const prevButton = document.getElementById("prev");
+    const nextButton = document.getElementById("next");
+    const submitButton = document.getElementById("submitModel");
+  
+    let currentStep = 0;
+  
+    function updateStep() {
+      steps.forEach((step, index) => {
+        step.classList.toggle("d-none", index !== currentStep);
+      });
+      prevButton.classList.toggle("d-none", currentStep === 0);
+      const onLastStep = currentStep === steps.length - 1;
+      nextButton.classList.toggle("d-none", onLastStep);
+      submitButton.classList.toggle("d-none", !onLastStep);
     }
-
-    // Handle form submission
-    modelForm.addEventListener("submit", async (event) => {
-        event.preventDefault();
-
-        const modelFormData = new FormData(modelForm);
-        const modelData = Object.fromEntries(modelFormData);
-
-        try {
-            const response = await fetch("/addModel", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(modelData),
-            });
-
-            if (response.ok) {
-                const updatedModels = await response.json();
-                renderModels(updatedModels);
-
-                // Reset form and close modal
-                modelForm.reset();
-                const modelModal = document.getElementById("addModelModal");
-                const modalInstance = bootstrap.Modal.getInstance(modelModal);
-                if (modalInstance) {
-                    modalInstance.hide();
-                }
-            } else {
-                console.error("Failed to add model:", await response.text());
-            }
-        } catch (error) {
-            console.error("Error:", error);
+  
+    nextButton.addEventListener("click", () => {
+      if (window.validateCurrentStep && window.validateCurrentStep()) {
+        if (currentStep < steps.length - 1) {
+          currentStep++;
+          updateStep();
         }
+      }
     });
-});
-
+  
+    prevButton.addEventListener("click", () => {
+      if (currentStep > 0) {
+        currentStep--;
+        updateStep();
+      }
+    });
+    updateStep();
+  });
 
