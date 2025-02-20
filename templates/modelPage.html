@@ -1,14 +1,12 @@
 {% extends 'base.html' %}
 
-<!-- Title -->
 {% block title %}
 Your Models
 {% endblock %}
 
 {% block content %}
-<!-- Container to hold my add button and models grid -->
 <div class="container mt-5">
-    <!-- Add -->
+    <!-- Add Model  -->
     <div class="d-flex justify-content-left mb-3">
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModelModal">
             Add Model
@@ -33,295 +31,171 @@ Your Models
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 
-                <!-- Get information -->
+                <!-- Modal Body -->
                 <div class="modal-body" style="background-color: #DEF2F1">
-                    <!-- Get name -->
+                    <!-- Step 1: name and Simulation Time -->
                     <div class="step" id="step1">
                         <div class="mb-3">
                             <label for="modelName" class="form-label">
                                 Please type in the name of your Simulation
                             </label>
-
                             <input type="text" class="form-control" id="modelName" name="name" placeholder="Model Name" required>
                         </div>
-
-                        <br>
-
                         <div class="mb-3">
                             <label for="simulationTime" class="form-label">
-                                Please provide your Simulation Time (how long it'll run for in minutes)
+                                Please provide your Simulation Time (in minutes)
                             </label>
-
-                            <input type="number" step="0.01" class="form-control" id="simulationTime" 
-                            name="simulationTime" placeholder="Simulation Time" required>
+                            <input type="number" step="0.01" class="form-control" id="simulationTime" name="simulationTime" placeholder="Simulation Time" required>
                         </div>
                     </div>
 
-                    <!-- Simulation length -->
-
-                    <!--
-                    <div class="step d-none" id="step2">
-                        <div class="mb-3">
-                            <label for="simulationTime" class="form-label">
-                                Please provide your Simulation Time (how long it'll run for in minutes)
-                            </label>
-
-                            <input type="number" step="0.01" class="form-control" id="simulationTime" 
-                            name="simulationTime" placeholder="Simulation Time" required>
-                        </div>
-
-                        <br>
-
-                        <div class="mb-3">
-                            <label for="simulationSecondLength" class="form-label">
-                                Please provide your Simulation Second Length (how long each simulation second represents a real life second)
-                            </label>
-
-                            <input type="number" class="form-control" id="simulationSecondLength" name="simulationSecondLength" 
-                            placeholder="Simulation Second Length" required>
-                        </div>
-                    </div>
-                    -->
-
-                    <!-- Northbound -->
+                    <!-- Step 2: Northbound -->
                     <div class="step d-none" id="step2">
                         <p>Please provide the Vehicles Per Hour heading Northbound</p>
-
-                        <br>
-
                         <div class="mb-3">
                             <label for="northBoundNorth" class="form-label">
-                                Please provide the Vehicles Per Hour heading North
+                                Vehicles Per Hour heading North
                             </label>
-
-                            <input type="number" class="form-control" id="northBoundNorth" name="northBoundNorth" 
-                            placeholder="Northbound North" required>
+                            <input type="number" class="form-control" id="northBoundNorth" name="northBoundNorth" placeholder="Northbound North" required>
                         </div>
-                        
-                        <br>
-
                         <div class="mb-3">
                             <label for="northBoundEast" class="form-label">
-                                Please provide the Vehicles Per Hour turning East
+                                Vehicles Per Hour turning East
                             </label>
-
-                            <input type="number" class="form-control" id="northBoundEast" name="northBoundEast" 
-                            placeholder="Northbound East" required>
+                            <input type="number" class="form-control" id="northBoundEast" name="northBoundEast" placeholder="Northbound East" required>
                         </div>
-
-                        <br>
-
                         <div class="mb-3">
                             <label for="northBoundWest" class="form-label">
-                                Please provide the Vehicles Per Hour turning West
+                                Vehicles Per Hour turning West
                             </label>
-
-                            <input type="number" class="form-control" id="northBoundWest" name="northBoundWest" 
-                            placeholder="Northbound West" required>
+                            <input type="number" class="form-control" id="northBoundWest" name="northBoundWest" placeholder="Northbound West" required>
                         </div>
                     </div>
 
-                    <!-- Southbound -->
+                    <!-- Step 3: Southbound -->
                     <div class="step d-none" id="step3">
                         <p>Please provide the Vehicles Per Hour heading Southbound</p>
-
-                        <br>
-
                         <div class="mb-3">
                             <label for="southBoundSouth" class="form-label">
-                                Please provide the Vehicles Per Hour heading South
+                                Vehicles Per Hour heading South
                             </label>
-
-                            <input type="number" class="form-control" id="southBoundSouth" name="southBoundSouth" 
-                            placeholder="Southbound South" required>
+                            <input type="number" class="form-control" id="southBoundSouth" name="southBoundSouth" placeholder="Southbound South" required>
                         </div>
-                        
-                        <br>
-
                         <div class="mb-3">
                             <label for="southBoundEast" class="form-label">
-                                Please provide the Vehicles Per Hour turning East
+                                Vehicles Per Hour turning East
                             </label>
-
-                            <input type="number" class="form-control" id="southBoundEast" name="southBoundEast" 
-                            placeholder="Southbound East" required>
+                            <input type="number" class="form-control" id="southBoundEast" name="southBoundEast" placeholder="Southbound East" required>
                         </div>
-
-                        <br>
-
                         <div class="mb-3">
                             <label for="southBoundWest" class="form-label">
-                                Please provide the Vehicles Per Hour turning West
+                                Vehicles Per Hour turning West
                             </label>
-
-                            <input type="number" class="form-control" id="southBoundWest" name="southBoundWest" 
-                            placeholder="Southbound West" required>
+                            <input type="number" class="form-control" id="southBoundWest" name="southBoundWest" placeholder="Southbound West" required>
                         </div>
                     </div>
 
-                    <!-- Westbound -->
+                    <!-- Step 4: Westbound -->
                     <div class="step d-none" id="step4">
                         <p>Please provide the Vehicles Per Hour heading Westbound</p>
-
-                        <br>
-                     
                         <div class="mb-3">
                             <label for="westBoundWest" class="form-label">
-                                Please provide the Vehicles Per Hour heading West
+                                Vehicles Per Hour heading West
                             </label>
-
-                            <input type="number" class="form-control" id="westBoundWest" name="westBoundWest" 
-                            placeholder="Westbound West" required>
+                            <input type="number" class="form-control" id="westBoundWest" name="westBoundWest" placeholder="Westbound West" required>
                         </div>
-
-                        <br>
-
                         <div class="mb-3">
                             <label for="westBoundNorth" class="form-label">
-                                Please provide the Vehicles Per Hour turning North
+                                Vehicles Per Hour turning North
                             </label>
-
-                            <input type="number" class="form-control" id="westBoundNorth" name="westBoundNorth" 
-                            placeholder="Westbound North" required>
+                            <input type="number" class="form-control" id="westBoundNorth" name="westBoundNorth" placeholder="Westbound North" required>
                         </div>
-
-                        <br>
-
                         <div class="mb-3">
                             <label for="westBoundSouth" class="form-label">
-                                Please provide the Vehicles Per Hour turning South
+                                Vehicles Per Hour turning South
                             </label>
-
-                            <input type="number" class="form-control" id="westBoundSouth" name="westBoundSouth" 
-                            placeholder="Westbound South" required>
+                            <input type="number" class="form-control" id="westBoundSouth" name="westBoundSouth" placeholder="Westbound South" required>
                         </div>
                     </div>
 
-                    <!-- Eastbound -->
+                    <!-- Step 5: Eastbound -->
                     <div class="step d-none" id="step5">
                         <p>Please provide the Vehicles Per Hour heading Eastbound</p>
-
-                        <br>
-
                         <div class="mb-3">
                             <label for="eastBoundEast" class="form-label">
-                                Please provide the Vehicles Per Hour heading East
+                                Vehicles Per Hour heading East
                             </label>
-
-                            <input type="number" class="form-control" id="eastBoundEast" name="eastBoundEast" 
-                            placeholder="Eastbound East" required>
+                            <input type="number" class="form-control" id="eastBoundEast" name="eastBoundEast" placeholder="Eastbound East" required>
                         </div>
-
-                        <br>
-
                         <div class="mb-3">
                             <label for="eastBoundNorth" class="form-label">
-                                Please provide the Vehicles Per Hour turning North
+                                Vehicles Per Hour turning North
                             </label>
-
-                            <input type="number" class="form-control" id="eastBoundNorth" name="eastBoundNorth" 
-                            placeholder="Eastbound North" required>
+                            <input type="number" class="form-control" id="eastBoundNorth" name="eastBoundNorth" placeholder="Eastbound North" required>
                         </div>
-
-                        <br>
-
                         <div class="mb-3">
                             <label for="eastBoundSouth" class="form-label">
-                                Please provide the Vehicles Per Hour turning South
+                                Vehicles Per Hour turning South
                             </label>
-
-                            <input type="number" class="form-control" id="eastBoundSouth" name="eastBoundSouth" 
-                            placeholder="Eastbound South" required>
+                            <input type="number" class="form-control" id="eastBoundSouth" name="eastBoundSouth" placeholder="Eastbound South" required>
                         </div>
                     </div>
 
-                    <!-- Vehicle information -->
+                    <!-- Step 6: Vehicle Info -->
                     <div class="step d-none" id="step6">
                         <p>Please provide information about the Vehicles</p>
-
-                        <br>
-
                         <div class="mb-3">
                             <label for="vehicleTopSpeed" class="form-label">
-                                Please provide the Vehicle's Top Speed (highest speed attainable)
+                                Vehicle's Top Speed
                             </label>
-
-                            <input type="number" class="form-control" id="vehicleTopSpeed" name="vehicleTopSpeed" 
-                            placeholder="Vehicle Top Speed" required>
+                            <input type="number" class="form-control" id="vehicleTopSpeed" name="vehicleTopSpeed" placeholder="Vehicle Top Speed" required>
                         </div>
-
-                        <br>
-
                         <div class="mb-3">
                             <label for="vehicleReactionTime" class="form-label">
-                                Please provide the Vehicle's Reaction Time (distance between vehicles while moving)
+                                Vehicle's Reaction Time
                             </label>
-
-                            <input type="number" class="form-control" id="vehicleReactionTime" name="vehicleReactionTime" 
-                            placeholder="Vehicle Reaction Time" required>
+                            <input type="number" class="form-control" id="vehicleReactionTime" name="vehicleReactionTime" placeholder="Vehicle Reaction Time" required>
                         </div>
-
-                        <br>
-
                         <div class="mb-3">
                             <label for="vehicleStationaryDistance" class="form-label">
-                                Please provide the Vehicle's Stationary Distance (distance between vehicles while not moving)
+                                Vehicle's Stationary Distance
                             </label>
-
-                            <input type="number" class="form-control" id="vehicleStationaryDistance" name="vehicleStationaryDistance" 
-                            placeholder="Vehicle Stationary Distance" required>
+                            <input type="number" class="form-control" id="vehicleStationaryDistance" name="vehicleStationaryDistance" placeholder="Vehicle Stationary Distance" required>
                         </div>
                     </div>
 
-                    <!-- Weighting -->
+                    <!-- Step 7: Weighting -->
                     <div class="step d-none" id="step7">
-                        <p>The junctions will be ranked by Maximum Wait Time, Average Wait Time, and Maximum Queue Length from each direction.</p>
-                        <p>Please provide the weighting for each factor, otherwise an equal split is assumed.</p>
-
-
+                        <p>
+                            The junctions will be ranked by Maximum Wait Time, Average Wait Time, and Maximum Queue Length.
+                            Please provide the weighting for each factor (0 ~ 1).
+                        </p>
                         <div class="mb-3">
-                            <input type="number" step="0.01" class="form-control" id="maxWaitTimeWeight" name="maxWaitTimeWeight" 
-                            placeholder="Maximum Wait Time Weight" required>
+                            <input type="number" step="0.01" class="form-control" id="maxWaitTimeWeight" name="maxWaitTimeWeight" placeholder="Maximum Wait Time Weight" required>
                         </div>
-
                         <div class="mb-3">
-                            <input type="number" step="0.01" class="form-control" id="averageWaitTimeWeight" name="averageWaitTimeWeight" 
-                            placeholder="Average Wait Time Weight" required>
+                            <input type="number" step="0.01" class="form-control" id="averageWaitTimeWeight" name="averageWaitTimeWeight" placeholder="Average Wait Time Weight" required>
                         </div>
-
                         <div class="mb-3">
-                            <input type="number" step="0.01" class="form-control" id="maxQueueLengthWeight" name="maxQueueLengthWeight" 
-                            placeholder="Maximum Queue Length Weight" required>
+                            <input type="number" step="0.01" class="form-control" id="maxQueueLengthWeight" name="maxQueueLengthWeight" placeholder="Maximum Queue Length Weight" required>
                         </div>
                     </div>
                 </div>
 
+                <!-- Modal Footer -->
                 <div class="modal-footer" style="background-color: #2B7A78">
-                    <button type="button" class="btn btn-warning d-none" id="prev">
-                        Back
-                    </button>
-
-                    <button type="button" class="btn btn-warning" id="next">
-                        Next
-                    </button>
-
-                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
-                        Cancel
-                    </button>
-
-                    <button type="submit" class="btn btn-success" id="submitModel">
-                        Save
-                    </button>
+                    <button type="button" class="btn btn-warning d-none" id="prev">Back</button>
+                    <button type="button" class="btn btn-warning" id="next">Next</button>
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success d-none" id="submitModel">Save</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
-
 {% endblock %}
 
-<!-- JS -->
 {% block scripts %}
-<script src="{{ url_for('static', filename='javascript/addModel.js')}}"></script>
-<script src="{{ url_for('static', filename='javascript/modalNavigation.js')}}"></script>
+<script src="{{ url_for('static', filename='javascript/addModel.js') }}"></script>
+<script src="{{ url_for('static', filename='javascript/modalNavigation.js') }}"></script>
 {% endblock %}
