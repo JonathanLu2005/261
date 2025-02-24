@@ -6,5 +6,158 @@ Your Models Junctions
 {% endblock %}
 
 {% block content %}
+<div class="container mt-5">
+    <!-- Add Junction -->
+    <div class="d-flex justify-content-left mb-3">
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addJunctionModal">
+            Add Junction
+        </button>
+    </div>
 
+    <!-- Junctions Grid -->
+    <div id="junctionsFolder" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
+        <!-- Junction cards appear here -->
+    </div>
+</div>
+
+<!-- Modal for adding model -->
+<div class="modal fade" id="addJunctionModal" tabindex="-1" aria-labelledby="addJunctionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="addJunctionForm">
+                <div class="modal-header" style="background-color: #2B7A78">
+                    <h5 class="modal-title text-white" id="addJunctionModalLabel">
+                        Add New Junction
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="modal-body" style="background-color: #DEF2F1">
+                    <!-- Step 1: Junction Name and Lanes -->
+                    <div class="step" id="step1">
+                        <div class="mb-3">
+                            <label for="junctionName" class="form-label">Simulation Name</label>
+                            <input type="text" class="form-control" id="junctionName" name="junctionName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="junctionLanes" class="form-label">Number of Lanes</label>
+                            <input type="number" class="form-control" id="junctionLanes" name="junctionLanes" required>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: adding pedestiran crossing -->
+                    <div class="step d-none" id="step2">
+                        <div class="mb-3">
+                            <label class="form-label" for="pedestrianCrossingAdded">
+                                Would you like to include a pedestrian crossing?
+                            </label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="pedestrianCrossingAdded" id="pedestrianCrossingYes" value="yes" checked>
+                                <label class="form-check-label" for="pedestrianCrossingYes">
+                                    Yes
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="pedestrianCrossingAdded" id="pedestrianCrossingNo" value="no">
+                                <label class="form-check-label" for="pedestrianCrossingNo">
+                                    No
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="pedestrianCrossingDuration" class="form-label">
+                                Please enter the duration of the pedestrian crossing
+                            </label>
+                            <input type="number" class="form-control" id="pedestrianCrossingDuration" name="pedestrianCrossingDuration" placeholder="Pedestrian Crossing Duration" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="pedestrianCrossingRequests" class="form-label">
+                                Please enter the number of pedestrian crossing requests
+                            </label>
+                            <input type="number" class="form-control" id="pedestrianCrossingRequests" name="pedestrianCrossingRequests" placeholder="Pedestrian Crossing Requests" required>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: adding directions order -->
+                    <div class="step d-none" id="step3">
+                        <div class="mb-3">
+                            <label for="northboundOrder" class="form-label">
+                                Enter the Northbound order
+                            </label>
+                            <input type="number" class="form-control" id="northboundOrder" name="northboundOrder" placeholder="Northbound order" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="southboundOrder" class="form-label">
+                                Enter the Southbound order
+                            </label>
+                            <input type="number" class="form-control" id="southboundOrder" name="southboundOrder" placeholder="Southbound order" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="eastboundOrder" class="form-label">
+                                Enter the Eastbound order
+                            </label>
+                            <input type="number" class="form-control" id="eastboundOrder" name="eastboundOrder" placeholder="Eastbound order" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="westboundOrder" class="form-label">
+                                Enter the Westbound order
+                            </label>
+                            <input type="number" class="form-control" id="westboundOrder" name="westboundOrder" placeholder="Westbound order" required>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: adding directions order -->
+                    <div class="step d-none" id="step4">
+                        <div class="mb-3">
+                            <label for="northboundDuration" class="form-label">
+                                Enter the Northbound Duration
+                            </label>
+                            <input type="number" class="form-control" id="northboundDuration" name="northboundDuration" placeholder="Northbound Duration" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="southboundDuration" class="form-label">
+                                Enter the Southbound Duration
+                            </label>
+                            <input type="number" class="form-control" id="southboundDuration" name="southboundDuration" placeholder="Southbound Duration" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="eastboundDuration" class="form-label">
+                                Enter the Eastbound Duration
+                            </label>
+                            <input type="number" class="form-control" id="eastboundDuration" name="eastboundDuration" placeholder="Eastbound Duration" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="westboundDuration" class="form-label">
+                                Enter the Westbound Duration
+                            </label>
+                            <input type="number" class="form-control" id="westboundDuration" name="westboundDuration" placeholder="Westbound Duration" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="modal-footer" style="background-color: #2B7A78">
+                    <button type="button" class="btn btn-warning d-none" id="prev">Back</button>
+                    <button type="button" class="btn btn-warning" id="next">Next</button>
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success d-none" id="submitJunction">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='javascript/modalJunctionNavigation.js') }}"></script>
+{% endblock %}
+
