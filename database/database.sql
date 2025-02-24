@@ -98,61 +98,61 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Junction Configuration Table
-CREATE TABLE IF NOT EXISTS JunctionConfigurations (
+CREATE TABLE IF NOT EXISTS junctionconfigurations (
     -- Main junction info
-    JunctionID SERIAL PRIMARY KEY,
-    JunctionName VARCHAR(100) UNIQUE NOT NULL,
+    junctionid SERIAL PRIMARY KEY,
+    junctionname VARCHAR(100) UNIQUE NOT NULL,
 
     -- Number of lanes
-    NumberOfLanes INTEGER NOT NULL,
+    numberoflanes INTEGER NOT NULL,
 
     -- Pedestrian crossing information
-    PedestrianCrossingAdded BOOLEAN NOT NULL DEFAULT FALSE,
-    PedestrianCrossingDuration INTEGER NOT NULL DEFAULT 0,
-    PedestrianCrossingRequestsPerHour INTEGER NOT NULL DEFAULT 0,
+    pedestriancrossingadded BOOLEAN NOT NULL DEFAULT FALSE,
+    pedestriancrossingduration INTEGER NOT NULL DEFAULT 0,
+    pedestriancrossingrequestsperhour INTEGER NOT NULL DEFAULT 0,
 
     -- Order of traffic lights sequencing
-    NorthboundOrder INTEGER NOT NULL,
-    SouthboundOrder INTEGER NOT NULL,
-    EastboundOrder INTEGER NOT NULL,
-    WestboundOrder INTEGER NOT NULL,
+    northboundorder INTEGER NOT NULL,
+    southboundorder INTEGER NOT NULL,
+    eastboundorder INTEGER NOT NULL,
+    westboundorder INTEGER NOT NULL,
 
     -- How long each traffic light runs for
-    NorthboundGreenLightDuration INTEGER NOT NULL,
-    SouthboundGreenLightDuration INTEGER NOT NULL,
-    WestboundGreenLightDuration INTEGER NOT NULL,
-    EastboundGreenLightDuration INTEGER NOT NULL,
+    northboundgreenlightduration INTEGER NOT NULL,
+    southboundgreenlightduration INTEGER NOT NULL,
+    westboundgreenlightduration INTEGER NOT NULL,
+    eastboundgreenlightduration INTEGER NOT NULL,
 
     -- Reference to model for simulation details
-    ModelID INTEGER NOT NULL REFERENCES ModelTrafficFlow(ModelID)
+    modelid INTEGER NOT NULL REFERENCES modeltrafficflow(modelid)
 );
 
 -- Junction Performance Table
-CREATE TABLE IF NOT EXISTS JunctionPerformance (
+CREATE TABLE IF NOT EXISTS junctionperformance (
     -- Main junction performance info
-    JunctionPerformanceID SERIAL PRIMARY KEY,
-    OverallJunctionScore FLOAT NOT NULL,
+    junctionperformanceid SERIAL PRIMARY KEY,
+    overalljunctionscore FLOAT NOT NULL,
 
     -- North results
-    NorthMaximumWaitTime INTEGER NOT NULL,
-    NorthAverageWaitTime INTEGER NOT NULL,
-    NorthMaximumQueueLength INTEGER NOT NULL,
+    northmaximumwaittime INTEGER NOT NULL,
+    northaveragewaittime INTEGER NOT NULL,
+    northmaximumqueuelength INTEGER NOT NULL,
 
     -- South results
-    SouthMaximumWaitTime INTEGER NOT NULL,
-    SouthAverageWaitTime INTEGER NOT NULL,
-    SouthMaximumQueueLength INTEGER NOT NULL,
+    southmaximumwaittime INTEGER NOT NULL,
+    southaveragewaittime INTEGER NOT NULL,
+    southmaximumqueuelength INTEGER NOT NULL,
 
     -- East results
-    EastMaximumWaitTime INTEGER NOT NULL,
-    EastAverageWaitTime INTEGER NOT NULL,
-    EastMaximumQueueLength INTEGER NOT NULL,
+    eastmaximumwaittime INTEGER NOT NULL,
+    eastaveragewaittime INTEGER NOT NULL,
+    eastmaximumqueuelength INTEGER NOT NULL,
 
     -- West results
-    WestMaximumWaitTime INTEGER NOT NULL,
-    WestAverageWaitTime INTEGER NOT NULL,
-    WestMaximumQueueLength INTEGER NOT NULL,
+    westmaximumwaittime INTEGER NOT NULL,
+    westaveragewaittime INTEGER NOT NULL,
+    westmaximumqueuelength INTEGER NOT NULL,
 
     -- Refer to what junction performance belongs to
-    JunctionID INTEGER NOT NULL REFERENCES JunctionConfigurations(JunctionID)
+    junctionid INTEGER NOT NULL REFERENCES junctionconfigurations(junctionid)
 );
