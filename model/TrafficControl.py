@@ -95,7 +95,10 @@ class TrafficControl:
             while env.now < endTime:
                 print(f"-=-New green light red light sequence at {env.now}")
                 # Cycle through the traffic light sequence suggested by the user
-                for direction in self.trafficLightSequence:
+                for direction in self.trafficLightSequence: 
+                    # Ensure to only give the green light to a direction if there are cars waiting - needs to not be the start times otherwise the whole sim fails due to no cars ever being generated into the queues
+                    if (env.now != 0 and self.junctionEntrances[direction].checkIfCarsWaiting() == False):
+                        continue
                     self.junctionEntrances[direction].signalGreen() # Signal Green to this direction
                     print(f"Signal Green to {direction} at {env.now}")
                     yield env.timeout(self.trafficLightGreenTimes[direction]) # Give the green light time corresopnding to this junction entrance 
@@ -237,12 +240,13 @@ class Lane:
 
 
 #-------------------
-# JUNCION ENTRANCE
+# JUNCTION ENTRANCE
 #-------------------
 
 class JunctionEntrance:
     def __init__(self, cardinalDirectionOfJunctionEntrance):
         self.cardinalDirectionOfJunctionEntrance = cardinalDirectionOfJunctionEntrance
+        # self.specialLane = .. make this only if the user requested it 
         self.generalLanes = []              # Linked lists of Cars according to number of lanes. It should be noted that index 0 corresponds to the left most lane and the greatest index corresponds to the right most lane.
         for _ in range(0, TrafficControl.numberOfGeneralLanes):
             self.generalLanes.append(Lane(cardinalDirectionOfJunctionEntrance))
@@ -268,6 +272,16 @@ class JunctionEntrance:
         print(f"Junction Entrance {self.cardinalDirectionOfJunctionEntrance} recieved green signal")
         for lane in self.generalLanes:
             lane.isGreen = True
+
+    def checkIfCarsWaiting(self):
+        # Return true if there are any cars waiting in any queues
+        for carLane in self.generalLanes:
+            if (carLane.getNumberOfCars() > 0):
+                return True
+        #if (self.specialLane.getNumberOfCars() > 0):
+        #    return True 
+        return False
+
     
     def getMaxWaitingTime(self):
         maxWaitingTime = -1
