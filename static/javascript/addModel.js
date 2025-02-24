@@ -1,47 +1,74 @@
 // static/javascript/addModel.js
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  //load some important elements
   const modelForm = document.getElementById("addModelForm");
   const nextButton = document.getElementById("next");
   const submitButton = document.getElementById("submitModel");
+  const modelsFolder = document.getElementById("modelsFolder"); 
+
+  //render function
+  function renderModels(models) {
+    // Clear the models container
+    modelsFolder.innerHTML = "";
+
+    // Loop through each model and create a card element
+    models.forEach((model) => {
+      const modelCard = document.createElement("div");
+      modelCard.className = "col";
+      modelCard.innerHTML = `
+        <div class="card h-100">
+          <div class="card-body">
+            <h5 class="card-title">${model.name}</h5>
+            <!-- You can add more model details here -->
+          </div>
+        </div>`;
+      modelsFolder.appendChild(modelCard);
+    });
+  }
+
+  try {
+    const response = await fetch("/api/models");
+    const models = await response.json();
+    renderModels(models);
+  } catch (error) {
+    console.error("Error fetching models:", error);
+  }
 
   // define the limits
   const limits = {
-    simulationTime: { min: 1, max: 999999 },
-
-    northBoundNorth: { min: 0, max: 999999 },
-    northBoundEast: { min: 0, max: 999999 },
-    northBoundWest: { min: 0, max: 999999 },
-
-    southBoundSouth: { min: 0, max: 999999 },
-    southBoundEast: { min: 0, max: 999999 },
-    southBoundWest: { min: 0, max: 999999 },
-
-    westBoundWest: { min: 0, max: 999999 },
-    westBoundNorth: { min: 0, max: 999999 },
-    westBoundSouth: { min: 0, max: 999999 },
-
-    eastBoundEast: { min: 0, max: 999999 },
-    eastBoundNorth: { min: 0, max: 999999 },
-    eastBoundSouth: { min: 0, max: 999999 },
-
     vehicleTopSpeed: { min: 0, max: 30 },
-    vehicleReactionTime: { min: 0, max: 999999 },
-    vehicleStationaryDistance: { min: 0, max: 999999 },
 
     maxWaitTimeWeight: { min: 0, max: 1 },
     averageWaitTimeWeight: { min: 0, max: 1 },
-    maxQueueLengthWeight: { min: 0, max: 1 }
+    maxQueueLengthWeight: { min: 0, max: 1 },
+
+    simulationTime: { min: 0, max: 99999 },
+    northBoundNorth: { min: 0, max: 99999 },
+    northBoundEast: { min: 0, max: 99999 },
+    northBoundWest: { min: 0, max: 99999 },
+    southBoundSouth: { min: 0, max: 99999 },
+    southBoundEast: { min: 0, max: 99999 },
+    southBoundWest: { min: 0, max: 99999 },
+    westBoundWest: { min: 0, max: 99999 },
+    westBoundNorth: { min: 0, max: 99999 },
+    westBoundSouth: { min: 0, max: 99999 },
+    eastBoundEast: { min: 0, max: 99999 },
+    eastBoundNorth: { min: 0, max: 99999 },
+    eastBoundSouth: { min: 0, max: 99999 },
+
+    vehicleReactionTime: { min: 0, max: 99999 },
+    vehicleStationaryDistance: { min: 0, max: 99999 }
   };
 
-  // return the input field at current step
+  //get the input fields at current step and use it to validate
   function getActiveStepInputFields() {
     const activeStep = document.querySelector(".step:not(.d-none)");
     if (!activeStep) return [];
     return activeStep.querySelectorAll("input[type='number']");
   }
 
-  // verify the input at current step
+  //validate current step
   function validateCurrentStep() {
     let allValid = true;
     const fields = getActiveStepInputFields();
@@ -51,6 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const fieldId = input.id;
       const limit = limits[fieldId] || { min: 0, max: 99999 };
 
+      //create warning message
       let warningMessage = input.nextElementSibling;
       if (!warningMessage || !warningMessage.classList.contains("warning-message")) {
         warningMessage = document.createElement("p");
@@ -86,24 +114,53 @@ document.addEventListener("DOMContentLoaded", () => {
     return allValid;
   }
 
+  //check the input fields all the time
   const allNumberInputs = modelForm.querySelectorAll("input[type='number']");
   allNumberInputs.forEach((input) => {
     input.addEventListener("input", () => {
-      // only validate the current step
       validateCurrentStep();
     });
   });
 
   window.validateCurrentStep = validateCurrentStep;
 
-  // validate again before submit
-  modelForm.addEventListener("submit", (event) => {
+  //saving the model
+  modelForm.addEventListener("submit", async (event) => {
+
     const valid = validateCurrentStep();
     if (!valid) {
       event.preventDefault();
       alert("Please correct the errors before submitting.");
+      return;
+    }
+
+    event.preventDefault();
+    const modelFormData = new FormData(modelForm);
+    const modelData = Object.fromEntries(modelFormData);
+
+    try {
+      const response = await fetch("/addModel", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(modelData),
+      });
+
+      if (response.ok) {
+        const updatedModels = await response.json();
+        renderModels(updatedModels);
+
+        modelForm.reset();
+        const modelModal = document.getElementById("addModelModal");
+        const modalInstance = bootstrap.Modal.getInstance(modelModal);
+        if (modalInstance) {
+          modalInstance.hide();
+        }
+      } else {
+        console.error("Failed to add model:", await response.text());
+      }
+    } catch (error) {
+      console.error("Error submitting model:", error);
     }
   });
 });
-
 
