@@ -2,6 +2,8 @@ from flask import Flask, render_template, request, jsonify, redirect, url_for
 from database.database import (
     insertModelTrafficFlowData,
     retrieveAllModelNames,
+    insertJunctionConfigurationsData,
+    retrieveAllModelJunctions
 )
 
 # Create web app

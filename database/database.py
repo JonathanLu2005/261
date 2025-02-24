@@ -125,3 +125,62 @@ def retrieveAllModelNames():
         return []
     finally:
         closeDatabaseConnection(connection, cursor)
+
+# Insert junction configurations data
+def insertJunctionConfigurationsData(InputJunctionName, InputNumberOfLanes,
+                                     InputPedestrianCrossingAdded, InputPedestrianCrossingDuration, InputPedestrianRequestsPerHour,
+                                     InputNorthboundOrder, InputSouthboundOrder, InputEastboundOrder, InputWestboundOrder,
+                                     InputNorthboundGreenLightDuration, InputSouthboundGreenLightDuration, InputWestboundGreenLightDuration, InputEastboundGreenLightDuration,
+                                     InputModelID):
+    connection, cursor = getDatabaseConnection()
+
+    if connection is None or cursor is None:
+        print("Failed to connect to the database.")
+        return []
+    
+    try:
+        cursor.execute("""
+            SELECT insertJunctionConfigurations(%s, %s,
+            %s, %s, %s,
+            %s, %s, %s, %s,
+            %s, %s, %s, %s,
+            %s)
+        """, (
+            InputJunctionName, InputNumberOfLanes,
+            InputPedestrianCrossingAdded, InputPedestrianCrossingDuration, InputPedestrianRequestsPerHour,
+            InputNorthboundOrder, InputSouthboundOrder, InputEastboundOrder, InputWestboundOrder,
+            InputNorthboundGreenLightDuration, InputSouthboundGreenLightDuration, InputWestboundGreenLightDuration, InputEastboundGreenLightDuration,
+            InputModelID
+        ))
+
+        connection.commit()
+    except Exception as e:
+        print(f"Error: {e}")
+        connection.rollback()
+    finally:
+        closeDatabaseConnection(connection, cursor)
+
+# Retrieve all junctions
+def retrieveAllModelJunctions(InputModelID):
+    connection, cursor = getDatabaseConnection()
+
+    if connection is None or cursor is None:
+        print("Failed to connect to the database.")
+        return []
+
+    try:
+        # Execute the function call with the provided modelid
+        cursor.execute("SELECT * FROM retrieveAllModelJunctions(%s);", (InputModelID,))
+
+        # Fetch all results from the function call
+        allJunctionInformation = cursor.fetchall()
+
+        return allJunctionInformation
+    except Exception as e:
+        print(f"Error: {e}")
+        return []
+    finally:
+        # Make sure to close the connection properly
+        closeDatabaseConnection(connection, cursor)
+
+
