@@ -1,5 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const modelId = "{{ model_id }}"; // Pass the modelId from Flask to the template
+    // Retrieve modelId from the URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const modelId = urlParams.get("modelId"); // Get modelId from the query string
+    console.log("Model ID:", modelId); // Check the modelId
 
     // Handle form submission
     const junctionForm = document.getElementById("addJunctionForm");
@@ -8,9 +11,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const formData = new FormData(junctionForm);
         const junctionData = Object.fromEntries(formData);
-        
+
         // Attach modelId to the junction data
         junctionData.modelId = modelId;
+
+        console.log("Junction Data:", junctionData); // Debug print to check junction data before sending
 
         try {
             const response = await fetch("/addJunction", {
@@ -20,8 +25,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 },
                 body: JSON.stringify(junctionData),
             });
+
+            if (response.ok) {
+                console.log("Junction added successfully!");
+            } else {
+                console.error("Error adding junction:", await response.text());
+            }
         } catch (error) {
             console.error("Error:", error);
         }
     });
 });
+
