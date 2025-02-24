@@ -127,6 +127,36 @@ CREATE TABLE IF NOT EXISTS junctionconfigurations (
     modelid INTEGER NOT NULL REFERENCES modeltrafficflow(modelid)
 );
 
+-- Junction - Add data
+CREATE OR REPLACE FUNCTION insertJunctionConfigurations(InputJunctionName VARCHAR, InputNumberOfLanes INTEGER,
+                                                        InputPedestrianCrossingAdded BOOLEAN, InputPedestrianCrossingDuration INTEGER, InputPedestrianRequestsPerHour INTEGER,
+                                                        InputNorthboundOrder INTEGER, InputSouthboundOrder INTEGER, InputEastboundOrder INTEGER, InputWestboundOrder INTEGER,
+                                                        InputNorthboundGreenLightDuration INTEGER, InputSouthboundGreenLightDuration INTEGER, InputWestboundGreenLightDuration INTEGER, InputEastboundGreenLightDuration INTEGER,
+                                                        InputModelID INTEGER)
+                                                        RETURNS VOID AS $$
+BEGIN 
+    INSERT INTO junctionconfigurations(junctionname, numberoflanes,
+                                        pedestriancrossingadded, pedestriancrossingduration, pedestriancrossingrequestsperhour,
+                                        northboundorder, southboundorder, eastboundorder, westboundorder,
+                                        northboundgreenlightduration, southboundgreenlightduration, westboundgreenlightduration, eastboundgreenlightduration,
+                                        modelid) 
+    VALUES(InputJunctionName, InputNumberOfLanes,
+    InputPedestrianCrossingAdded, InputPedestrianCrossingDuration, InputPedestrianRequestsPerHour,
+    InputNorthboundOrder, InputSouthboundOrder, InputEastboundOrder, InputWestboundOrder,
+    InputNorthboundGreenLightDuration, InputSouthboundGreenLightDuration, InputEastboundGreenLightDuration, InputWestboundGreenLightDuration,
+    InputModelID);
+END;
+$$ LANGUAGE plpgsql;
+
+-- Junction - Retrieve data 
+CREATE OR REPLACE FUNCTION retrieveAllModelJunctions() RETURNS TABLE(junctionid INTEGER, junctionname VARCHAR) AS $$ 
+BEGIN 
+    RETURN QUERY 
+    SELECT junctionconfigurations.junctionid, junctionconfigurations.junctionname;
+END;
+$$ LANGUAGE plpgsql;
+
+
 -- Junction Performance Table
 CREATE TABLE IF NOT EXISTS junctionperformance (
     -- Main junction performance info
