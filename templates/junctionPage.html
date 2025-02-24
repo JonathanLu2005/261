@@ -20,7 +20,7 @@ Your Models Junctions
     </div>
 </div>
 
-<!-- Modal for adding model -->
+<!-- Modal for adding junction -->
 <div class="modal fade" id="addJunctionModal" tabindex="-1" aria-labelledby="addJunctionModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -46,7 +46,7 @@ Your Models Junctions
                         </div>
                     </div>
 
-                    <!-- Step 2: adding pedestiran crossing -->
+                    <!-- Step 2: Adding pedestrian crossing -->
                     <div class="step d-none" id="step2">
                         <div class="mb-3">
                             <label class="form-label" for="pedestrianCrossingAdded">
@@ -81,7 +81,7 @@ Your Models Junctions
                         </div>
                     </div>
 
-                    <!-- Step 3: adding directions order -->
+                    <!-- Step 3: Adding directions order -->
                     <div class="step d-none" id="step3">
                         <div class="mb-3">
                             <label for="northboundOrder" class="form-label">
@@ -112,7 +112,7 @@ Your Models Junctions
                         </div>
                     </div>
 
-                    <!-- Step 4: adding directions order -->
+                    <!-- Step 4: Adding directions duration -->
                     <div class="step d-none" id="step4">
                         <div class="mb-3">
                             <label for="northboundDuration" class="form-label">
@@ -157,7 +157,9 @@ Your Models Junctions
 </div>
 {% endblock %}
 
+
 {% block scripts %}
 <script src="{{ url_for('static', filename='javascript/modalJunctionNavigation.js') }}"></script>
+<script src="{{ url_for('static', filename='javascript/junctionFormSent.js') }}"></script>
 {% endblock %}
 

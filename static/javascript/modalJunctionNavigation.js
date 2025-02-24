@@ -37,7 +37,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // Handle form submission
     form.addEventListener("submit", (event) => {
         event.preventDefault();
-        alert("Form submitted!");
         // Additional logic for handling form data
     });
 

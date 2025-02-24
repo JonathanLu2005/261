@@ -9,23 +9,21 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   //render function
   function renderModels(models) {
-    // Clear the models container
     modelsFolder.innerHTML = "";
 
-    // Loop through each model and create a card element
     models.forEach((model) => {
-      const modelCard = document.createElement("div");
-      modelCard.className = "col";
-      modelCard.innerHTML = `
-        <div class="card h-100">
-          <div class="card-body">
-            <h5 class="card-title">${model.name}</h5>
-            <!-- You can add more model details here -->
-          </div>
-        </div>`;
-      modelsFolder.appendChild(modelCard);
+        const modelCard = document.createElement("div");
+        modelCard.className = "col";
+        modelCard.innerHTML = `
+            <div class="card h-100 model-card" data-id="${model.id}" data-name="${model.name}">
+                <div class="card-body">
+                    <h5 class="card-title">${model.name}</h5>
+                </div>
+            </div>`;
+        modelsFolder.appendChild(modelCard);
     });
   }
+
 
   try {
     const response = await fetch("/api/models");
