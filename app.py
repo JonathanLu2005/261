@@ -37,8 +37,6 @@ def addModel():
         return jsonify({"Error": "Invalid Data"}), 400 
     
     ModelInformation = []
-
-    print(modelData)
     
     for key, value in modelData.items():
         if key == "name":
@@ -82,6 +80,27 @@ def junctionPage():
 def addJunction():
     # Expecting JSON data from the frontend (for now, this is the junction data received)
     junctionData = request.json
+
+    if not junctionData:
+        return jsonify({"Error": "Invalid Data"}), 400 
+    
+    junctionInformation = []
+
+    for key, value in junctionData.items():
+        if key == "junctionName":
+            junctionInformation.append(value)
+        elif key == "pedestrianCrossingAdded":
+            if value == "yes":
+                junctionInformation.append(True)
+            else:
+                junctionInformation.append(False)
+        elif (key == "pedestrianCrossingDuration" or key == "pedestrianCrossingRequests") and value == '':
+            junctionInformation.append(0)
+        else:
+            junctionInformation.append(int(value))
+
+    insertJunctionConfigurationsData(*junctionInformation)
+    
 
     # Print the received junction data to verify it's coming through correctly
     print(f"Received junction data: {junctionData}")
