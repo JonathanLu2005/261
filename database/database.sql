@@ -159,6 +159,32 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- Get all data to send to simulation after being added
+CREATE OR REPLACE FUNCTION dataForSimulation(inputmodelid INTEGER)
+RETURNS TABLE (modelid INTEGER, simulationtime INTEGER,
+            northboundvphtotal INTEGER, southboundvphtotal INTEGER, eastboundvphtotal INTEGER, westboundvphtotal INTEGER,
+            northboundnorthvph INTEGER, northboundeastvph INTEGER, northboundwestvph INTEGER,
+            southboundsouthvph INTEGER, southboundeastvph INTEGER, southboundwestvph INTEGER,
+            eastboundeastvph INTEGER, eastboundnorthvph INTEGER, eastboundsouthvph INTEGER,
+            westboundwestvph INTEGER, westboundnorthvph INTEGER, westboundsouthvph INTEGER,
+            vehicletopspeed INTEGER, vehiclereactiontime INTEGER, vehiclestationarydistance INTEGER,
+            maximumwaittimeweight FLOAT, averagewaittimeweight FLOAT, maximumqueuelengthweight FLOAT)
+            AS $$
+BEGIN
+    RETURN QUERY
+    SELECT modeltrafficflow.modelid, modeltrafficflow.simulationtime,
+        modeltrafficflow.northboundvphtotal, modeltrafficflow.southboundvphtotal, modeltrafficflow.eastboundvphtotal, modeltrafficflow.westboundvphtotal,
+        modeltrafficflow.northboundnorthvph, modeltrafficflow.northboundeastvph, modeltrafficflow.northboundwestvph,
+        modeltrafficflow.southboundsouthvph, modeltrafficflow.southboundeastvph, modeltrafficflow.southboundwestvph,
+        modeltrafficflow.eastboundeastvph, modeltrafficflow.eastboundnorthvph, modeltrafficflow.eastboundsouthvph,
+        modeltrafficflow.westboundwestvph, modeltrafficflow.westboundnorthvph, modeltrafficflow.westboundsouthvph,
+        modeltrafficflow.vehicletopspeed, modeltrafficflow.vehiclereactiontime, modeltrafficflow.vehiclestationarydistance,
+        modeltrafficflow.maximumwaittimeweight, modeltrafficflow.averagewaittimeweight, modeltrafficflow.maximumqueuelengthweight
+    FROM modeltrafficflow 
+    WHERE modeltrafficflow.modelid = inputmodelid;
+END;
+$$ LANGUAGE plpgsql;
+
 -- Junction Performance Table
 CREATE TABLE IF NOT EXISTS junctionperformance (
     -- Main junction performance info

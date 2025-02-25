@@ -1,5 +1,4 @@
 import psycopg2
-import os
 
 # Connection parameters
 host = "dpg-cuo9l73qf0us738ub4gg-a.frankfurt-postgres.render.com"
@@ -183,4 +182,37 @@ def retrieveAllModelJunctions(InputModelID):
         # Make sure to close the connection properly
         closeDatabaseConnection(connection, cursor)
 
+# Retrieve data for simulation
+def retrieveSimulationData(InputModelID):
+    connection, cursor = getDatabaseConnection()
+
+    if connection is None or cursor is None:
+        print("Failed to connect to the database.")
+        return []
+
+    try:
+        # Execute the function call with the provided modelid
+        cursor.execute("SELECT * FROM dataForSimulation(%s);", (InputModelID,))  
+
+        modelSimulationData = cursor.fetchall()
+
+        modelKeys = [
+            "ModelID", "SimulationTime",
+            "NorthboundVphTotal", "SouthboundVphTotal", "EastboundVphTotal", "WestboundVphTotal",
+            "NorthboundNorthVph", "NorthboundEastVph", "NorthboundWestVph",
+            "SouthboundSouthVph", "SouthboundEastVph", "SouthboundWestVph",
+            "EastboundEastVph", "EastboundNorthVph", "EastboundSouthVph",
+            "WestboundWestVph", "WestboundNorthVph", "WestboundSouthVph",
+            "VehicleTopSpeed", "VehicleReactionTime", "VehicleStationaryDistance",
+            "MaximumWaitTimeWeight", "AverageWaitTimeWeight", "MaximumQueueLengthWeight"
+        ]
+
+        modelSimulationDataHashmap = dict(zip(modelKeys, modelSimulationData[0]))
+
+        return modelSimulationDataHashmap
+    except Exception as e:
+        print(f"Error: {e}")
+        return []
+    finally:
+        closeDatabaseConnection(connection, cursor)
 

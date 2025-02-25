@@ -3,7 +3,8 @@ from database.database import (
     insertModelTrafficFlowData,
     retrieveAllModelNames,
     insertJunctionConfigurationsData,
-    retrieveAllModelJunctions
+    retrieveAllModelJunctions,
+    retrieveSimulationData
 )
 
 # Create web app
@@ -12,6 +13,7 @@ app = Flask(__name__)
 # Model page
 @app.route("/", methods=["GET"])
 def modelPage():
+    print(retrieveSimulationData(27))
     return render_template("modelPage.html")
 
 # Show models to frontend
@@ -37,7 +39,7 @@ def addModel():
         return jsonify({"Error": "Invalid Data"}), 400 
     
     ModelInformation = []
-    
+
     for key, value in modelData.items():
         if key == "name":
             ModelInformation.append(value)
@@ -47,7 +49,6 @@ def addModel():
             ModelInformation.append(int(value))
 
     insertModelTrafficFlowData(*ModelInformation)
-
     return getAllModels()
 
 # Show junction page with model information
@@ -72,7 +73,6 @@ def getAllJunctions():
         for JunctionID, JunctionName in AllJunctions
     ]
 
-    print(CurrentJunctions)
     return jsonify(CurrentJunctions)
 
 # Add junction with model ID
@@ -87,23 +87,24 @@ def addJunction():
 
     junctionInformation = []
 
-    try:
-        for key, value in junctionData.items():
-            if key == "junctionName":
-                junctionInformation.append(value)
-            elif key == "pedestrianCrossingAdded":
-                junctionInformation.append(value.lower() == "yes")
-            elif key in ["pedestrianCrossingDuration", "pedestrianCrossingRequests"] and value == "":
-                junctionInformation.append(0)
-            else:
-                junctionInformation.append(int(value))
 
-        # Insert into the database
-        insertJunctionConfigurationsData(*junctionInformation)
-        return getAllJunctions()
-    except Exception as e:
-        print(f"Error processing data: {e}")  # Debugging
-        return jsonify({"Error": "Failed to process data"}), 400
+    for key, value in junctionData.items():
+        if key == "junctionName":
+            junctionInformation.append(value)
+        elif key == "pedestrianCrossingAdded":
+            junctionInformation.append(value.lower() == "yes")
+        elif key in ["pedestrianCrossingDuration", "pedestrianCrossingRequests"] and value == "":
+            junctionInformation.append(0)
+        else:
+            junctionInformation.append(int(value))
+
+    # Insert into the database
+    insertJunctionConfigurationsData(*junctionInformation)
+
+    # Once junction is added, it is time to start simulating it
+
+    return getAllJunctions()
+
 
 
 # Help page
