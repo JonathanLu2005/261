@@ -19,11 +19,17 @@ class TrafficControl:
     generalVPH = None
     hasLeftTurnLanes = None
     hasRightTurnLanes = None
+    specialLength = None
+    specialSpeed = None
+    busLane = None
+    cycleLane = None
+    specialVehicleRatio = None
+    specialVPH = None
 
 
     simulationComplete = False
 
-    def __init__(self, sideLengthOfJunction, lengthOfSim, simulationTimeUnit, carSpeed, carLength, carStationaryDistance, carReactionTime, numberOfGeneralLanes, generalVPH, hasLeftTurnLanes, hasRightTurnLanes,  hasPedestrianCrossings, crossingPedestrianTime, crossingRequestsPerHour, trafficLightSequence, trafficLightGreenTimes):
+    def __init__(self, sideLengthOfJunction, lengthOfSim, simulationTimeUnit, carSpeed, carLength, carStationaryDistance, carReactionTime, numberOfGeneralLanes, generalVPH, hasLeftTurnLanes, hasRightTurnLanes,  hasPedestrianCrossings, crossingPedestrianTime, crossingRequestsPerHour, trafficLightSequence, trafficLightGreenTimes, specialLength, specialSpeed, busLane, cycleLane, specialVehicleRatio, specialVPH):
         self.sideLengthOfJunction = sideLengthOfJunction
         self.lengthOfSim = TrafficControl.convertSecondsToTimeUnits(lengthOfSim)
         TrafficControl.carSpeed = carSpeed * 0.44704 * TrafficControl.simulationTimeUnit # Multiplying by 0.44704 converts mph to meters per second. Multiplying by the simulation time unit means meters per time unit.
@@ -38,10 +44,24 @@ class TrafficControl:
         self.hasPedestrianCrossings = hasPedestrianCrossings
         self.crossingPedestrianTime = TrafficControl.convertSecondsToTimeUnits(crossingPedestrianTime)
         self.crossingRequestsPerHour = crossingRequestsPerHour
+
+        # New variables being added for the "could have" feature of Bus/Cycle lanes:
+        # If there is no Bus lane and no Cycle lane, then these variables will be set to None and will not be needed in the program. 
+        TrafficControl.specialLength = specialLength
+        TrafficControl.specialSpeed = specialSpeed
+        # Only one of these should be True, or neither, but not both - TESTING TEAM must validate the input before this code runs. 
+        TrafficControl.busLane = busLane
+        TrafficControl.cycleLane = cycleLane
+        # The user must specify the ratio of green light time which will be applied for the special vehicles, 
+            # and the flow of VPH for each arm of the junction and their turning direction, similar to the VPH for cars. 
+        TrafficControl.specialVehicleRatio = specialVehicleRatio
+        TrafficControl.specialVPH = specialVPH
+        
         self.trafficLightSequence = trafficLightSequence
         self.trafficLightGreenTimes = [TrafficControl.convertSecondsToTimeUnits(greenLightTime) for greenLightTime in trafficLightGreenTimes]
         self.directions = [Direction.North, Direction.East, Direction.South, Direction.West]
         self.junctionEntrances = [JunctionEntrance(direction) for direction in self.directions]
+
         
         print(f"{TrafficControl.carSpeed} - Car speed")
 
@@ -99,11 +119,23 @@ class TrafficControl:
                     # Ensure to only give the green light to a direction if there are cars waiting - needs to not be the start times otherwise the whole sim fails due to no cars ever being generated into the queues
                     if (env.now != 0 and self.junctionEntrances[direction].checkIfCarsWaiting() == False):
                         continue
-                    self.junctionEntrances[direction].signalGreen() # Signal Green to this direction
-                    print(f"Signal Green to {direction} at {env.now}")
-                    yield env.timeout(self.trafficLightGreenTimes[direction]) # Give the green light time corresopnding to this junction entrance 
-                    print(f"Signal Red to {direction} at {env.now}")
-                    self.junctionEntrances[direction].signalRed()   # Signal Red to this direction
+                    if (TrafficControl.busLane == True or TrafficControl.cycleLane == True):
+                        self.junctionEntrances[direction].signalGreen() # Signal Green to this direction (for cars)
+                        print(f"Signal Green to {direction} at {env.now}")
+                        yield env.timeout(self.trafficLightGreenTimes[direction] * (1-TrafficControl.specialVehicleRatio)) # Give the green light time corresponding to this junction entrance
+                        print(f"Signal Red to {direction} at {env.now}")
+                        self.junctionEntrances[direction].signalRed()   # Signal Red to this direction
+                        self.junctionEntrances[direction].signalSpecialGreen() # Signal Green to the buses or cycles for this direction
+                        print(f"Signal Green to {direction} at {env.now} for buses/cycles")
+                        yield env.timeout(self.trafficLightGreenTimes[direction] * (TrafficControl.specialVehicleRatio)) # Give the green light time corresponding to this junction entrance
+                        print(f"Signal Red to {direction} at {env.now} for buses/cycles")
+                        self.junctionEntrances[direction].signalSpecialRed()   # Signal Red to th buses or cycles for this direction
+                    else:
+                        self.junctionEntrances[direction].signalGreen() # Signal Green to this direction 
+                        print(f"Signal Green to {direction} at {env.now}")
+                        yield env.timeout(self.trafficLightGreenTimes[direction]) # Give the green light time corresponding to this junction entrance
+                        print(f"Signal Red to {direction} at {env.now}")
+                        self.junctionEntrances[direction].signalRed()   # Signal Red to this direction
                     
                 # Pedestrian Crossing logic goes here
                 if(env.now - timeOfLastCrossing > timeInBetweenCrossings):
@@ -198,18 +230,28 @@ class Lane:
     def getNumberOfCars(self):
         return self.numberOfCarsPresent
     
-    def addCar(self, turningExitCardinality, env):
+    def addCar(self, turningExitCardinality, isCar, env):
+        # If vehicleToAdd is not a Car, then we need to manually set the speed and length of the special vehicle.  
         if(self.numberOfCarsPresent == 0):
             self.leadingCar = Car(0, turningExitCardinality, env.now, None, self)
+            if (isCar == False):
+                self.leadingCar.setLength(TrafficControl.specialLength)
+                self.leadingCar.setSpeed(TrafficControl.specialSpeed)
+                print(f"Number of buses/cycles present is {self.numberOfCarsPresent+1} at junction entrance {self.junctionEntrance}")
+            else:
+                print(f"Number of cars present is {self.numberOfCarsPresent+1} at junction entrance {self.junctionEntrance}")
             self.trailingCar = self.leadingCar
             
-            print(f"Number of cars present is {self.numberOfCarsPresent+1} at junction entrance {self.junctionEntrance}")
             env.process(self.leadingCar.carTimeManager(env))
         else:
             self.trailingCar.pointerToCarBehind = Car(self.trailingCar.distanceFromJunctionEntrance + TrafficControl.carLength + TrafficControl.carStationaryDistance, turningExitCardinality, env.now, self.trailingCar, self)
             self.trailingCar = self.trailingCar.pointerToCarBehind
-
-            print(f"Number of cars present is {self.numberOfCarsPresent+1} at junction entrance {self.junctionEntrance}")
+            if (isCar == False):
+                self.trailingCar.setLength(TrafficControl.specialLength)
+                self.trailingCar.setSpeed(TrafficControl.specialSpeed)
+                print(f"Number of buses/cycles present is {self.numberOfCarsPresent+1} at junction entrance {self.junctionEntrance}")
+            else:
+                print(f"Number of cars present is {self.numberOfCarsPresent+1} at junction entrance {self.junctionEntrance}")
             env.process(self.trailingCar.carTimeManager(env))
 
         self.numberOfCarsPresent += 1
@@ -235,10 +277,6 @@ class Lane:
 
 
 
-
-
-
-
 #-------------------
 # JUNCTION ENTRANCE
 #-------------------
@@ -246,7 +284,9 @@ class Lane:
 class JunctionEntrance:
     def __init__(self, cardinalDirectionOfJunctionEntrance):
         self.cardinalDirectionOfJunctionEntrance = cardinalDirectionOfJunctionEntrance
-        # self.specialLane = .. make this only if the user requested it 
+        self.specialLane = None
+        if (TrafficControl.busLane == True or TrafficControl.cycleLane == True):
+            self.specialLane = Lane(cardinalDirectionOfJunctionEntrance)
         self.generalLanes = []              # Linked lists of Cars according to number of lanes. It should be noted that index 0 corresponds to the left most lane and the greatest index corresponds to the right most lane.
         for _ in range(0, TrafficControl.numberOfGeneralLanes):
             self.generalLanes.append(Lane(cardinalDirectionOfJunctionEntrance))
@@ -259,7 +299,7 @@ class JunctionEntrance:
         entrance are still traversing.
     """
     def signalRed(self):
-        print(f"Junction Entrance {self.cardinalDirectionOfJunctionEntrance} recieved red signal")
+        print(f"Junction Entrance {self.cardinalDirectionOfJunctionEntrance} recieved red signal for Cars")
         # No notion of transfer time yet but i have an idea of how to make it blocking.
         for lane in self.generalLanes:
             lane.isGreen = False
@@ -269,17 +309,28 @@ class JunctionEntrance:
         of vehicles across the junction from this particular junction entrance.
     """
     def signalGreen(self):
-        print(f"Junction Entrance {self.cardinalDirectionOfJunctionEntrance} recieved green signal")
+        print(f"Junction Entrance {self.cardinalDirectionOfJunctionEntrance} recieved green signal for Cars")
         for lane in self.generalLanes:
             lane.isGreen = True
+
+    def signalSpecialRed(self):
+        if (self.specialLane is not None):
+            print(f"Junction Entrance {self.cardinalDirectionOfJunctionEntrance} recieved red signal For Buses/Cycles")
+            self.specialLane.isGreen = False
+
+    def signalSpecialGreen(self):
+        if (self.specialLane is not None):
+            print(f"Junction Entrance {self.cardinalDirectionOfJunctionEntrance} recieved green signal for Buses/Cycles")
+            self.specialLane.isGreen = True
 
     def checkIfCarsWaiting(self):
         # Return true if there are any cars waiting in any queues
         for carLane in self.generalLanes:
             if (carLane.getNumberOfCars() > 0):
                 return True
-        #if (self.specialLane.getNumberOfCars() > 0):
-        #    return True 
+        if (self.specialLane is not None):
+            if (self.specialLane.getNumberOfCars() > 0):
+                return True 
         return False
 
     
@@ -315,8 +366,17 @@ class JunctionEntrance:
             timeInBetweenVehicleSpawns = TrafficControl.convertSecondsToTimeUnits(60*60) / vph 
             
             while True and not TrafficControl.simulationComplete:
-                print(f"Vehicle spawning at {env.now} in junction {self.cardinalDirectionOfJunctionEntrance}")
-                random.choice(possibleLanesToSpawn).addCar(exitCardinality, env)
+                print(f"Car spawning at {env.now} in junction {self.cardinalDirectionOfJunctionEntrance}")
+                random.choice(possibleLanesToSpawn).addCar(exitCardinality, True, env)
+                yield env.timeout(timeInBetweenVehicleSpawns)
+
+    def buscycleGenerator(self, env, specialLane, vph, exitCardinality):
+        if (vph > 0):
+            timeInBetweenVehicleSpawns = TrafficControl.convertSecondsToTimeUnits(60*60) / vph 
+            
+            while True and not TrafficControl.simulationComplete:
+                print(f"Bus/Cycle spawning at {env.now} in junction {self.cardinalDirectionOfJunctionEntrance}")
+                specialLane.addCar(exitCardinality, False, env)
                 yield env.timeout(timeInBetweenVehicleSpawns)
 
 
@@ -327,7 +387,6 @@ class JunctionEntrance:
     """
     def junctionEntranceCarGeneratorSetup(self, env):
         # Reminder of the format of the vph: [[North Bound Traffic Exiting North, North Bound Traffic Exiting East, North Bound Traffic Exiting West], [East Bound Traffic Exiting East, East Bound Traffic Exiting South, East Bound Traffic Exiting North], [South Bound Traffic Exiting South, South Bound Traffic Exiting West, South Bound Traffic Exiting East], [West Bound Traffic Exiting West, West Bound Traffic Exiting North, West Bound Traffic Exiting South]]
-        
         match self.cardinalDirectionOfJunctionEntrance:
             case Direction.North:
                 # Corresponding Subarray: [North Bound Traffic Exiting North, North Bound Traffic Exiting East, North Bound Traffic Exiting West]
@@ -348,6 +407,12 @@ class JunctionEntrance:
                 
                 env.process(self.carGenerator(env, straightLanes, TrafficControl.generalVPH[Direction.North][0], Direction.North))
 
+                # Bus/Cycle generators if needed:
+                if (self.specialLane is not None and TrafficControl.specialVPH is not None):
+                    env.process(self.buscycleGenerator(env, self.specialLane, TrafficControl.specialVPH[Direction.North][2], Direction.West))
+                    env.process(self.buscycleGenerator(env, self.specialLane, TrafficControl.specialVPH[Direction.North][1], Direction.East))
+                    env.process(self.buscycleGenerator(env, self.specialLane, TrafficControl.specialVPH[Direction.North][0], Direction.North))
+
             case Direction.East:
                 # Corresponding Subarray: [East Bound Traffic Exiting East, East Bound Traffic Exiting South, East Bound Traffic Exiting North]
                 
@@ -366,6 +431,14 @@ class JunctionEntrance:
                     straightLanes.append(self.generalLanes[i])
                 
                 env.process(self.carGenerator(env, straightLanes, TrafficControl.generalVPH[Direction.East][0], Direction.East))
+                
+                # Bus/Cycle generators if needed:
+                if (self.specialLane is not None and TrafficControl.specialVPH is not None):
+                    env.process(self.buscycleGenerator(env, self.specialLane, TrafficControl.specialVPH[Direction.East][2], Direction.North))
+                    env.process(self.buscycleGenerator(env, self.specialLane, TrafficControl.specialVPH[Direction.East][1], Direction.South))
+                    env.process(self.buscycleGenerator(env, self.specialLane, TrafficControl.specialVPH[Direction.East][0], Direction.East))
+
+
 
             case Direction.South:
                 # Corresponding Subarray: [South Bound Traffic Exiting South, South Bound Traffic Exiting West, South Bound Traffic Exiting East]
@@ -386,6 +459,13 @@ class JunctionEntrance:
                 
                 env.process(self.carGenerator(env, straightLanes, TrafficControl.generalVPH[Direction.South][0], Direction.South))
 
+                # Bus/Cycle generators if needed:
+                if (self.specialLane is not None and TrafficControl.specialVPH is not None):
+                    env.process(self.buscycleGenerator(env, self.specialLane, TrafficControl.specialVPH[Direction.South][2], Direction.East))
+                    env.process(self.buscycleGenerator(env, self.specialLane, TrafficControl.specialVPH[Direction.South][1], Direction.West))
+                    env.process(self.buscycleGenerator(env, self.specialLane, TrafficControl.specialVPH[Direction.South][0], Direction.South))
+
+
             case Direction.West:
                 # Corresponding Subarray: [West Bound Traffic Exiting West, West Bound Traffic Exiting North, West Bound Traffic Exiting South]
             
@@ -404,11 +484,12 @@ class JunctionEntrance:
                     straightLanes.append(self.generalLanes[i])
                 
                 env.process(self.carGenerator(env, straightLanes, TrafficControl.generalVPH[Direction.West][0], Direction.West))
-
-
-
-
-
+                
+                # Bus/Cycle generators if needed:
+                if (self.specialLane is not None and TrafficControl.specialVPH is not None):
+                    env.process(self.buscycleGenerator(env, self.specialLane, TrafficControl.specialVPH[Direction.West][2], Direction.South))
+                    env.process(self.buscycleGenerator(env, self.specialLane, TrafficControl.specialVPH[Direction.West][1], Direction.North))
+                    env.process(self.buscycleGenerator(env, self.specialLane, TrafficControl.specialVPH[Direction.West][0], Direction.West))
 
 
 
@@ -430,12 +511,19 @@ class Car:
         self.distanceFromJunctionEntrance = distanceFromJunctionEntrance
         self.turningExitCardinality = turningExitCardinality
         self.length = TrafficControl.carLength
+        self.speed = TrafficControl.carSpeed
         self.timeOfQueueStart = timeOfQueueStart
         self.currentState = CarState.Stationary                 # The default is that cars spawn stationary (Don't worry they dont always spawn stationary depending on the car ahead's state.)
         self.pointerToCarBehind = None                          # There are no cars behind the car that was just added to the lane. This is not used in the car object itself, it is simply used by its corresponding lane object to refer to the next leading car after this car enters the junction.
         self.pointerToCarAhead = pointerToCarAhead
         self.junctionEntranceLane = junctionEntranceLane        # Integer indicating to the junction entrance which lane the car is in to remove it later
+
+    def setLength(self, length):
+        self.length = length
     
+    def setSpeed(self, speed):
+        self.speed = speed
+
     def getGapToCarAhead(self):
         return self.distanceFromJunctionEntrance - self.pointerToCarAhead.distanceFromJunctionEntrance - self.pointerToCarAhead.length
 
@@ -456,13 +544,13 @@ class Car:
                     print(f"and starts to move at {env.now}")
 
                 # If at the current speed you wont reach the junction entrance in the next time step, move as normal.
-                if(self.distanceFromJunctionEntrance > TrafficControl.carSpeed):
+                if(self.distanceFromJunctionEntrance > self.speed):
                     self.currentState = CarState.NotStationary
-                    self.distanceFromJunctionEntrance -= TrafficControl.carSpeed
+                    self.distanceFromJunctionEntrance -= self.speed
                 # If at the current speed you will cross the junction entrance in the next time step...
-                elif(self.distanceFromJunctionEntrance == TrafficControl.carSpeed):
+                elif(self.distanceFromJunctionEntrance == self.speed):
                     self.currentState = CarState.NotStationary if self.junctionEntranceLane.isGreen else CarState.Stationary
-                    self.distanceFromJunctionEntrance -= TrafficControl.carSpeed
+                    self.distanceFromJunctionEntrance -= self.speed
                 else:
                     # Check if the signal is green. If this is the case, then just leave on this time step.
                     if(self.junctionEntranceLane.isGreen):
@@ -483,20 +571,20 @@ class Car:
                     if(self.pointerToCarAhead.currentState == CarState.NotStationary):
                         yield env.timeout(TrafficControl.carReactionTime) # We have to wait the car reaction time duration before we can also begin moving.
                         print(f"Detected Car Ahead moving at {env.now}")
-                        self.distanceFromJunctionEntrance -= TrafficControl.carSpeed
+                        self.distanceFromJunctionEntrance -= self.speed
                         self.currentState = CarState.NotStationary
                     # If the car ahead is still stationary, we don't do anything.
                 
                 # If the car is not leading and it is currently moving.
                 else:
                     # If moving forward keeps the gap large enough then do it.
-                    if(self.getGapToCarAhead() - TrafficControl.carSpeed > TrafficControl.carStationaryDistance):
-                        self.distanceFromJunctionEntrance -= TrafficControl.carSpeed
+                    if(self.getGapToCarAhead() - self.speed > TrafficControl.carStationaryDistance):
+                        self.distanceFromJunctionEntrance -= self.speed
 
                     # If moving forward is the exact stationary car distance, then we could change state depending if the car in front has stopped.
-                    elif(self.getGapToCarAhead() - TrafficControl.carSpeed == TrafficControl.carStationaryDistance):
+                    elif(self.getGapToCarAhead() - self.speed == TrafficControl.carStationaryDistance):
                         self.currentState = CarState.NotStationary if self.pointerToCarAhead.currentState == CarState.NotStationary else CarState.Stationary
-                        self.distanceFromJunctionEntrance -= TrafficControl.carSpeed
+                        self.distanceFromJunctionEntrance -= self.speed
                     
                     # If moving forward will close the gap beyond stationary distance, then the car must "slow down" or even stop.
                     else:
