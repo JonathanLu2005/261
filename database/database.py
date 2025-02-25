@@ -216,3 +216,62 @@ def retrieveSimulationData(InputModelID):
     finally:
         closeDatabaseConnection(connection, cursor)
 
+# Insert data to junction performance
+def insertJunctionPerformance(InputNorthMaxWait, InputNorthAverageWait, InputNorthMaxQueue, InputNorthTotal,
+                            InputSouthMaxWait, InputSouthAverageWait, InputSouthMaxQueue, InputSouthTotal,
+                            InputEastMaxWait, InputEastAverageWait, InputEastMaxQueue, InputEastTotal,
+                            InputWestMaxWait, InputWestAverageWait, InputWestMaxQueue, InputWestTotal,
+                            InputJunctionID):
+    connection, cursor = getDatabaseConnection()
+
+    if connection is None or cursor is None:
+        print("Failed to connect to the database.")
+        return []
+    
+    try:
+        cursor.execute(""" 
+            SELECT insertJunctionPerformance(
+                %s, %s, %s, %s,
+                %s, %s, %s, %s,
+                %s, %s, %s, %s,
+                %s, %s, %s, %s,
+                %s)
+            """, (InputNorthMaxWait, InputNorthAverageWait, InputNorthMaxQueue, InputNorthTotal,
+            InputSouthMaxWait, InputSouthAverageWait, InputSouthMaxQueue, InputSouthTotal,
+            InputEastMaxWait, InputEastAverageWait, InputEastMaxQueue, InputEastTotal,
+            InputWestMaxWait, InputWestAverageWait, InputWestMaxQueue, InputWestTotal,
+            InputJunctionID))
+        
+        connection.commit()
+    except Exception as e:
+        print(f"Error: {e}")
+        connection.rollback()
+    finally:
+        closeDatabaseConnection(connection, cursor)
+
+# Retrieve data from junction performance
+def retrieveJunctionPerformance(InputJunctionID):
+    connection, cursor = getDatabaseConnection()
+
+    if connection is None or cursor is None:
+        print("Failed to connect to the database.")
+        return []
+    
+    try:
+        cursor.execute("SELECT * FROM retrieveJunctionPerformance(%s);", (InputJunctionID,))
+        junctionPerformanceData = cursor.fetchall()
+
+        junctionKeys = [
+            "InputNorthMaxWait", "InputNorthAverageWait", "InputNorthMaxQueue", "InputNorthTotal",
+            "InputSouthMaxWait", "InputSouthAverageWait", "InputSouthMaxQueue", "InputSouthTotal",
+            "InputEastMaxWait", "InputEastAverageWait", "InputEastMaxQueue", "InputEastTotal",
+            "InputWestMaxWait", "InputWestAverageWait", "InputWestMaxQueue", "InputWestTotal"
+        ]
+        junctionSimulationDataHashmap = dict(zip(junctionKeys, junctionPerformanceData[0]))
+
+        return junctionSimulationDataHashmap
+    except Exception as e:
+        print(f"Error: {e}")
+        return []
+    finally:
+        closeDatabaseConnection(connection, cursor)

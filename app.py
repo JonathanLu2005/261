@@ -4,7 +4,8 @@ from database.database import (
     retrieveAllModelNames,
     insertJunctionConfigurationsData,
     retrieveAllModelJunctions,
-    retrieveSimulationData
+    retrieveSimulationData,
+    insertJunctionPerformance
 )
 
 # Create web app
@@ -109,6 +110,7 @@ def addJunction():
     modelData = retrieveSimulationData(modelId)
 
     """
+    # run simulation - this will add the parameters to let the simulation run
     simulationResults = runModel(20,
             modelData["SimulationTime"], 1,
             modelData["VehicleTopSpeed"], 5, modelData["VehicleStationaryDistance"], modelData["VehicleReactionTime"],
@@ -133,6 +135,15 @@ def addJunction():
             junctionData["southboundDuration"], 
             junctionData["westboundDuration"]
             ])
+
+    # insert simulation results - get results from above and store it for visualisations section
+    insertJunctionPerformance(
+        simulationResults.northMaxWaitingTime, simulationResults.northMaxQueueLength, simulationResults.northAvgWaitingTime, simulationResults.northTotalVehiclesPassed, 
+        simulationResults.eastMaxWaitingTime, simulationResults.eastMaxQueueLength, simulationResults.eastAvgWaitingTime, simulationResults.eastTotalVehiclesPassed,
+        simulationResults.southMaxWaitingTime, simulationResults.southMaxQueueLength, simulationResults.southAvgWaitingTime, simulationResults.southTotalVehiclesPassed,
+        simulationResults.westMaxWaitingTime, simulationResults.westMaxQueueLength, simulationResults.westAvgWaitingTime, simulationResults.westTotalVehiclesPassed,
+        junctionData["junctionid"]
+    )
     """
 
     return getAllJunctions()

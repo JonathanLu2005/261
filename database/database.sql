@@ -239,3 +239,24 @@ BEGIN
         InputJunctionID);
 END;
 $$ LANGUAGE plpgsql;
+
+-- Get junction performance data
+CREATE OR REPLACE FUNCTION retrieveJunctionPerformance(InputJunctionID INTEGER)
+RETURNS TABLE (
+    northmaximumwaittime INTEGER, northaveragewaittime INTEGER, northmaximumqueuelength INTEGER, northtotalvehiclespassed INTEGER,
+    southmaximumwaittime INTEGER, southaveragewaittime INTEGER, southmaximumqueuelength INTEGER, southtotalvehiclespassed INTEGER,
+    eastmaximumwaittime INTEGER, eastaveragewaittime INTEGER, eastmaximumqueuelength INTEGER, easttotalvehiclespassed INTEGER,
+    westmaximumwaittime INTEGER, westaveragewaittime INTEGER, westmaximumqueuelength INTEGER, westtotalvehiclespassed INTEGER
+) AS
+$$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        northmaximumwaittime, northaveragewaittime, northmaximumqueuelength, northtotalvehiclespassed,
+        southmaximumwaittime, southaveragewaittime, southmaximumqueuelength, southtotalvehiclespassed,
+        eastmaximumwaittime, eastaveragewaittime, eastmaximumqueuelength, easttotalvehiclespassed,
+        westmaximumwaittime, westaveragewaittime, westmaximumqueuelength, westtotalvehiclespassed
+    FROM junctionperformance
+    WHERE junctionid = InputJunctionID;
+END;
+$$ LANGUAGE plpgsql;
