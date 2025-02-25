@@ -28,6 +28,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (response.ok) {
                 console.log("Junction added successfully!");
+
+                // Reset the form
+                junctionForm.reset();
+
+                // Close the modal
+                const junctionModal = document.getElementById("addJunctionModal");
+                const modalInstance = bootstrap.Modal.getInstance(junctionModal);
+                if (modalInstance) {
+                    modalInstance.hide();
+                }
             } else {
                 console.error("Error adding junction:", await response.text());
             }
@@ -36,4 +46,5 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 });
+
 

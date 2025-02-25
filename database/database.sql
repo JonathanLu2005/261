@@ -149,13 +149,13 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Junction - Retrieve data 
-CREATE OR REPLACE FUNCTION retrieveAllModelJunctions(modelid INTEGER) 
+CREATE OR REPLACE FUNCTION retrieveAllModelJunctions(inputmodelid INTEGER) 
 RETURNS TABLE(junctionid INTEGER, junctionname VARCHAR) AS $$
 BEGIN
     RETURN QUERY
     SELECT junctionconfigurations.junctionid, junctionconfigurations.junctionname
     FROM junctionconfigurations
-    WHERE junctionconfigurations.modelid = modelid;
+    WHERE junctionconfigurations.modelid = inputmodelid;
 END;
 $$ LANGUAGE plpgsql;
 
