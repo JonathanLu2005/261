@@ -220,3 +220,22 @@ CREATE TABLE IF NOT EXISTS junctionperformance (
 );
 
 -- Insert into junction performance 
+CREATE OR REPLACE FUNCTION insertJunctionPerformance(InputNorthMaxWait INTEGER, InputNorthAverageWait INTEGER, InputNorthMaxQueue INTEGER, InputNorthTotal INTEGER,
+                                                    InputSouthMaxWait INTEGER, InputSouthAverageWait INTEGER, InputSouthMaxQueue INTEGER, InputSouthTotal INTEGER,
+                                                    InputEastMaxWait INTEGER, InputEastAverageWait INTEGER, InputEastMaxQueue INTEGER, InputEastTotal INTEGER,
+                                                    InputWestMaxWait INTEGER, InputWestAverageWait INTEGER, InputWestMaxQueue INTEGER, InputWestTotal INTEGER,
+                                                    InputJunctionID INTEGER)
+                                                    RETURNS VOID AS $$
+BEGIN 
+    INSERT INTO junctionperformance(northmaximumwaittime, northaveragewaittime, northmaximumqueuelength, northtotalvehiclespassed,
+                                    southmaximumwaittime, southaveragewaittime, southmaximumqueuelength, southtotalvehiclespassed,
+                                    eastmaximumwaittime, eastaveragewaittime, eastmaximumqueuelength, easttotalvehiclespassed,
+                                    westmaximumwaittime, westaveragewaittime, westmaximumqueuelength, westtotalvehiclespassed,
+                                    junctionid)
+    VALUES(InputNorthMaxWait, InputNorthAverageWait, InputNorthMaxQueue, InputNorthTotal,
+        InputSouthMaxWait, InputSouthAverageWait, InputSouthMaxQueue, InputSouthTotal,
+        InputEastMaxWait, InputEastAverageWait, InputEastMaxQueue, InputEastTotal,
+        InputWestMaxWait, InputWestAverageWait, InputWestMaxQueue, InputWestTotal,
+        InputJunctionID);
+END;
+$$ LANGUAGE plpgsql;
