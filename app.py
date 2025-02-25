@@ -13,7 +13,6 @@ app = Flask(__name__)
 # Model page
 @app.route("/", methods=["GET"])
 def modelPage():
-    print(retrieveSimulationData(27))
     return render_template("modelPage.html")
 
 # Show models to frontend
@@ -87,14 +86,18 @@ def addJunction():
 
     junctionInformation = []
 
+    if junctionData["pedestrianCrossingAdded"].lower() == "yes":
+        junctionData["pedestrianCrossingAdded"] = True 
+    else:
+        junctionData["pedestrianCrossingAdded"] = False
+
 
     for key, value in junctionData.items():
-        if key == "junctionName":
+        if key == "junctionName" or key == "pedestrianCrossingAdded":
             junctionInformation.append(value)
-        elif key == "pedestrianCrossingAdded":
-            junctionInformation.append(value.lower() == "yes")
         elif key in ["pedestrianCrossingDuration", "pedestrianCrossingRequests"] and value == "":
             junctionInformation.append(0)
+            junctionData[key] = None
         else:
             junctionInformation.append(int(value))
 
@@ -102,6 +105,26 @@ def addJunction():
     insertJunctionConfigurationsData(*junctionInformation)
 
     # Once junction is added, it is time to start simulating it
+    modelId = request.args.get("modelId") 
+    modelData = retrieveSimulationData(modelId)
+
+    """
+    runModel(20,
+            modelData["SimulationTime"], 1,
+            modelData["VehicleTopSpeed"], 5, modelData["VehicleStationaryDistance"], modelData["VehicleReactionTime"],
+            junctionData["junctionLanes"],
+            [
+                [modelData["NorthboundNorthVph"], modelData["NorthboundEastVph"], modelData["NorthboundWestVph"]],
+                [modelData["EastboundEastVph"], modelData["EastboundSouthVph"], modelData["EastboundNorthVph"]],
+                [modelData["SouthboundSouthVph"], modelData["SouthboundWestVph"], modelData["SouthboundEastVph"]],
+                [modelData["WestboundWestVph"], modelData["WestboundNorthVph"], modelData["WestboundSouthVph"]]
+            ],
+            False, False,
+            junctionData["pedestrianCrossingAdded"], junctionData["pedestrianCrossingDuration"], junctionData["pedestrianCrossingRequests"],
+            junctionData["northboundOrder"], junctionData["eastboundOrder"], junctionData["southboundOrder"], junctionData["westboundOrder"],
+            junctionData["northboundDuration"], junctionData["eastboundDuration"], junctionData["southboundDuration"], junctionData["westboundDuration"]
+    )
+    """
 
     return getAllJunctions()
 
