@@ -109,7 +109,7 @@ def addJunction():
     modelData = retrieveSimulationData(modelId)
 
     """
-    runModel(20,
+    simulationResults = runModel(20,
             modelData["SimulationTime"], 1,
             modelData["VehicleTopSpeed"], 5, modelData["VehicleStationaryDistance"], modelData["VehicleReactionTime"],
             junctionData["junctionLanes"],
@@ -121,9 +121,18 @@ def addJunction():
             ],
             False, False,
             junctionData["pedestrianCrossingAdded"], junctionData["pedestrianCrossingDuration"], junctionData["pedestrianCrossingRequests"],
-            junctionData["northboundOrder"], junctionData["eastboundOrder"], junctionData["southboundOrder"], junctionData["westboundOrder"],
-            junctionData["northboundDuration"], junctionData["eastboundDuration"], junctionData["southboundDuration"], junctionData["westboundDuration"]
-    )
+            [
+            junctionData["northboundOrder"], 
+            junctionData["eastboundOrder"], 
+            junctionData["southboundOrder"], 
+            junctionData["westboundOrder"]
+            ],
+            [
+            junctionData["northboundDuration"], 
+            junctionData["eastboundDuration"], 
+            junctionData["southboundDuration"], 
+            junctionData["westboundDuration"]
+            ])
     """
 
     return getAllJunctions()

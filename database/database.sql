@@ -189,28 +189,34 @@ $$ LANGUAGE plpgsql;
 CREATE TABLE IF NOT EXISTS junctionperformance (
     -- Main junction performance info
     junctionperformanceid SERIAL PRIMARY KEY,
-    overalljunctionscore FLOAT NOT NULL,
+    --overalljunctionscore FLOAT NOT NULL,
 
     -- North results
     northmaximumwaittime INTEGER NOT NULL,
     northaveragewaittime INTEGER NOT NULL,
     northmaximumqueuelength INTEGER NOT NULL,
+    northtotalvehiclespassed INTEGER NOT NULL,
 
     -- South results
     southmaximumwaittime INTEGER NOT NULL,
     southaveragewaittime INTEGER NOT NULL,
     southmaximumqueuelength INTEGER NOT NULL,
+    southtotalvehiclespassed INTEGER NOT NULL,
 
     -- East results
     eastmaximumwaittime INTEGER NOT NULL,
     eastaveragewaittime INTEGER NOT NULL,
     eastmaximumqueuelength INTEGER NOT NULL,
+    easttotalvehiclespassed INTEGER NOT NULL,
 
     -- West results
     westmaximumwaittime INTEGER NOT NULL,
     westaveragewaittime INTEGER NOT NULL,
     westmaximumqueuelength INTEGER NOT NULL,
+    westtotalvehiclespassed INTEGER NOT NULL,
 
     -- Refer to what junction performance belongs to
     junctionid INTEGER NOT NULL REFERENCES junctionconfigurations(junctionid)
 );
+
+-- Insert into junction performance 
