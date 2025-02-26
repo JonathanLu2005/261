@@ -23,10 +23,8 @@ class Results:
         self.westAvgWaitingTime = trafficControlInstance.westAvgWaitingTime
         self.westTotalVehiclesPassed = trafficControlInstance.westTotalVehiclesPassed
 
-        isSpecialLane = False
 
-        if (trafficControlInstance.busLane == True or trafficControlInstance.cycleLane == True):
-            isSpecialLane = True
+        if (trafficControlInstance.hasSpecialVehicleLane == True):
             self.specialNorthMaxWaitingTime = trafficControlInstance.specialNorthMaxWaitingTime
             self.specialNorthMaxQueueLength = trafficControlInstance.specialNorthMaxQueueLength
             self.specialNorthAvgWaitingTime = trafficControlInstance.specialNorthAvgWaitingTime
@@ -48,7 +46,7 @@ class Results:
             self.specialWestTotalVehiclesPassed = trafficControlInstance.specialWestTotalVehiclesPassed
         
 
-        self.print_results(isSpecialLane) # Comment this out in production
+        self.print_results(trafficControlInstance.hasSpecialVehicleLane) # Comment this out in production
 
     def print_results(self, isSpecialLane):
         print(f"North Bound Junction Entrance: Max Waiting Time = {self.northMaxWaitingTime}, Max Queue Length = {self.northMaxQueueLength}, "
@@ -78,8 +76,8 @@ class Results:
 
 
 # This is the function that the front-end calls to get results of a simulation
-def runModel(sideLengthOfJunction, lengthOfSim, simulationSecondLength, carSpeed, carLength, carStationaryDistance, carReactionTime, numberOfGeneralLanes, generalVPH, hasLeftTurnLanes, hasRightTurnLanes, hasPedestrianCrossings, crossingPedestrianTime, crossingRequestsPerHour, trafficLightSequence, trafficLightGreenTimes, specialLength, specialSpeed, busLane, cycleLane, specialVehicleRatio, specialVPH):
-    simulation = TrafficControl(sideLengthOfJunction, lengthOfSim, simulationSecondLength, carSpeed, carLength, carStationaryDistance, carReactionTime, numberOfGeneralLanes, generalVPH, hasLeftTurnLanes, hasRightTurnLanes,  hasPedestrianCrossings, crossingPedestrianTime, crossingRequestsPerHour, trafficLightSequence, trafficLightGreenTimes, specialLength, specialSpeed, busLane, cycleLane, specialVehicleRatio, specialVPH)
+def runModel(sideLengthOfJunction, lengthOfSim, simulationSecondLength, carSpeed, carLength, carStationaryDistance, carReactionTime, numberOfGeneralLanes, generalVPH, hasLeftTurnLanes, hasRightTurnLanes, hasPedestrianCrossings, crossingPedestrianTime, crossingRequestsPerHour, trafficLightSequence, trafficLightGreenTimes, specialLength, specialSpeed, hasSpecialVehicleLane, specialVehicleRatio, specialVPH):
+    simulation = TrafficControl(sideLengthOfJunction, lengthOfSim, simulationSecondLength, carSpeed, carLength, carStationaryDistance, carReactionTime, numberOfGeneralLanes, generalVPH, hasLeftTurnLanes, hasRightTurnLanes,  hasPedestrianCrossings, crossingPedestrianTime, crossingRequestsPerHour, trafficLightSequence, trafficLightGreenTimes, specialLength, specialSpeed, hasSpecialVehicleLane, specialVehicleRatio, specialVPH)
     
     while not simulation.simulationComplete:
         time.sleep(0.5)
@@ -91,13 +89,13 @@ def runModel(sideLengthOfJunction, lengthOfSim, simulationSecondLength, carSpeed
     Note to front-end developers, you simply need to call runModel() with all of its paramaters and it will return a Results object which you can pick
     through to get the results gathered from the simulation. (Refer to the definition of the Results class above to know how to do this).
 
-    Paramaters will be listed in the order they need to be inputted into runModel:
+    Parameters will be listed in the order they need to be inputted into runModel:
 
     sideLengthOfJunction: The side length of the junction in meters.
     lengthOfSim: The length of the simulation in seconds. For example, if the simulation is 1 hour, this would be 3600.
     simulationSecondLength: N/A at the moment, doesn't currently do anything yet - may use later.
     carSpeed: Speed of cars in mph.
-    carLength: Length of cars in meters
+    carLength: Length of cars in meters.
     carStationaryDistance: How far the cars are from each other in meters.
     carReactionTime: The delay car behind takes to respond to the car's changes in speed.
     numberOfGeneralLanes: Number of general lanes (excluding bus lanes and cycle lanes and currently left turn lanes). Must be at least 2.
@@ -109,7 +107,12 @@ def runModel(sideLengthOfJunction, lengthOfSim, simulationSecondLength, carSpeed
     crossingRequestsPerHour: The number of pedestrain crossings occuring each hour. This should be None when no crossings occur
     trafficLightSequence: Specify the sequence in which traffic lights should trigger. Example: [Direction.North, Direction.East, Direction.South, Direction.West].
     trafficLightGreenTimes: The following times are in seconds: [Green light time for North Arm, Green light time for East Arm, Green light time for South Arm, Green light time for West arm]
+    specialLength: Length of special vehicle (bus/cycle) in meters.
+    specialSpeed: Speed of special vehicle (bus/cycle) in mph.
+    hasSpecialVehicleLane: True or False. If the user has requested a bus lane or a cycle lane, then this variable should be set to True. The user cannot request bus lanes at the same time as cycle lanes.
+    specialVehicleRatio: A float in the interval (0,1]. This represents the ratio of green light time that the buses/cycles will receive - if this is 0.75, then the cars will receive 25% of the green light time specified in trafficGreenLightTimes, and the buses/cycles will receive the other 75%. This number may be 1, but not ever 0 - if this is 0, then hasSpecialLane should be set to False since there is no support for this ratio being 0 and hasSpecialLane being True. 
+    specialPVH: Similar to generalVPH, except for buses/cycles instead of Cars. 
 """
-runModel(15, 360, 1, 15, 3, 1, 1, 1, [[0,0,60], [0,0,60], [0,0,60], [0,0,60]], False, False, True, 60, 1, [Direction.North, Direction.East, Direction.South, Direction.West], [60,60,60,60], 2, 20, True, False, 0.5, [[10,10,60], [10,10,60], [10,10,60], [10,10,60]])
+runModel(15, 360, 1, 15, 3, 1, 0, 1, [[0,0,60], [0,0,60], [0,0,60], [0,0,60]], False, False, True, 60, 1, [Direction.North, Direction.East, Direction.South, Direction.West], [60,60,60,60], 3, 15, True, 1, [[0,0,60], [0,0,60], [0,0,60], [0,0,60]])
 
-# sideLengthOfJunction, lengthOfSim, simulationTimeUnit, carSpeed, carLength, carStationaryDistance, carReactionTime, numberOfGeneralLanes, generalVPH, hasLeftTurnLanes, hasRightTurnLanes,  hasPedestrianCrossings, crossingPedestrianTime, crossingRequestsPerHour, trafficLightSequence, trafficLightGreenTimes, specialLength, specialSpeed, busLane, cycleLane, specialVehicleRatio, specialPVH):
+# sideLengthOfJunction, lengthOfSim, simulationTimeUnit, carSpeed, carLength, carStationaryDistance, carReactionTime, numberOfGeneralLanes, generalVPH, hasLeftTurnLanes, hasRightTurnLanes,  hasPedestrianCrossings, crossingPedestrianTime, crossingRequestsPerHour, trafficLightSequence, trafficLightGreenTimes, specialLength, specialSpeed, hasSpecialVehicleLane, specialVehicleRatio, specialPVH):
