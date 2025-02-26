@@ -23,9 +23,34 @@ class Results:
         self.westAvgWaitingTime = trafficControlInstance.westAvgWaitingTime
         self.westTotalVehiclesPassed = trafficControlInstance.westTotalVehiclesPassed
 
-        self.print_results() # Comment this out in production
+        isSpecialLane = False
 
-    def print_results(self):
+        if (trafficControlInstance.busLane == True or trafficControlInstance.cycleLane == True):
+            isSpecialLane = True
+            self.specialNorthMaxWaitingTime = trafficControlInstance.specialNorthMaxWaitingTime
+            self.specialNorthMaxQueueLength = trafficControlInstance.specialNorthMaxQueueLength
+            self.specialNorthAvgWaitingTime = trafficControlInstance.specialNorthAvgWaitingTime
+            self.specialNorthTotalVehiclesPassed = trafficControlInstance.specialNorthTotalVehiclesPassed
+
+            self.specialEastMaxWaitingTime = trafficControlInstance.specialEastMaxWaitingTime
+            self.specialEastMaxQueueLength = trafficControlInstance.specialEastMaxQueueLength
+            self.specialEastAvgWaitingTime = trafficControlInstance.specialEastAvgWaitingTime
+            self.specialEastTotalVehiclesPassed = trafficControlInstance.specialEastTotalVehiclesPassed
+
+            self.specialSouthMaxWaitingTime = trafficControlInstance.specialSouthMaxWaitingTime
+            self.specialSouthMaxQueueLength = trafficControlInstance.specialSouthMaxQueueLength
+            self.specialSouthAvgWaitingTime = trafficControlInstance.specialSouthAvgWaitingTime
+            self.specialSouthTotalVehiclesPassed = trafficControlInstance.specialSouthTotalVehiclesPassed
+
+            self.specialWestMaxWaitingTime = trafficControlInstance.specialWestMaxWaitingTime
+            self.specialWestMaxQueueLength = trafficControlInstance.specialWestMaxQueueLength
+            self.specialWestAvgWaitingTime = trafficControlInstance.specialWestAvgWaitingTime
+            self.specialWestTotalVehiclesPassed = trafficControlInstance.specialWestTotalVehiclesPassed
+        
+
+        self.print_results(isSpecialLane) # Comment this out in production
+
+    def print_results(self, isSpecialLane):
         print(f"North Bound Junction Entrance: Max Waiting Time = {self.northMaxWaitingTime}, Max Queue Length = {self.northMaxQueueLength}, "
               f"Avg Waiting Time = {self.northAvgWaitingTime}, Total Vehicles Passed = {self.northTotalVehiclesPassed}")
         
@@ -38,13 +63,27 @@ class Results:
         print(f"West Bound Junction Entrance: Max Waiting Time = {self.westMaxWaitingTime}, Max Queue Length = {self.westMaxQueueLength}, "
               f"Avg Waiting Time = {self.westAvgWaitingTime}, Total Vehicles Passed = {self.westTotalVehiclesPassed}")
 
+        if (isSpecialLane):
+            print(f"North Bound Junction Entrance Bus/Cycle: Max Waiting Time = {self.specialNorthMaxWaitingTime}, Max Queue Length = {self.specialNorthMaxQueueLength}, "
+                f"Avg Waiting Time = {self.specialNorthAvgWaitingTime}, Total Vehicles Passed = {self.specialNorthTotalVehiclesPassed}")
+
+            print(f"East Bound Junction Entrance Bus/Cycle: Max Waiting Time = {self.specialEastMaxWaitingTime}, Max Queue Length = {self.specialEastMaxQueueLength}, "
+                f"Avg Waiting Time = {self.specialEastAvgWaitingTime}, Total Vehicles Passed = {self.specialEastTotalVehiclesPassed}")
+
+            print(f"South Bound Junction Entrance Bus/Cycle: Max Waiting Time = {self.specialSouthMaxWaitingTime}, Max Queue Length = {self.specialSouthMaxQueueLength}, "
+                f"Avg Waiting Time = {self.specialSouthAvgWaitingTime}, Total Vehicles Passed = {self.specialSouthTotalVehiclesPassed}")
+
+            print(f"West Bound Junction Entrance Bus/Cycle: Max Waiting Time = {self.specialWestMaxWaitingTime}, Max Queue Length = {self.specialWestMaxQueueLength}, "
+                f"Avg Waiting Time = {self.specialWestAvgWaitingTime}, Total Vehicles Passed = {self.specialWestTotalVehiclesPassed}")
+
+
 # This is the function that the front-end calls to get results of a simulation
 def runModel(sideLengthOfJunction, lengthOfSim, simulationSecondLength, carSpeed, carLength, carStationaryDistance, carReactionTime, numberOfGeneralLanes, generalVPH, hasLeftTurnLanes, hasRightTurnLanes, hasPedestrianCrossings, crossingPedestrianTime, crossingRequestsPerHour, trafficLightSequence, trafficLightGreenTimes, specialLength, specialSpeed, busLane, cycleLane, specialVehicleRatio, specialVPH):
     simulation = TrafficControl(sideLengthOfJunction, lengthOfSim, simulationSecondLength, carSpeed, carLength, carStationaryDistance, carReactionTime, numberOfGeneralLanes, generalVPH, hasLeftTurnLanes, hasRightTurnLanes,  hasPedestrianCrossings, crossingPedestrianTime, crossingRequestsPerHour, trafficLightSequence, trafficLightGreenTimes, specialLength, specialSpeed, busLane, cycleLane, specialVehicleRatio, specialVPH)
     
     while not simulation.simulationComplete:
         time.sleep(0.5)
-
+    
     print("Printing results!")
     return Results(simulation)
 

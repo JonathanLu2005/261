@@ -87,6 +87,26 @@ class TrafficControl:
         self.westAvgWaitingTime = None
         self.westTotalVehiclesPassed = None
 
+        self.specialNorthMaxWaitingTime = None
+        self.specialNorthMaxQueueLength = None
+        self.specialNorthAvgWaitingTime = None
+        self.specialNorthTotalVehiclesPassed = None
+
+        self.specialEastMaxWaitingTime = None
+        self.specialEastMaxQueueLength = None
+        self.specialEastAvgWaitingTime = None
+        self.specialEastTotalVehiclesPassed = None
+
+        self.specialSouthMaxWaitingTime = None
+        self.specialSouthMaxQueueLength = None
+        self.specialSouthAvgWaitingTime = None
+        self.specialSouthTotalVehiclesPassed = None
+
+        self.specialWestMaxWaitingTime = None
+        self.specialWestMaxQueueLength = None
+        self.specialWestAvgWaitingTime = None
+        self.specialWestTotalVehiclesPassed = None
+
         self.transferTime = TrafficControl.convertSecondsToTimeUnits(6) # Assume transfer time is 6 seconds constant for all cars for now.
         
         print("Init Simpy Environment")
@@ -175,6 +195,27 @@ class TrafficControl:
         self.westMaxQueueLength = self.junctionEntrances[Direction.West].getMaxQueueLength()
         self.westAvgWaitingTime = self.junctionEntrances[Direction.West].getAvgWaitingTime()
         self.westTotalVehiclesPassed = self.junctionEntrances[Direction.West].getTotalVehiclesPassed()
+
+        if (TrafficControl.busLane == True or TrafficControl.cycleLane == True):
+            self.specialNorthMaxWaitingTime = self.junctionEntrances[Direction.North].getSpecialMaxWaitingTime()
+            self.specialNorthMaxQueueLength = self.junctionEntrances[Direction.North].getSpecialMaxQueueLength()
+            self.specialNorthAvgWaitingTime = self.junctionEntrances[Direction.North].getSpecialAvgWaitingTime()
+            self.specialNorthTotalVehiclesPassed = self.junctionEntrances[Direction.North].getSpecialTotalVehiclesPassed()
+
+            self.specialEastMaxWaitingTime = self.junctionEntrances[Direction.East].getSpecialMaxWaitingTime()
+            self.specialEastMaxQueueLength = self.junctionEntrances[Direction.East].getSpecialMaxQueueLength()
+            self.specialEastAvgWaitingTime = self.junctionEntrances[Direction.East].getSpecialAvgWaitingTime()
+            self.specialEastTotalVehiclesPassed = self.junctionEntrances[Direction.East].getSpecialTotalVehiclesPassed()
+
+            self.specialSouthMaxWaitingTime = self.junctionEntrances[Direction.South].getSpecialMaxWaitingTime()
+            self.specialSouthMaxQueueLength = self.junctionEntrances[Direction.South].getSpecialMaxQueueLength()
+            self.specialSouthAvgWaitingTime = self.junctionEntrances[Direction.South].getSpecialAvgWaitingTime()
+            self.specialSouthTotalVehiclesPassed = self.junctionEntrances[Direction.South].getSpecialTotalVehiclesPassed()
+
+            self.specialWestMaxWaitingTime = self.junctionEntrances[Direction.West].getSpecialMaxWaitingTime()
+            self.specialWestMaxQueueLength = self.junctionEntrances[Direction.West].getSpecialMaxQueueLength()
+            self.specialWestAvgWaitingTime = self.junctionEntrances[Direction.West].getSpecialAvgWaitingTime()
+            self.specialWestTotalVehiclesPassed = self.junctionEntrances[Direction.West].getSpecialTotalVehiclesPassed()
 
 
         TrafficControl.simulationComplete = True
@@ -359,6 +400,20 @@ class JunctionEntrance:
         for lane in self.generalLanes:
             totalNumberOfVehiclesPassed += lane.numberOfVehiclesPassed
         return totalNumberOfVehiclesPassed
+
+    def getSpecialMaxWaitingTime(self):
+        return self.specialLane.maxWaitingTime
+
+    def getSpecialMaxQueueLength(self):
+        return self.specialLane.maxQueueLength
+
+    def getSpecialAvgWaitingTime(self):
+        totalWaitingTime = self.specialLane.totalWaitingTime
+        totalNumberOfVehiclesPassed = self.specialLane.numberOfVehiclesPassed
+        return TrafficControl.convertTimeUnitsToSeconds(totalWaitingTime) / totalNumberOfVehiclesPassed if totalNumberOfVehiclesPassed > 0 else -1
+
+    def getSpecialTotalVehiclesPassed(self):
+        return self.specialLane.numberOfVehiclesPassed
 
     def carGenerator(self, env, possibleLanesToSpawn, vph, exitCardinality):
 
