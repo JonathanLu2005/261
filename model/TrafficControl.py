@@ -464,7 +464,7 @@ class JunctionEntrance:
         return totalNumberOfVehiclesPassed
 
     def getSpecialMaxWaitingTime(self):
-        return self.specialLane.maxWaitingTime
+        return TrafficControl.convertTimeUnitsToSeconds(self.specialLane.maxWaitingTime)
 
     def getSpecialMaxQueueLength(self):
         return self.specialLane.maxQueueLength
