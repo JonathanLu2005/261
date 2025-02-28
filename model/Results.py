@@ -76,8 +76,8 @@ class Results:
 
 
 # This is the function that the front-end calls to get results of a simulation
-def runModel(sideLengthOfJunction, lengthOfSim, simulationSecondLength, carSpeed, carLength, carStationaryDistance, carReactionTime, numberOfGeneralLanes, generalVPH, hasLeftTurnLanes, hasRightTurnLanes, hasPedestrianCrossings, crossingPedestrianTime, crossingRequestsPerHour, trafficLightSequence, trafficLightGreenTimes, specialLength, specialSpeed, hasSpecialVehicleLane, specialVehicleRatio, specialVPH):
-    simulation = TrafficControl(sideLengthOfJunction, lengthOfSim, simulationSecondLength, carSpeed, carLength, carStationaryDistance, carReactionTime, numberOfGeneralLanes, generalVPH, hasLeftTurnLanes, hasRightTurnLanes,  hasPedestrianCrossings, crossingPedestrianTime, crossingRequestsPerHour, trafficLightSequence, trafficLightGreenTimes, specialLength, specialSpeed, hasSpecialVehicleLane, specialVehicleRatio, specialVPH)
+def runModel(sideLengthOfJunction, lengthOfSim, simulationSecondLength, carSpeed, carLength, realisticLengthFluctuation, carStationaryDistance, carReactionTime, numberOfGeneralLanes, generalVPH, hasLeftTurnLanes, hasRightTurnLanes, hasPedestrianCrossings, crossingPedestrianTime, crossingRequestsPerHour, trafficLightSequence, trafficLightGreenTimes, specialLength, specialSpeed, hasSpecialVehicleLane, specialVehicleRatio, specialVPH):
+    simulation = TrafficControl(sideLengthOfJunction, lengthOfSim, simulationSecondLength, carSpeed, carLength, realisticLengthFluctuation, carStationaryDistance, carReactionTime, numberOfGeneralLanes, generalVPH, hasLeftTurnLanes, hasRightTurnLanes,  hasPedestrianCrossings, crossingPedestrianTime, crossingRequestsPerHour, trafficLightSequence, trafficLightGreenTimes, specialLength, specialSpeed, hasSpecialVehicleLane, specialVehicleRatio, specialVPH)
     
     while not simulation.simulationComplete:
         time.sleep(0.5)
@@ -96,6 +96,7 @@ def runModel(sideLengthOfJunction, lengthOfSim, simulationSecondLength, carSpeed
     simulationSecondLength: N/A at the moment, doesn't currently do anything yet - may use later.
     carSpeed: Speed of cars in mph.
     carLength: Length of cars in meters.
+    realisticLengthFluctuation: A length in meters representing the range of values which carLength can fluctuate by. Testing team must ensure that carLength - realisticLengthFluctuation >= 1.5 metres.  
     carStationaryDistance: How far the cars are from each other in meters.
     carReactionTime: The delay car behind takes to respond to the car's changes in speed.
     numberOfGeneralLanes: Number of general lanes (excluding bus lanes and cycle lanes and currently left turn lanes). Must be at least 2.
@@ -113,6 +114,6 @@ def runModel(sideLengthOfJunction, lengthOfSim, simulationSecondLength, carSpeed
     specialVehicleRatio: A float in the interval (0,1]. This represents the ratio of green light time that the buses/cycles will receive - if this is 0.75, then the cars will receive 25% of the green light time specified in trafficGreenLightTimes, and the buses/cycles will receive the other 75%. This number may be 1, but not ever 0 - if this is 0, then hasSpecialLane should be set to False since there is no support for this ratio being 0 and hasSpecialLane being True. 
     specialPVH: Similar to generalVPH, except for buses/cycles instead of Cars. 
 """
-runModel(15, 360, 1, 15, 3, 1, 0, 1, [[0,0,60], [0,0,60], [0,0,60], [0,0,60]], False, False, True, 60, 1, [Direction.North, Direction.East, Direction.South, Direction.West], [60,60,60,60], 3, 15, False, 0, [[0,0,60], [0,0,60], [0,0,60], [0,0,60]])
+runModel(15, 480, 1, 15, 3, 0.5, 1, 0, 1, [[0,0,60], [0,0,60], [0,0,60], [0,0,60]], False, False, True, 60, 1, [Direction.North, Direction.East, Direction.South, Direction.West], [60,60,60,60], 3, 15, False, 0, [[0,0,60], [0,0,60], [0,0,60], [0,0,60]])
 
-# sideLengthOfJunction, lengthOfSim, simulationTimeUnit, carSpeed, carLength, carStationaryDistance, carReactionTime, numberOfGeneralLanes, generalVPH, hasLeftTurnLanes, hasRightTurnLanes,  hasPedestrianCrossings, crossingPedestrianTime, crossingRequestsPerHour, trafficLightSequence, trafficLightGreenTimes, specialLength, specialSpeed, hasSpecialVehicleLane, specialVehicleRatio, specialPVH):
+# sideLengthOfJunction, lengthOfSim, simulationTimeUnit, carSpeed, carLength, realisticLengthFluctuation, carStationaryDistance, carReactionTime, numberOfGeneralLanes, generalVPH, hasLeftTurnLanes, hasRightTurnLanes,  hasPedestrianCrossings, crossingPedestrianTime, crossingRequestsPerHour, trafficLightSequence, trafficLightGreenTimes, specialLength, specialSpeed, hasSpecialVehicleLane, specialVehicleRatio, specialPVH):

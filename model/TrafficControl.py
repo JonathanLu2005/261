@@ -13,6 +13,7 @@ class TrafficControl:
     simulationTimeUnit = 0.01    # If this is 1/10, then it will take 10 time units in the simulation to simulate one second.
     carSpeed = None
     carLength = None
+    realisticLengthFluctuation = None
     carStationaryDistance = None
     carReactionTime = None
     numberOfGeneralLanes = None
@@ -28,11 +29,12 @@ class TrafficControl:
 
     simulationComplete = False
 
-    def __init__(self, sideLengthOfJunction, lengthOfSim, simulationTimeUnit, carSpeed, carLength, carStationaryDistance, carReactionTime, numberOfGeneralLanes, generalVPH, hasLeftTurnLanes, hasRightTurnLanes,  hasPedestrianCrossings, crossingPedestrianTime, crossingRequestsPerHour, trafficLightSequence, trafficLightGreenTimes, specialLength, specialSpeed, hasSpecialVehicleLane, specialVehicleRatio, specialVPH):
+    def __init__(self, sideLengthOfJunction, lengthOfSim, simulationTimeUnit, carSpeed, carLength, realisticLengthFluctuation, carStationaryDistance, carReactionTime, numberOfGeneralLanes, generalVPH, hasLeftTurnLanes, hasRightTurnLanes,  hasPedestrianCrossings, crossingPedestrianTime, crossingRequestsPerHour, trafficLightSequence, trafficLightGreenTimes, specialLength, specialSpeed, hasSpecialVehicleLane, specialVehicleRatio, specialVPH):
         self.sideLengthOfJunction = sideLengthOfJunction
         self.lengthOfSim = TrafficControl.convertSecondsToTimeUnits(lengthOfSim)
         TrafficControl.carSpeed = carSpeed * 0.44704 * TrafficControl.simulationTimeUnit # Multiplying by 0.44704 converts mph to meters per second. Multiplying by the simulation time unit means meters per time unit.
         TrafficControl.carLength = carLength
+        TrafficControl.realisticLengthFluctuation = realisticLengthFluctuation
         TrafficControl.carStationaryDistance = carStationaryDistance
         TrafficControl.carReactionTime = TrafficControl.convertSecondsToTimeUnits(carReactionTime)
         print(f"Car reaction time in time units is {TrafficControl.carReactionTime}")
@@ -627,7 +629,7 @@ class Car:
     def __init__(self, distanceFromJunctionEntrance : int, turningExitCardinality : Direction, timeOfQueueStart : int, pointerToCarAhead, junctionEntranceLane : Lane):
         self.distanceFromJunctionEntrance = distanceFromJunctionEntrance
         self.turningExitCardinality = turningExitCardinality
-        self.length = TrafficControl.carLength
+        self.length = random.uniform(TrafficControl.carLength - TrafficControl.realisticLengthFluctuation, TrafficControl.carLength + TrafficControl.realisticLengthFluctuation)
         self.speed = TrafficControl.carSpeed
         self.timeOfQueueStart = timeOfQueueStart
         self.currentState = CarState.Stationary                 # The default is that cars spawn stationary (Don't worry they dont always spawn stationary depending on the car ahead's state.)
