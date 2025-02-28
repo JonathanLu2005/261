@@ -123,42 +123,53 @@ class TrafficControl:
 
 
     def calculatingTransferDistances(self):
-        self.transferDistances = []
-        numberOfLanes = self.numberOfGeneralLanes
+        TrafficControl.transferDistances = []
+
         if(self.hasSpecialVehicleLane):
-            self.specialTransferDistances = []
-            numberOfLanes +=1
-            laneWidth = self.sideLengthOfJunction / numberOfLanes*2
+            TrafficControl.specialTransferDistances = []
+            laneWidth = self.sideLengthOfJunction / ((self.numberOfGeneralLanes + 1) * 2)
 
             # Car left
-            self.transferDistances.append(0.25 * math.pi * math.sqrt(2) * ((0.5 * 1.5 * laneWidth)**2 + (0.5 * 0.5 * laneWidth)**2))
+            TrafficControl.transferDistances.append(0.25 * self.ramanujan_ellipse_perimeter(1.5*laneWidth, 0.5*laneWidth))
             
             # Bus left 
-            self.specialTransferDistances.append(math.pi * laneWidth * 0.25)
+            TrafficControl.specialTransferDistances.append(0.5 * math.pi * (laneWidth / 2))
             
             # Car and bus straight
-            self.transferDistances.append(self.sideLengthOfJunction)
-            self.specialTransferDistances.append(self.sideLengthOfJunction)
+            TrafficControl.transferDistances.append(self.sideLengthOfJunction)
+            TrafficControl.specialTransferDistances.append(self.sideLengthOfJunction)
             
             # Car right
-            self.transferDistances.append(math.pi * self.sideLengthOfJunction * laneWidth * 0.25)   
+            TrafficControl.transferDistances.append(0.5 * math.pi * ( (self.sideLengthOfJunction / 2) + (laneWidth / 2) ) ) 
             
             # Bus right
-            a = self.sideLengthOfJunction - (lanewidth * 0.5)
-            b = (self.sideLengthOfJunction * 0.5) + (lanewidth * 0.5)
-            self.specialTransferDistances.append(0.25 * math.pi * math.sqrt(2) * ((0.5 * a)**2 + (0.5 * b)**2))
-
-
-            
-
+            a = self.sideLengthOfJunction - (laneWidth * 0.5)
+            b = (self.sideLengthOfJunction * 0.5) + (laneWidth * 0.5)
+            TrafficControl.specialTransferDistances.append(0.25 * self.ramanujan_ellipse_perimeter(a,b))
 
         else:
-            laneWidth = self.sideLengthOfJunction / numberOfLanes*2
-            self.transferDistances.append(math.pi * laneWidth * 0.25)
-            self.transferDistances.append(self.sideLengthOfJunction)
-            self.transferDistances.append(math.pi * self.sideLengthOfJunction * laneWidth * 0.25)   
+            laneWidth = self.sideLengthOfJunction / (self.numberOfGeneralLanes * 2)
+            # Car Left
+            TrafficControl.transferDistances.append(0.5 * math.pi * (laneWidth / 2))
+            # Car Straight
+            TrafficControl.transferDistances.append(self.sideLengthOfJunction)
+            # Car Right
+            TrafficControl.transferDistances.append(0.5 * math.pi * ( (self.sideLengthOfJunction / 2) + (laneWidth / 2) ) ) 
 
+    # Auxillary function used to calculate transfer distanccfs.
+    def ramanujan_ellipse_perimeter(a, b):
+        # Eccentricity of the ellipse
+        e = math.sqrt(1 - (b**2 / a**2)) if a > b else math.sqrt(1 - (a**2 / b**2))
 
+        # Mysterious term epsilon
+        epsilon = (3 * a * e**20) / 68719476736
+
+        # Final approximation for the perimeter P
+        P = math.pi * (
+            (a + b) + (3 * (a - b)**2) / (10 * (a + b) + math.sqrt(a**2 + 14 * a * b + b**2)) + epsilon
+        )
+
+        return P
 
 
     """
