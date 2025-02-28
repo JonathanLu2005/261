@@ -1,6 +1,7 @@
 from enum import IntEnum
 import simpy
 import random
+import math
 
 class Direction(IntEnum):
     North = 0
@@ -25,7 +26,8 @@ class TrafficControl:
     hasSpecialVehicleLane = None
     specialVehicleRatio = None
     specialVPH = None
-
+    transferDistances = None
+    specialTransferDistances = None
 
     simulationComplete = False
 
@@ -118,6 +120,47 @@ class TrafficControl:
             junctionEntrance.junctionEntranceCarGeneratorSetup(env)
         env.run()   # Run the simulation
 
+
+
+    def calculatingTransferDistances(self):
+        self.transferDistances = []
+        numberOfLanes = self.numberOfGeneralLanes
+        if(self.hasSpecialVehicleLane):
+            self.specialTransferDistances = []
+            numberOfLanes +=1
+            laneWidth = self.sideLengthOfJunction / numberOfLanes*2
+
+            # Car left
+            self.transferDistances.append(0.25 * math.pi * math.sqrt(2) * ((0.5 * 1.5 * laneWidth)**2 + (0.5 * 0.5 * laneWidth)**2))
+            
+            # Bus left 
+            self.specialTransferDistances.append(math.pi * laneWidth * 0.25)
+            
+            # Car and bus straight
+            self.transferDistances.append(self.sideLengthOfJunction)
+            self.specialTransferDistances.append(self.sideLengthOfJunction)
+            
+            # Car right
+            self.transferDistances.append(math.pi * self.sideLengthOfJunction * laneWidth * 0.25)   
+            
+            # Bus right
+            a = self.sideLengthOfJunction - (lanewidth * 0.5)
+            b = (self.sideLengthOfJunction * 0.5) + (lanewidth * 0.5)
+            self.specialTransferDistances.append(0.25 * math.pi * math.sqrt(2) * ((0.5 * a)**2 + (0.5 * b)**2))
+
+
+            
+
+
+        else:
+            laneWidth = self.sideLengthOfJunction / numberOfLanes*2
+            self.transferDistances.append(math.pi * laneWidth * 0.25)
+            self.transferDistances.append(self.sideLengthOfJunction)
+            self.transferDistances.append(math.pi * self.sideLengthOfJunction * laneWidth * 0.25)   
+
+
+
+
     """
         A function which runs constantly to handle the sequencing of traffic lights, the occurrences and 
         frequency of pedestrian crossings and their duration, etc. This function runs until the junction has 
@@ -189,7 +232,7 @@ class TrafficControl:
                         if remainingTime <= 0:
                             break
 
-
+                    # Dont need this code anymore: 
                     # Case 1: Only simulating the flow of buses/cycles
                     #if(TrafficControl.specialVehicleRatio == 1):           
                     #    self.junctionEntrances[direction].signalSpecialGreen() # Signal Green to the buses or cycles for this direction
