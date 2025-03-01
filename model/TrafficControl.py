@@ -23,6 +23,7 @@ class TrafficControl:
     hasRightTurnLanes = None
     specialLength = None
     specialSpeed = None
+    specialRealisticLengthFluctuation = None
     hasSpecialVehicleLane = None
     specialVehicleRatio = None
     specialVPH = None
@@ -31,7 +32,7 @@ class TrafficControl:
 
     simulationComplete = False
 
-    def __init__(self, sideLengthOfJunction, lengthOfSim, carSpeed, carLength, realisticLengthFluctuation, carStationaryDistance, carReactionTime, numberOfGeneralLanes, generalVPH, hasLeftTurnLanes, hasRightTurnLanes,  hasPedestrianCrossings, crossingPedestrianTime, crossingRequestsPerHour, trafficLightSequence, trafficLightGreenTimes, specialLength, specialSpeed, hasSpecialVehicleLane, specialVehicleRatio, specialVPH):
+    def __init__(self, sideLengthOfJunction, lengthOfSim, carSpeed, carLength, realisticLengthFluctuation, carStationaryDistance, carReactionTime, numberOfGeneralLanes, generalVPH, hasLeftTurnLanes, hasRightTurnLanes,  hasPedestrianCrossings, crossingPedestrianTime, crossingRequestsPerHour, trafficLightSequence, trafficLightGreenTimes, specialLength, specialSpeed, specialRealisticLengthFluctuation, hasSpecialVehicleLane, specialVehicleRatio, specialVPH):
         self.sideLengthOfJunction = sideLengthOfJunction
         self.lengthOfSim = TrafficControl.convertSecondsToTimeUnits(lengthOfSim)
         TrafficControl.carSpeed = carSpeed * 0.44704 * TrafficControl.simulationTimeUnit # Multiplying by 0.44704 converts mph to meters per second. Multiplying by the simulation time unit means meters per time unit.
@@ -52,6 +53,7 @@ class TrafficControl:
         # If there is no Bus lane and no Cycle lane, then these variables will be set to None and will not be needed in the program. 
         TrafficControl.specialLength = specialLength
         TrafficControl.specialSpeed = specialSpeed * 0.44704 * TrafficControl.simulationTimeUnit # Multiplying by 0.44704 converts mph to meters per second. Multiplying by the simulation time unit means meters per time unit.
+        TrafficControl.specialRealisticLengthFluctuation = specialRealisticLengthFluctuation
         # This variable is used to determine whether the "specialLane" will be implemented, either for buses, or cycles - this information is not relevant to the model team, but may be relevant to those displaying results. 
         TrafficControl.hasSpecialVehicleLane = hasSpecialVehicleLane
         # The user must specify the ratio of green light time which will be applied for the special vehicles, 
@@ -365,7 +367,7 @@ class Lane:
         if(self.numberOfCarsPresent == 0):
             self.leadingCar = Car(0, turningExitCardinality, env.now, None, self)
             if (isCar == False):
-                self.leadingCar.setLength(TrafficControl.specialLength)
+                self.leadingCar.setLength(random.uniform(TrafficControl.specialLength - TrafficControl.realisticLengthFluctuation, TrafficControl.carLength + TrafficControl.realisticLengthFluctuation))
                 self.leadingCar.setSpeed(TrafficControl.specialSpeed)
                 print(f"Number of buses/cycles present is {self.numberOfCarsPresent+1} at junction entrance {self.junctionEntrance}")
             else:
@@ -377,7 +379,7 @@ class Lane:
             self.trailingCar.pointerToCarBehind = Car(self.trailingCar.distanceFromJunctionEntrance + TrafficControl.carLength + TrafficControl.carStationaryDistance, turningExitCardinality, env.now, self.trailingCar, self)
             self.trailingCar = self.trailingCar.pointerToCarBehind
             if (isCar == False):
-                self.trailingCar.setLength(TrafficControl.specialLength)
+                self.leadingCar.setLength(random.uniform(TrafficControl.specialLength - TrafficControl.realisticLengthFluctuation, TrafficControl.carLength + TrafficControl.realisticLengthFluctuation))
                 self.trailingCar.setSpeed(TrafficControl.specialSpeed)
                 print(f"Number of buses/cycles present is {self.numberOfCarsPresent+1} at junction entrance {self.junctionEntrance}")
             else:
