@@ -109,7 +109,7 @@ class TrafficControl:
         self.specialWestAvgWaitingTime = None
         self.specialWestTotalVehiclesPassed = None
 
-        self.transferTime = TrafficControl.convertSecondsToTimeUnits(6) # Assume transfer time is 6 seconds constant for all cars for now.
+        self.calculatingTransferDistances()
         
         print("Init Simpy Environment")
 
@@ -213,6 +213,7 @@ class TrafficControl:
                         yield env.timeout(carGreenTime)
                         print(f"Signal Red to {direction} for cars at {env.now}")
                         self.junctionEntrances[direction].signalRed()
+                        yield env.timeout(self.junctionEntrances[direction].getTimeUntilJunctionClearCars())
 
                         remainingTime = endTime - env.now  # Update remaining time
                         if remainingTime <= 0:
@@ -226,6 +227,7 @@ class TrafficControl:
                         yield env.timeout(specialGreenTime)
                         print(f"Signal Red to {direction} for buses/cycles at {env.now}")
                         self.junctionEntrances[direction].signalSpecialRed()
+                        yield env.timeout(self.junctionEntrances[direction].getTimeUntilJunctionClearSpecial())
                         remainingTime = endTime - env.now
                         if remainingTime <= 0:
                             break
@@ -239,40 +241,10 @@ class TrafficControl:
                         yield env.timeout(totalGreenTime)
                         print(f"Signal Red to {direction} at {env.now}")
                         self.junctionEntrances[direction].signalRed()
+                        yield env.timeout(self.junctionEntrances[direction].getTimeUntilJunctionClearCars())
                         remainingTime = endTime - env.now
                         if remainingTime <= 0:
                             break
-
-                    # Dont need this code anymore: 
-                    # Case 1: Only simulating the flow of buses/cycles
-                    #if(TrafficControl.specialVehicleRatio == 1):           
-                    #    self.junctionEntrances[direction].signalSpecialGreen() # Signal Green to the buses or cycles for this direction
-                    #    print(f"Signal Green to {direction} at {env.now} for buses/cycles")
-                    #    yield env.timeout(self.trafficLightGreenTimes[direction] * (TrafficControl.specialVehicleRatio)) # Give the green light time corresponding to this junction entrance
-                    #    print(f"Signal Red to {direction} at {env.now} for buses/cycles")
-                    #    self.junctionEntrances[direction].signalSpecialRed()   # Signal Red to the buses or cycles for this direction
-                    
-                    # Case 2: Simulating the flow of buses/cycles and cars
-                    #else:
-                    #            
-                    #    self.junctionEntrances[direction].signalGreen() # Signal Green to this direction (for cars)
-                    #    print(f"Signal Green to {direction} at {env.now}")
-                    #    yield env.timeout(self.trafficLightGreenTimes[direction] * (1-TrafficControl.specialVehicleRatio)) # Give the green light time corresponding to this junction entrance
-                    #    print(f"Signal Red to {direction} at {env.now}")
-                    #    self.junctionEntrances[direction].signalRed()   # Signal Red to this direction
-                    #    self.junctionEntrances[direction].signalSpecialGreen() # Signal Green to the buses or cycles for this direction
-                    #    print(f"Signal Green to {direction} at {env.now} for buses/cycles")
-                    #    yield env.timeout(self.trafficLightGreenTimes[direction] * (TrafficControl.specialVehicleRatio)) # Give the green light time corresponding to this junction entrance
-                    #    print(f"Signal Red to {direction} at {env.now} for buses/cycles")
-                    #    self.junctionEntrances[direction].signalSpecialRed()   # Signal Red to the buses or cycles for this direction
-                # Case 3: Only simulating the flow of cars
-                #else:
-                #        
-                #    self.junctionEntrances[direction].signalGreen() # Signal Green to this direction 
-                #    print(f"Signal Green to {direction} at {env.now}")
-                #    yield env.timeout(self.trafficLightGreenTimes[direction]) # Give the green light time corresponding to this junction entrance
-                #    print(f"Signal Red to {direction} at {env.now}")
-                #    self.junctionEntrances[direction].signalRed()   # Signal Red to this direction
                         
             # Pedestrian Crossing logic goes here
             if(self.hasPedestrianCrossings):
@@ -281,16 +253,6 @@ class TrafficControl:
                     yield env.timeout(self.crossingPedestrianTime)
                     print(f"Pedestrian Crossing Ending at {env.now}")
                     timeOfLastCrossing = env.now
-        
-        #else:
-        #    while env.now < endTime:
-        #        # Cycle through the traffic light sequence suggested by the user
-        #        for direction in self.trafficLightSequence:
-        #            self.junctionEntrances[direction].signalGreen() # Signal Green to this direction
-        #            print(f"Signal Green to {direction} at {env.now}")
-        #            yield env.timeout(self.trafficLightGreenTimes[direction]) # Give the green light time corresopnding to this junction entrance 
-        #            print(f"Signal Red to {direction} at {env.now}")
-        #            self.junctionEntrances[direction].signalRed()   # Signal Red to this direction
 
         # Fetch Results from junction entrances and set them.
 
@@ -375,7 +337,7 @@ class TrafficControl:
 #-------------------
 
 class Lane:
-    def __init__(self, junctionEntrance):
+    def __init__(self, junctionEntranceDirection, isSpecialLane):
         self.leadingCar : Car = None
         self.trailingCar : Car = None
         self.numberOfCarsPresent = 0
@@ -384,7 +346,9 @@ class Lane:
         self.maxWaitingTime = -1        # Maximum default value (which is the maximum time a car has waited. Set to -1 as a N/A value to show no cars have entered the junction yet).
         self.maxQueueLength = -1        # Maximum default value (which is the maximum length a queue has been. Set to -1 as a N/A value to show no queues were formed yet.)
         self.isGreen = False
-        self.junctionEntrance = junctionEntrance
+        self.junctionEntrance = junctionEntranceDirection
+        self.timeUntilJunctionClear = 0
+        self.isSpecialLane = isSpecialLane
 
     def getNumberOfCars(self):
         return self.numberOfCarsPresent
@@ -416,7 +380,9 @@ class Lane:
         self.numberOfCarsPresent += 1
         self.maxQueueLength = max(self.maxQueueLength, self.numberOfCarsPresent)
     
-    def leadingCarEnteringJunction(self, waitingTime, envTime):
+    def leadingCarEnteringJunction(self, envTime):
+        enteringJunctionCar = self.leadingCar
+
         if(self.numberOfCarsPresent == 1):
             self.leadingCar = None
             self.trailingCar = None
@@ -426,8 +392,17 @@ class Lane:
         print(f"Car Entering Junction from {self.junctionEntrance} at {envTime}")
         self.numberOfCarsPresent -= 1
         self.numberOfVehiclesPassed += 1
-        self.totalWaitingTime += waitingTime
-        self.maxWaitingTime = max(self.maxWaitingTime, waitingTime)
+        self.totalWaitingTime += envTime - enteringJunctionCar.timeOfQueueStart
+        self.maxWaitingTime = max(self.maxWaitingTime, envTime - enteringJunctionCar.timeOfQueueStart)
+        
+        indexOfTransferDistance = ((enteringJunctionCar.turningExitCardinality - self.junctionEntrance) % 4) - 1
+
+        if(self.isSpecialLane):
+            self.timeUntilJunctionClear = max(self.timeUntilJunctionClear, TrafficControl.specialTransferDistances[indexOfTransferDistance] / enteringJunctionCar.speed )
+        else:
+            self.timeUntilJunctionClear = max(self.timeUntilJunctionClear, TrafficControl.transferDistances[indexOfTransferDistance] / enteringJunctionCar.speed)
+
+
 
 
 
@@ -445,10 +420,10 @@ class JunctionEntrance:
         self.cardinalDirectionOfJunctionEntrance = cardinalDirectionOfJunctionEntrance
         self.specialLane = None
         if (TrafficControl.hasSpecialVehicleLane == True):
-            self.specialLane = Lane(cardinalDirectionOfJunctionEntrance)
+            self.specialLane = Lane(cardinalDirectionOfJunctionEntrance, True)
         self.generalLanes = []              # Linked lists of Cars according to number of lanes. It should be noted that index 0 corresponds to the left most lane and the greatest index corresponds to the right most lane.
         for _ in range(0, TrafficControl.numberOfGeneralLanes):
-            self.generalLanes.append(Lane(cardinalDirectionOfJunctionEntrance))
+            self.generalLanes.append(Lane(cardinalDirectionOfJunctionEntrance, False))
         self.timeUntilJunctionIsEmpty = 0   # The junction is initially empty when the junction is created
 
     """
@@ -470,6 +445,7 @@ class JunctionEntrance:
     def signalGreen(self):
         print(f"Junction Entrance {self.cardinalDirectionOfJunctionEntrance} recieved green signal for Cars")
         for lane in self.generalLanes:
+            lane.timeUntilJunctionClear = 0
             lane.isGreen = True
 
     def signalSpecialRed(self):
@@ -480,6 +456,7 @@ class JunctionEntrance:
     def signalSpecialGreen(self):
         if (self.specialLane is not None):
             print(f"Junction Entrance {self.cardinalDirectionOfJunctionEntrance} recieved green signal for Buses/Cycles")
+            self.specialLane.timeUntilJunctionClear = 0
             self.specialLane.isGreen = True
 
     def checkIfCarsWaiting(self):
@@ -492,7 +469,17 @@ class JunctionEntrance:
                 return True 
         return False
 
-    
+    def getTimeUntilJunctionClearCars(self):
+        maxTime = 0
+        for lane in self.generalLanes:
+            maxTime = max(maxTime, lane.timeUntilJunctionClear)
+        
+        return maxTime
+
+    def getTimeUntilJunctionClearSpecial(self):
+        return self.specialLane.timeUntilJunctionClear
+
+
     def getMaxWaitingTime(self):
         maxWaitingTime = -1
         for lane in self.generalLanes:
@@ -728,7 +715,7 @@ class Car:
                     # Check if the signal is green. If this is the case, then just leave on this time step.
                     if(self.junctionEntranceLane.isGreen):
                         # Leave the junction entrance.
-                        self.junctionEntranceLane.leadingCarEnteringJunction(env.now - self.timeOfQueueStart, env.now) # Must take into account transfer time?
+                        self.junctionEntranceLane.leadingCarEnteringJunction(env.now) # Must take into account transfer time?
                         break # Stop the while true loop as now this car will just despawn.
 
                     # If the signal is red, then you must stop at the junction entrance and become stationary.

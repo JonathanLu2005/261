@@ -114,6 +114,6 @@ def runModel(sideLengthOfJunction, lengthOfSim, simulationSecondLength, carSpeed
     specialVehicleRatio: A float in the interval (0,1]. This represents the ratio of green light time that the buses/cycles will receive - if this is 0.75, then the cars will receive 25% of the green light time specified in trafficGreenLightTimes, and the buses/cycles will receive the other 75%. This number may be 1, but not ever 0 - if this is 0, then hasSpecialLane should be set to False since there is no support for this ratio being 0 and hasSpecialLane being True. 
     specialPVH: Similar to generalVPH, except for buses/cycles instead of Cars. 
 """
-runModel(15, 480, 1, 15, 3, 0.5, 1, 0, 1, [[0,0,60], [0,0,60], [0,0,60], [0,0,60]], False, False, True, 60, 1, [Direction.North, Direction.East, Direction.South, Direction.West], [60,60,60,60], 3, 15, False, 0, [[0,0,60], [0,0,60], [0,0,60], [0,0,60]])
+runModel(0, 360, 1, 15, 3, 0.5, 1, 0, 1, [[0,0,60], [0,0,60], [0,0,60], [0,0,60]], False, False, True, 60, 1, [Direction.North, Direction.East, Direction.South, Direction.West], [60,60,60,60], 3, 15, False, 0, [[0,0,60], [0,0,60], [0,0,60], [0,0,60]])
 
 # sideLengthOfJunction, lengthOfSim, simulationTimeUnit, carSpeed, carLength, realisticLengthFluctuation, carStationaryDistance, carReactionTime, numberOfGeneralLanes, generalVPH, hasLeftTurnLanes, hasRightTurnLanes,  hasPedestrianCrossings, crossingPedestrianTime, crossingRequestsPerHour, trafficLightSequence, trafficLightGreenTimes, specialLength, specialSpeed, hasSpecialVehicleLane, specialVehicleRatio, specialPVH):
