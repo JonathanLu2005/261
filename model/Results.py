@@ -76,8 +76,8 @@ class Results:
 
 
 # This is the function that the front-end calls to get results of a simulation
-def runModel(sideLengthOfJunction, lengthOfSim, simulationSecondLength, carSpeed, carLength, realisticLengthFluctuation, carStationaryDistance, carReactionTime, numberOfGeneralLanes, generalVPH, hasLeftTurnLanes, hasRightTurnLanes, hasPedestrianCrossings, crossingPedestrianTime, crossingRequestsPerHour, trafficLightSequence, trafficLightGreenTimes, specialLength, specialSpeed, hasSpecialVehicleLane, specialVehicleRatio, specialVPH):
-    simulation = TrafficControl(sideLengthOfJunction, lengthOfSim, simulationSecondLength, carSpeed, carLength, realisticLengthFluctuation, carStationaryDistance, carReactionTime, numberOfGeneralLanes, generalVPH, hasLeftTurnLanes, hasRightTurnLanes,  hasPedestrianCrossings, crossingPedestrianTime, crossingRequestsPerHour, trafficLightSequence, trafficLightGreenTimes, specialLength, specialSpeed, hasSpecialVehicleLane, specialVehicleRatio, specialVPH)
+def runModel(sideLengthOfJunction, lengthOfSim, carSpeed, carLength, realisticLengthFluctuation, carStationaryDistance, carReactionTime, numberOfGeneralLanes, generalVPH, hasLeftTurnLanes, hasRightTurnLanes, hasPedestrianCrossings, crossingPedestrianTime, crossingRequestsPerHour, trafficLightSequence, trafficLightGreenTimes, specialLength, specialSpeed, hasSpecialVehicleLane, specialVehicleRatio, specialVPH):
+    simulation = TrafficControl(sideLengthOfJunction, lengthOfSim, carSpeed, carLength, realisticLengthFluctuation, carStationaryDistance, carReactionTime, numberOfGeneralLanes, generalVPH, hasLeftTurnLanes, hasRightTurnLanes,  hasPedestrianCrossings, crossingPedestrianTime, crossingRequestsPerHour, trafficLightSequence, trafficLightGreenTimes, specialLength, specialSpeed, hasSpecialVehicleLane, specialVehicleRatio, specialVPH)
     
     while not simulation.simulationComplete:
         time.sleep(0.5)
@@ -91,29 +91,31 @@ def runModel(sideLengthOfJunction, lengthOfSim, simulationSecondLength, carSpeed
 
     Parameters will be listed in the order they need to be inputted into runModel:
 
-    sideLengthOfJunction: The side length of the junction in meters.
-    lengthOfSim: The length of the simulation in seconds. For example, if the simulation is 1 hour, this would be 3600.
-    simulationSecondLength: N/A at the moment, doesn't currently do anything yet - may use later.
-    carSpeed: Speed of cars in mph.
-    carLength: Length of cars in meters.
+    sideLengthOfJunction: The side length of the junction in meters. Cannot be less than or equal to 0
+    lengthOfSim: The length of the simulation in seconds. For example, if the simulation is 1 hour, this would be 3600. Greater than 0.
+    carSpeed: Speed of cars in mph. Greater than 0 and not fractional.
+    carLength: Length of cars in meters. Greater or equal to 1.5 meters (can be fracitonal)
     realisticLengthFluctuation: A length in meters representing the range of values which carLength can fluctuate by. Testing team must ensure that carLength - realisticLengthFluctuation >= 1.5 metres.  
-    carStationaryDistance: How far the cars are from each other in meters.
-    carReactionTime: The delay car behind takes to respond to the car's changes in speed.
-    numberOfGeneralLanes: Number of general lanes (excluding bus lanes and cycle lanes and currently left turn lanes). Must be at least 2.
-    generalVPH: An array of arrays holding the VPH values. It is a 2D array in the form of [[North Bound Traffic Exiting North, North Bound Traffic Exiting East, North Bound Traffic Exiting West], [East Bound Traffic Exiting East, East Bound Traffic Exiting South, East Bound Traffic Exiting North], [South Bound Traffic Exiting South, South Bound Traffic Exiting West, South Bound Traffic Exiting East], [West Bound Traffic Exiting West, West Bound Traffic Exiting North, West Bound Traffic Exiting South]]
+    carStationaryDistance: How far the cars are from each other in meters. Greater or equal to 0.5m.
+    carReactionTime: The delay car behind takes to respond to the car's changes in speed. Greater or equal to 0.
+    numberOfGeneralLanes: Number of general lanes (excluding bus lanes and cycle lanes and currently left turn lanes). Must be at least 1.
+    generalVPH: An array of arrays holding the VPH values. It is a 2D array in the form of [[North Bound Traffic Exiting North, North Bound Traffic Exiting East, North Bound Traffic Exiting West], [East Bound Traffic Exiting East, East Bound Traffic Exiting South, East Bound Traffic Exiting North], [South Bound Traffic Exiting South, South Bound Traffic Exiting West, South Bound Traffic Exiting East], [West Bound Traffic Exiting West, West Bound Traffic Exiting North, West Bound Traffic Exiting South]] - Values must be non fractional and greater or equal to 0.
     hasLeftTurnLanes: True or False. If both the junction has both left turn and right turn exclusive lanes, the number of general lanes must be at least 3. 
     hasRightTurnLanes: True or False. If both the junction has both left turn and right turn exclusive lanes, the number of general lanes must be at least 3.
     hasPedestrianCrossings: True or False.
-    crossingPedestrianTime: How long pedestrians crossings last for in seconds. This should be None when no crossings occur.
-    crossingRequestsPerHour: The number of pedestrain crossings occuring each hour. This should be None when no crossings occur
+    crossingPedestrianTime: How long pedestrians crossings last for in seconds. Must be greater than 0 strictly and not fractional. This should be None when no crossings occur. The following must hold: (60 / CrossingRequestsPerHour) > crossingPedestrianTime
+    crossingRequestsPerHour: The number of pedestrian crossings occuring each hour. Must be greater than 0 and can be fractional. This should be None when no crossings occur. The following must hold: (60 / CrossingRequestsPerHour) > crossingPedestrianTime
     trafficLightSequence: Specify the sequence in which traffic lights should trigger. Example: [Direction.North, Direction.East, Direction.South, Direction.West].
-    trafficLightGreenTimes: The following times are in seconds: [Green light time for North Arm, Green light time for East Arm, Green light time for South Arm, Green light time for West arm]
-    specialLength: Length of special vehicle (bus/cycle) in meters.
-    specialSpeed: Speed of special vehicle (bus/cycle) in mph.
+    trafficLightGreenTimes: The following times are in seconds: [Green light time for North Arm, Green light time for East Arm, Green light time for South Arm, Green light time for West arm] This cannot be fractional and must greater than 0.
+    
+    FARHEEN TO DO COMMENTS:
+    specialLength: Length of special vehicle (bus/cycle) in meters. Greater or equal to 1 meter (can be fractional). 
+    specialSpeed: Speed of special vehicle (bus/cycle) in mph. Greater than 0 and not fractional.
+
     hasSpecialVehicleLane: True or False. If the user has requested a bus lane or a cycle lane, then this variable should be set to True. The user cannot request bus lanes at the same time as cycle lanes.
     specialVehicleRatio: A float in the interval (0,1]. This represents the ratio of green light time that the buses/cycles will receive - if this is 0.75, then the cars will receive 25% of the green light time specified in trafficGreenLightTimes, and the buses/cycles will receive the other 75%. This number may be 1, but not ever 0 - if this is 0, then hasSpecialLane should be set to False since there is no support for this ratio being 0 and hasSpecialLane being True. 
     specialPVH: Similar to generalVPH, except for buses/cycles instead of Cars. 
 """
-runModel(0, 360, 1, 15, 3, 0.5, 1, 0, 1, [[0,0,60], [0,0,60], [0,0,60], [0,0,60]], False, False, True, 60, 1, [Direction.North, Direction.East, Direction.South, Direction.West], [60,60,60,60], 3, 15, False, 0, [[0,0,60], [0,0,60], [0,0,60], [0,0,60]])
+runModel(0.1, 360, 15, 3, 0, 1, 0, 1, [[0,0,0], [0,0,0], [0,0,0], [0,0,0]], False, False, True, 10, 60, [Direction.North, Direction.East, Direction.South, Direction.West], [60,60,60,60], 3, 15, False, 0, [[0,0,60], [0,0,60], [0,0,60], [0,0,60]])
 
 # sideLengthOfJunction, lengthOfSim, simulationTimeUnit, carSpeed, carLength, realisticLengthFluctuation, carStationaryDistance, carReactionTime, numberOfGeneralLanes, generalVPH, hasLeftTurnLanes, hasRightTurnLanes,  hasPedestrianCrossings, crossingPedestrianTime, crossingRequestsPerHour, trafficLightSequence, trafficLightGreenTimes, specialLength, specialSpeed, hasSpecialVehicleLane, specialVehicleRatio, specialPVH):

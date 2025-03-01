@@ -31,7 +31,7 @@ class TrafficControl:
 
     simulationComplete = False
 
-    def __init__(self, sideLengthOfJunction, lengthOfSim, simulationTimeUnit, carSpeed, carLength, realisticLengthFluctuation, carStationaryDistance, carReactionTime, numberOfGeneralLanes, generalVPH, hasLeftTurnLanes, hasRightTurnLanes,  hasPedestrianCrossings, crossingPedestrianTime, crossingRequestsPerHour, trafficLightSequence, trafficLightGreenTimes, specialLength, specialSpeed, hasSpecialVehicleLane, specialVehicleRatio, specialVPH):
+    def __init__(self, sideLengthOfJunction, lengthOfSim, carSpeed, carLength, realisticLengthFluctuation, carStationaryDistance, carReactionTime, numberOfGeneralLanes, generalVPH, hasLeftTurnLanes, hasRightTurnLanes,  hasPedestrianCrossings, crossingPedestrianTime, crossingRequestsPerHour, trafficLightSequence, trafficLightGreenTimes, specialLength, specialSpeed, hasSpecialVehicleLane, specialVehicleRatio, specialVPH):
         self.sideLengthOfJunction = sideLengthOfJunction
         self.lengthOfSim = TrafficControl.convertSecondsToTimeUnits(lengthOfSim)
         TrafficControl.carSpeed = carSpeed * 0.44704 * TrafficControl.simulationTimeUnit # Multiplying by 0.44704 converts mph to meters per second. Multiplying by the simulation time unit means meters per time unit.
@@ -157,7 +157,7 @@ class TrafficControl:
             TrafficControl.transferDistances.append(0.5 * math.pi * ( (self.sideLengthOfJunction / 2) + (laneWidth / 2) ) ) 
 
     # Auxillary function used to calculate transfer distanccfs.
-    def ramanujan_ellipse_perimeter(a, b):
+    def ramanujan_ellipse_perimeter(self, a, b):
         # Eccentricity of the ellipse
         e = math.sqrt(1 - (b**2 / a**2)) if a > b else math.sqrt(1 - (a**2 / b**2))
 
@@ -181,13 +181,24 @@ class TrafficControl:
     def junctionTimeManager(self, env):
         endTime = self.lengthOfSim + env.now
 
+        timeOfLastCrossing = None
+        timeInBetweenCrossings = None
+
         if(self.hasPedestrianCrossings):
-            print(f"Pedestrian Crossing at {env.now}")
             timeOfLastCrossing = env.now
             timeInBetweenCrossings = (TrafficControl.convertSecondsToTimeUnits(60*60) / self.crossingRequestsPerHour) - self.crossingPedestrianTime
             
         while env.now < endTime:
-            print(f"-=-New green light red light sequence at {env.now}")
+            #print(f"-=-New green light red light sequence at {env.now}")
+
+            # Pedestrian Crossing logic goes here
+            if(self.hasPedestrianCrossings):
+                if(env.now - timeOfLastCrossing > timeInBetweenCrossings):
+                    print(f"Pedestrian Crossing Starting at {env.now}")
+                    yield env.timeout(self.crossingPedestrianTime)
+                    print(f"Pedestrian Crossing Ending at {env.now}")
+                    timeOfLastCrossing = env.now
+
             # Cycle through the traffic light sequence suggested by the user
             for direction in self.trafficLightSequence: 
                 # If the time is exceeded, we need to leave this loop and get back to the while loop condition check: break will do this. 
@@ -196,6 +207,7 @@ class TrafficControl:
 
             # Ensure to only give the green light to a direction if there are cars waiting - needs to not be the start time otherwise the whole sim fails due to no cars ever being generated into the queues
                 if (env.now != 0 and self.junctionEntrances[direction].checkIfCarsWaiting() == False):
+                    yield env.timeout(1)
                     continue # Skip this arm of the junction since there are no vehicles waiting.
 
                 remainingTime = endTime - env.now
@@ -210,9 +222,10 @@ class TrafficControl:
                             carGreenTime = remainingTime            
                         self.junctionEntrances[direction].signalGreen()
                         print(f"Signal Green to {direction} for cars at {env.now}")
-                        yield env.timeout(carGreenTime)
+                        yield env.timeout(carGreenTime - 1) # Ensure that the car that spawns after the carGreenTime does not spawn.
                         print(f"Signal Red to {direction} for cars at {env.now}")
                         self.junctionEntrances[direction].signalRed()
+                        yield env.timeout(1) # Ensure we still wait for that 1 that we skipped before to ensure that cars dont spawn.
                         yield env.timeout(self.junctionEntrances[direction].getTimeUntilJunctionClearCars())
 
                         remainingTime = endTime - env.now  # Update remaining time
@@ -224,9 +237,10 @@ class TrafficControl:
                             specialGreenTime = remainingTime  # Adjust to prevent exceeding endTime
                         self.junctionEntrances[direction].signalSpecialGreen()
                         print(f"Signal Green to {direction} for buses/cycles at {env.now}")
-                        yield env.timeout(specialGreenTime)
+                        yield env.timeout(specialGreenTime - 1) # Ensure that the car that spawns after the carGreenTime does not spawn.
                         print(f"Signal Red to {direction} for buses/cycles at {env.now}")
                         self.junctionEntrances[direction].signalSpecialRed()
+                        yield env.timeout(1) # Ensure we still wait for that 1 that we skipped before to ensure that cars dont spawn.
                         yield env.timeout(self.junctionEntrances[direction].getTimeUntilJunctionClearSpecial())
                         remainingTime = endTime - env.now
                         if remainingTime <= 0:
@@ -238,21 +252,14 @@ class TrafficControl:
                             totalGreenTime = remainingTime  # Adjust to prevent exceeding endTime
                         self.junctionEntrances[direction].signalGreen()
                         print(f"Signal Green to {direction} at {env.now}")
-                        yield env.timeout(totalGreenTime)
+                        yield env.timeout(totalGreenTime - 1) # Ensure that the car that spawns after the carGreenTime does not spawn.
                         print(f"Signal Red to {direction} at {env.now}")
                         self.junctionEntrances[direction].signalRed()
+                        yield env.timeout(1) # Ensure we still wait for that 1 that we skipped before to ensure that cars dont spawn.
                         yield env.timeout(self.junctionEntrances[direction].getTimeUntilJunctionClearCars())
                         remainingTime = endTime - env.now
                         if remainingTime <= 0:
                             break
-                        
-            # Pedestrian Crossing logic goes here
-            if(self.hasPedestrianCrossings):
-                if(env.now - timeOfLastCrossing > timeInBetweenCrossings):
-                    print(f"Pedestrian Crossing Starting at {env.now}")
-                    yield env.timeout(self.crossingPedestrianTime)
-                    print(f"Pedestrian Crossing Ending at {env.now}")
-                    timeOfLastCrossing = env.now
 
         # Fetch Results from junction entrances and set them.
 
