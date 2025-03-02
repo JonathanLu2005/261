@@ -6,11 +6,17 @@ Your Models
 
 {% block content %}
 <div class="container mt-5">
-    <!-- Add Model  -->
-    <div class="d-flex justify-content-left mb-3">
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModelModal">
+    <!-- Add Model and Search Bar -->
+    <div class="d-flex align-items-center mb-3">
+        <button class="btn btn-primary me-4" data-bs-toggle="modal" data-bs-target="#addModelModal">
             Add Model
         </button>
+        <input 
+            type="text" 
+            id="searchInput" 
+            class="form-control w-25" 
+            placeholder="Search models by name..." 
+        />
     </div>
 
     <!-- Models Grid -->
@@ -333,6 +339,7 @@ Your Models
 
 {% block scripts %}
 <script src="{{ url_for('static', filename='javascript/addModel.js') }}"></script>
+<script src="{{ url_for('static', filename='javascript/modelSearchBar.js') }}"></script>
 <script src="{{ url_for('static', filename='javascript/modelFolderNavigation.js') }}"></script>
 <script src="{{ url_for('static', filename='javascript/modalModelNavigation.js') }}"></script>
 {% endblock %}

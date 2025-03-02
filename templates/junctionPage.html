@@ -7,11 +7,17 @@ Your Models Junctions
 
 {% block content %}
 <div class="container mt-5">
-    <!-- Add Junction -->
-    <div class="d-flex justify-content-left mb-3">
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addJunctionModal">
+    <!-- Add Junction and Search Bar -->
+    <div class="d-flex align-items-center mb-3">
+        <button class="btn btn-primary me-4" data-bs-toggle="modal" data-bs-target="#addJunctionModal">
             Add Junction
         </button>
+        <input 
+            type="text" 
+            id="searchJunctionInput" 
+            class="form-control w-25" 
+            placeholder="Search junctions by name..." 
+        />
     </div>
 
     <!-- Junctions Grid -->
@@ -19,6 +25,7 @@ Your Models Junctions
         <!-- Junction cards appear here -->
     </div>
 </div>
+
 
 <!-- Modal for adding junction -->
 <div class="modal fade" id="addJunctionModal" tabindex="-1" aria-labelledby="addJunctionModalLabel" aria-hidden="true">
@@ -239,5 +246,6 @@ Your Models Junctions
 <script src="{{ url_for('static', filename='javascript/modalJunctionNavigation.js') }}"></script>
 <script src="{{ url_for('static', filename='javascript/junctionFormSent.js') }}"></script>
 <script src="{{ url_for('static', filename='javascript/addJunctions.js') }}"></script>
+<script src="{{ url_for('static', filename='javascript/junctionSearchBar.js') }}"></script>
 {% endblock %}
 
