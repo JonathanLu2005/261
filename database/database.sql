@@ -3,11 +3,7 @@ CREATE TABLE IF NOT EXISTS modeltrafficflow (
     -- Main model info
     modelid SERIAL PRIMARY KEY,
     modelname VARCHAR(100) UNIQUE NOT NULL,
-
-    -- How long simulation runs for
-    -- side length of junction go here
     simulationtime INTEGER NOT NULL,
-    --SimulationSecondLength FLOAT NOT NULL,
 
     -- Total VPH from each direction
     northboundvphtotal INTEGER NOT NULL,
@@ -37,16 +33,40 @@ CREATE TABLE IF NOT EXISTS modeltrafficflow (
 
     -- Vehicle top speed
     vehicletopspeed INTEGER NOT NULL,
-    -- car length go here
-    -- realistic number of lanes go here
 
     -- Vehicle reaction time and stationary distance
     vehiclereactiontime INTEGER NOT NULL,
     vehiclestationarydistance INTEGER NOT NULL,
 
-    -- special vehicle stuff
-    -- special lenegth, speical speed, special fluctiation
-    -- special vph
+    -- Vehicle length and fluctuation
+    vehiclelength FLOAT NOT NULL,
+    vehiclelengthfluctuation FLOAT NOT NULL,
+
+    -- Buses and cycles info
+    vehicletopspeedspecial INTEGER NOT NULL,
+    vehiclelengthspecial FLOAT NOT NULL, 
+    vehiclelengthfluctuationspecial FLOAT NOT NULL, 
+
+    -- Buses and cycles vph
+    -- Northbound 
+    northboundnorthvphspecial INTEGER NOT NULL,
+    northboundeastvphspecial INTEGER NOT NULL,
+    northboundwestvphspecial INTEGER NOT NULL,
+
+    -- Southbound
+    southboundsouthvphspecial INTEGER NOT NULL,
+    southboundeastvphspecial INTEGER NOT NULL,
+    southboundwestvphspecial INTEGER NOT NULL, 
+
+    -- Eastbound 
+    eastboundeastvphspecial INTEGER NOT NULL,
+    eastboundnorthvphspecial INTEGER NOT NULL,
+    eastboundsouthvphspecial INTEGER NOT NULL,
+
+    -- Westbound 
+    westboundwestvphspecial INTEGER NOT NULL,
+    westboundnorthvphspecial INTEGER NOT NULL,
+    westboundsouthvphspecial INTEGER NOT NULL,
 
     -- Weightings for results
     maximumwaittimeweight FLOAT NOT NULL DEFAULT 0.33,
@@ -63,7 +83,15 @@ CREATE OR REPLACE FUNCTION insertModelTrafficFlow(InputModelName VARCHAR, InputS
                                                 InputWestboundWest INTEGER, InputWestboundNorth INTEGER, InputWestboundSouth INTEGER,
 
                                                 InputVehicleTopSpeed INTEGER, InputVehicleReactionTime INTEGER, InputVehicleStationaryDistance INTEGER,
+                                                InputVehicleLength FLOAT, InputVehicleLengthFluctuation FLOAT, 
+
+                                                InputVehicleTopSpeedSpecial INTEGER, InputVehicleLengthSpecial FLOAT, InputVehicleLengthFluctuationSpecial FLOAT,
                                                
+                                                InputNorthboundNorthSpecial INTEGER, InputNorthboundEastSpecial INTEGER, InputNorthboundWestSpecial INTEGER, 
+                                                InputSouthboundSouthSpecial INTEGER, InputSouthboundEastSpecial INTEGER, InputSouthboundWestSpecial INTEGER,
+                                                InputEastboundEastSpecial INTEGER, InputEastboundNorthSpecial INTEGER, InputEastboundSouthSpecial INTEGER,
+                                                InputWestboundWestSpecial INTEGER, InputWestboundNorthSpecial INTEGER, InputWestboundSouthSpecial INTEGER,
+
                                                 InputMaximumWaitTimeWeight FLOAT, InputAverageWaitTimeWeight FLOAT, InputMaximumQueueLengthWeight FLOAT)
                                                 RETURNS VOID AS $$
 BEGIN
@@ -76,6 +104,14 @@ BEGIN
                                 westboundwestvph, westboundnorthvph, westboundsouthvph,
 
                                 vehicletopspeed, vehiclereactiontime, vehiclestationarydistance,
+                                vehiclelength, vehiclelengthfluctuation,
+
+                                vehicletopspeedspecial, vehiclelengthspecial, vehiclelengthfluctuationspecial,
+
+                                northboundnorthvphspecial, northboundeastvphspecial, northboundwestvphspecial, 
+                                southboundsouthvphspecial, southboundeastvphspecial, southboundwestvphspecial,
+                                eastboundeastvphspecial, eastboundnorthvphspecial, eastboundsouthvphspecial,
+                                westboundwestvphspecial, westboundnorthvphspecial, westboundsouthvphspecial,                                
 
                                 maximumwaittimeweight, averagewaittimeweight, maximumqueuelengthweight)
     VALUES(InputModelName, InputSimulationTime,
@@ -91,6 +127,14 @@ BEGIN
     InputWestboundWest, InputWestboundNorth, InputWestboundSouth,
 
     InputVehicleTopSpeed, InputVehicleReactionTime, InputVehicleStationaryDistance,
+    InputVehicleLength, InputVehicleLengthFluctuation, 
+
+    InputVehicleTopSpeedSpecial, InputVehicleLengthSpecial, InputVehicleLengthFluctuationSpecial,
+
+    InputNorthboundNorthSpecial, InputNorthboundEastSpecial, InputNorthboundWestSpecial, 
+    InputSouthboundSouthSpecial, InputSouthboundEastSpecial, InputSouthboundWestSpecial,
+    InputEastboundEastSpecial, InputEastboundNorthSpecial, InputEastboundSouthSpecial,
+    InputWestboundWestSpecial, InputWestboundNorthSpecial, InputWestboundSouthSpecial,
 
     InputMaximumWaitTimeWeight, InputAverageWaitTimeWeight, InputMaximumQueueLengthWeight);
 END;
@@ -112,6 +156,7 @@ CREATE TABLE IF NOT EXISTS junctionconfigurations (
 
     -- Number of lanes
     numberoflanes INTEGER NOT NULL,
+    junctionsidelength INTEGER NOT NULL,
 
     -- Pedestrian crossing information
     pedestriancrossingadded BOOLEAN NOT NULL DEFAULT FALSE,
@@ -130,31 +175,39 @@ CREATE TABLE IF NOT EXISTS junctionconfigurations (
     westboundgreenlightduration INTEGER NOT NULL,
     eastboundgreenlightduration INTEGER NOT NULL,
 
-    -- has left or right turn lane go here
-
-    -- special vehiche lane, special vehicle ratio
-
+    -- Other lanes
+    leftturnlane BOOLEAN NOT NULL DEFAULT FALSE,
+    rightturnlane BOOLEAN NOT NULL DEFAULT FALSE,
+    speciallane BOOLEAN NOT NULL DEFAULT FALSE,
+    speciallaneratio FLOAT NOT NULL DEFAULT 0,
+  
     -- Reference to model for simulation details
     modelid INTEGER NOT NULL REFERENCES modeltrafficflow(modelid)
 );
 
 -- Junction - Add data
-CREATE OR REPLACE FUNCTION insertJunctionConfigurations(InputJunctionName VARCHAR, InputNumberOfLanes INTEGER,
+CREATE OR REPLACE FUNCTION insertJunctionConfigurations(InputJunctionName VARCHAR, InputNumberOfLanes INTEGER, InputJunctionSideLength INTEGER,
                                                         InputPedestrianCrossingAdded BOOLEAN, InputPedestrianCrossingDuration INTEGER, InputPedestrianRequestsPerHour INTEGER,
                                                         InputNorthboundOrder INTEGER, InputSouthboundOrder INTEGER, InputEastboundOrder INTEGER, InputWestboundOrder INTEGER,
                                                         InputNorthboundGreenLightDuration INTEGER, InputSouthboundGreenLightDuration INTEGER, InputWestboundGreenLightDuration INTEGER, InputEastboundGreenLightDuration INTEGER,
+                                                        InputLeftTurnLane BOOLEAN, InputRightTurnLane BOOLEAN,
+                                                        InputSpecialLane BOOLEAN, InputSpecialLaneRatio FLOAT,
                                                         InputModelID INTEGER)
                                                         RETURNS VOID AS $$
 BEGIN 
-    INSERT INTO junctionconfigurations(junctionname, numberoflanes,
+    INSERT INTO junctionconfigurations(junctionname, numberoflanes, junctionsidelength,
                                         pedestriancrossingadded, pedestriancrossingduration, pedestriancrossingrequestsperhour,
                                         northboundorder, southboundorder, eastboundorder, westboundorder,
                                         northboundgreenlightduration, southboundgreenlightduration, westboundgreenlightduration, eastboundgreenlightduration,
+                                        leftturnlane, rightturnlane,
+                                        speciallane, speciallaneratio,
                                         modelid) 
-    VALUES(InputJunctionName, InputNumberOfLanes,
+    VALUES(InputJunctionName, InputNumberOfLanes, InputJunctionSideLength,
     InputPedestrianCrossingAdded, InputPedestrianCrossingDuration, InputPedestrianRequestsPerHour,
     InputNorthboundOrder, InputSouthboundOrder, InputEastboundOrder, InputWestboundOrder,
     InputNorthboundGreenLightDuration, InputSouthboundGreenLightDuration, InputEastboundGreenLightDuration, InputWestboundGreenLightDuration,
+    InputLeftTurnLane, InputRightTurnLane,
+    InputSpecialLane, InputSpecialLaneRatio,
     InputModelID);
 END;
 $$ LANGUAGE plpgsql;
@@ -179,6 +232,12 @@ RETURNS TABLE (modelid INTEGER, simulationtime INTEGER,
             eastboundeastvph INTEGER, eastboundnorthvph INTEGER, eastboundsouthvph INTEGER,
             westboundwestvph INTEGER, westboundnorthvph INTEGER, westboundsouthvph INTEGER,
             vehicletopspeed INTEGER, vehiclereactiontime INTEGER, vehiclestationarydistance INTEGER,
+            vehiclelength FLOAT, vehiclelengthfluctuation FLOAT, 
+            vehicletopspeedspecial INTEGER, vehiclelengthspecial FLOAT, vehiclelengthfluctuationspecial FLOAT,
+            northboundnorthvphspecial INTEGER, northboundeastvphspecial INTEGER, northboundwestvphspecial INTEGER,
+            southboundsouthvphspecial INTEGER, southboundeastvphspecial INTEGER, southboundwestvphspecial INTEGER,
+            eastboundeastvphspecial INTEGER, eastboundnorthvphspecial INTEGER, eastboundsouthvphspecial INTEGER, 
+            westboundwestvphspecial INTEGER, westboundnorthvphspecial INTEGER, westboundsouthvphspecial INTEGER,
             maximumwaittimeweight FLOAT, averagewaittimeweight FLOAT, maximumqueuelengthweight FLOAT)
             AS $$
 BEGIN
@@ -190,6 +249,12 @@ BEGIN
         modeltrafficflow.eastboundeastvph, modeltrafficflow.eastboundnorthvph, modeltrafficflow.eastboundsouthvph,
         modeltrafficflow.westboundwestvph, modeltrafficflow.westboundnorthvph, modeltrafficflow.westboundsouthvph,
         modeltrafficflow.vehicletopspeed, modeltrafficflow.vehiclereactiontime, modeltrafficflow.vehiclestationarydistance,
+        modeltrafficflow.vehiclelength, modeltrafficflow.vehiclelengthfluctuation,
+        modeltrafficflow.vehicletopspeedspecial, modeltrafficflow.vehiclelengthspecial, modeltrafficflow.vehiclelengthfluctuationspecial,
+        modeltrafficflow.northboundnorthvphspecial, modeltrafficflow.northboundeastvphspecial, modeltrafficflow.northboundwestvphspecial,
+        modeltrafficflow.southboundsouthvphspecial, modeltrafficflow.southboundeastvphspecial, modeltrafficflow.southboundwestvphspecial,
+        modeltrafficflow.eastboundeastvphspecial, modeltrafficflow.eastboundnorthvphspecial, modeltrafficflow.eastboundsouthvphspecial,
+        modeltrafficflow.westboundwestvphspecial, modeltrafficflow.westboundnorthvphspecial, modeltrafficflow.westboundsouthvphspecial,
         modeltrafficflow.maximumwaittimeweight, modeltrafficflow.averagewaittimeweight, modeltrafficflow.maximumqueuelengthweight
     FROM modeltrafficflow 
     WHERE modeltrafficflow.modelid = inputmodelid;

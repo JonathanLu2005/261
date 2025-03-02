@@ -72,6 +72,12 @@ def insertModelTrafficFlowData(InputModelName, InputSimulationTime,
                             InputEastboundEast, InputEastboundNorth, InputEastboundSouth,
                             InputWestboundWest, InputWestboundNorth, InputWestboundSouth,
                             InputVehicleTopSpeed, InputVehicleReactionTime, InputVehicleStationaryDistance,
+                            InputVehicleLength, InputVehicleLengthFluctuation, 
+                            InputVehicleTopSpeedSpecial, InputVehicleLengthSpecial, InputVehicleLengthFluctuationSpecial,
+                            InputNorthboundNorthSpecial, InputNorthboundEastSpecial, InputNorthboundWestSpecial, 
+                            InputSouthboundSouthSpecial, InputSouthboundEastSpecial, InputSouthboundWestSpecial,
+                            InputEastboundEastSpecial, InputEastboundNorthSpecial, InputEastboundSouthSpecial,
+                            InputWestboundWestSpecial, InputWestboundNorthSpecial, InputWestboundSouthSpecial,
                             InputMaximumWaitTimeWeight, InputAverageWaitTimeWeight, InputMaximumQueueLengthWeight):
     connection, cursor = getDatabaseConnection()
 
@@ -87,6 +93,12 @@ def insertModelTrafficFlowData(InputModelName, InputSimulationTime,
             %s, %s, %s,
             %s, %s, %s,
             %s, %s, %s,
+            %s, %s, 
+            %s, %s, %s,
+            %s, %s, %s,
+            %s, %s, %s,
+            %s, %s, %s,
+            %s, %s, %s,          
             %s, %s, %s)
             """, (
             InputModelName, InputSimulationTime,
@@ -95,6 +107,12 @@ def insertModelTrafficFlowData(InputModelName, InputSimulationTime,
             InputEastboundEast, InputEastboundNorth, InputEastboundSouth,
             InputWestboundWest, InputWestboundNorth, InputWestboundSouth,
             InputVehicleTopSpeed, InputVehicleReactionTime, InputVehicleStationaryDistance,
+            InputVehicleLength, InputVehicleLengthFluctuation, 
+            InputVehicleTopSpeedSpecial, InputVehicleLengthSpecial, InputVehicleLengthFluctuationSpecial,
+            InputNorthboundNorthSpecial, InputNorthboundEastSpecial, InputNorthboundWestSpecial, 
+            InputSouthboundSouthSpecial, InputSouthboundEastSpecial, InputSouthboundWestSpecial,
+            InputEastboundEastSpecial, InputEastboundNorthSpecial, InputEastboundSouthSpecial,
+            InputWestboundWestSpecial, InputWestboundNorthSpecial, InputWestboundSouthSpecial,
             InputMaximumWaitTimeWeight, InputAverageWaitTimeWeight, InputMaximumQueueLengthWeight
         ))
 
@@ -126,10 +144,12 @@ def retrieveAllModelNames():
         closeDatabaseConnection(connection, cursor)
 
 # Insert junction configurations data
-def insertJunctionConfigurationsData(InputJunctionName, InputNumberOfLanes,
+def insertJunctionConfigurationsData(InputJunctionName, InputNumberOfLanes, InputJunctionSideLength,
                                      InputPedestrianCrossingAdded, InputPedestrianCrossingDuration, InputPedestrianRequestsPerHour,
                                      InputNorthboundOrder, InputSouthboundOrder, InputEastboundOrder, InputWestboundOrder,
                                      InputNorthboundGreenLightDuration, InputSouthboundGreenLightDuration, InputWestboundGreenLightDuration, InputEastboundGreenLightDuration,
+                                     InputLeftTurnLane, InputRightTurnLane,
+                                     InputSpecialLane, InputSpecialLaneRatio,
                                      InputModelID):
     connection, cursor = getDatabaseConnection()
 
@@ -139,16 +159,20 @@ def insertJunctionConfigurationsData(InputJunctionName, InputNumberOfLanes,
     
     try:
         cursor.execute("""
-            SELECT insertJunctionConfigurations(%s, %s,
+            SELECT insertJunctionConfigurations(%s, %s, %s,
             %s, %s, %s,
             %s, %s, %s, %s,
             %s, %s, %s, %s,
+            %s, %s,
+            %s, %s,
             %s)
         """, (
-            InputJunctionName, InputNumberOfLanes,
+            InputJunctionName, InputNumberOfLanes, InputJunctionSideLength,
             InputPedestrianCrossingAdded, InputPedestrianCrossingDuration, InputPedestrianRequestsPerHour,
             InputNorthboundOrder, InputSouthboundOrder, InputEastboundOrder, InputWestboundOrder,
             InputNorthboundGreenLightDuration, InputSouthboundGreenLightDuration, InputWestboundGreenLightDuration, InputEastboundGreenLightDuration,
+            InputLeftTurnLane, InputRightTurnLane,
+            InputSpecialLane, InputSpecialLaneRatio,
             InputModelID
         ))
 
@@ -195,7 +219,7 @@ def retrieveSimulationData(InputModelID):
         cursor.execute("SELECT * FROM dataForSimulation(%s);", (InputModelID,))  
 
         modelSimulationData = cursor.fetchall()
-
+        
         modelKeys = [
             "ModelID", "SimulationTime",
             "NorthboundVphTotal", "SouthboundVphTotal", "EastboundVphTotal", "WestboundVphTotal",
@@ -204,6 +228,12 @@ def retrieveSimulationData(InputModelID):
             "EastboundEastVph", "EastboundNorthVph", "EastboundSouthVph",
             "WestboundWestVph", "WestboundNorthVph", "WestboundSouthVph",
             "VehicleTopSpeed", "VehicleReactionTime", "VehicleStationaryDistance",
+            "VehicleLength", "VehiceLengthFluctuation",
+            "VehicleTopSpeedSpecial", "VehicleLengthSpecial", "VehicleLengthFluctuationSpecial",
+            "NorthboundNorthVphSpecial", "NorthboundEastVphSpecial", "NorthboundWestVphSpecial",
+            "SouthboundSouthVphSpecial", "SouthboundEastVphSpecial", "SouthboundWestVphSpecial",
+            "EastboundEastVphSpecial", "EastboundNorthVphSpecial", "EastboundSouthVphSpecial",
+            "WestboundWestVphSpecial", "WestboundNorthVphSpecial", "WestboundSouthVphSpecial",
             "MaximumWaitTimeWeight", "AverageWaitTimeWeight", "MaximumQueueLengthWeight"
         ]
 

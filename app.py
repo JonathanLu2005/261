@@ -35,15 +35,22 @@ def getAllModels():
 def addModel():
     modelData = request.json 
 
+    print(modelData)
+
     if not modelData or 'name' not in modelData: 
         return jsonify({"Error": "Invalid Data"}), 400 
     
     ModelInformation = []
 
+    floatKeys = ["maxWaitTimeWeight", "averageWaitTimeWeight", "maxQueueLengthWeight",
+                "vehicleLength", "vehicleLengthFluctuation",
+                "vehicleLengthSpecial", "vehicleLengthFluctuationSpecial"
+                ]
+
     for key, value in modelData.items():
         if key == "name":
             ModelInformation.append(value)
-        elif (key == "maxWaitTimeWeight") or (key == "averageWaitTimeWeight") or (key == "maxQueueLengthWeight"):
+        elif key in floatKeys:
             ModelInformation.append(float(value))
         else:
             ModelInformation.append(int(value))
@@ -79,6 +86,8 @@ def getAllJunctions():
 @app.route("/addJunction", methods=["POST"])
 def addJunction():
     junctionData = request.json
+
+    print(junctionData)
     print("Received junction data:", junctionData)  # Add this line for debugging
 
     if not junctionData:
@@ -87,18 +96,27 @@ def addJunction():
 
     junctionInformation = []
 
-    if junctionData["pedestrianCrossingAdded"].lower() == "yes":
-        junctionData["pedestrianCrossingAdded"] = True 
-    else:
-        junctionData["pedestrianCrossingAdded"] = False
+    convertToBoolean = ["pedestrianCrossingAdded", "leftTurnLane", "rightTurnLane", "specialLane"]
+
+    for configuration in convertToBoolean:
+        if junctionData[configuration].lower() == "yes":
+            junctionData[configuration] = True 
+        else:
+            junctionData[configuration] = False 
+
+            if configuration == "specialLane":
+                junctionData["specialLaneRatio"] = 0
+
 
 
     for key, value in junctionData.items():
-        if key == "junctionName" or key == "pedestrianCrossingAdded":
+        if key in ["junctionName", "pedestrianCrossingAdded", "leftTurnLane", "rightTurnLane", "specialLane"]:
             junctionInformation.append(value)
         elif key in ["pedestrianCrossingDuration", "pedestrianCrossingRequests"] and value == "":
             junctionInformation.append(0)
-            junctionData[key] = None
+            junctionData[key] = 0 
+        elif key == "specialLaneRatio":
+            junctionInformation.append(float(value))
         else:
             junctionInformation.append(int(value))
 
@@ -109,24 +127,30 @@ def addJunction():
     modelId = request.args.get("modelId") 
     modelData = retrieveSimulationData(modelId)
 
+    class Direction(IntEnum):
+        North = junctionData["northboundOrder"], 
+        East = junctionData["eastboundOrder"], 
+        South = junctionData["southboundOrder"], 
+        West = junctionData["westboundOrder"]
+
     """
-    simulationResults = runModel(sideLengthOfJunction,
-        modelData["SimulationTime"], modelData["VehicleTopSpeed"], carLength, realisticLengthFluctuation,
+    simulationResults = runModel(junctionData["junctionSideLength"],
+        modelData["SimulationTime"], modelData["VehicleTopSpeed"], modelData["VehicleLength"], modelData["VehiceLengthFluctuation"],
         modelData["VehicleStationaryDistance"], modelData["VehicleReactionTime"],
-        numberofgenerallanes, 
+        junctionData["junctionLanes"], 
         [
             [modelData["NorthboundNorthVph"], modelData["NorthboundEastVph"], modelData["NorthboundWestVph"]],
             [modelData["EastboundEastVph"], modelData["EastboundSouthVph"], modelData["EastboundNorthVph"]],
             [modelData["SouthboundSouthVph"], modelData["SouthboundWestVph"], modelData["SouthboundEastVph"]],
             [modelData["WestboundWestVph"], modelData["WestboundNorthVph"], modelData["WestboundSouthVph"]]
         ],
-        hasleftturnlanes, hasrightturnlanes,
+        junctionData["leftTurnLane"], junctionData["rightTurnLane"],
         junctionData["pedestrianCrossingAdded"], junctionData["pedestrianCrossingDuration"], junctionData["pedestrianCrossingRequests"],
         [
-            junctionData["northboundOrder"], 
-            junctionData["eastboundOrder"], 
-            junctionData["southboundOrder"], 
-            junctionData["westboundOrder"]
+            Direction.North,
+            Direction.East,
+            Direction.South,
+            Direction.West
         ],
         [
             junctionData["northboundDuration"], 
@@ -134,7 +158,15 @@ def addJunction():
             junctionData["southboundDuration"], 
             junctionData["westboundDuration"]
         ],
-        specialLength, specialSpeed, specialRealisticLengthFluctuation, hasSpecialVehicleLane, specialVehicleRatio, specialVPH
+        modelData["VehicleLengthSpecial"], modelData["VehicleTopSpeedSpecial"], 
+        modelData["VehicleLengthFluctuationSpecial"], junctionData["specialLane"], 
+        junctionData["specialLaneRatio"],
+        [
+            [modelData["NorthboundNorthVphSpecial"], modelData["NorthboundEastVphSpecial"], modelData["NorthboundWestVphSpecial"]],
+            [modelData["EastboundEastVphSpecial"], modelData["EastboundSouthVphSpecial"], modelData["EastboundNorthVphSpecial"]],
+            [modelData["SouthboundSouthVphSpecial"], modelData["SouthboundWestVphSpecial"], modelData["SouthboundEastVphSpecial"]],
+            [modelData["WestboundWestVphSpecial"], modelData["WestboundNorthVphSpecial"], modelData["WestboundSouthVphSpecial"]]
+        ],
     )
 
     # insert simulation results - get results from above and store it for visualisations section

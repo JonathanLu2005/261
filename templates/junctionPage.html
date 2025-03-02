@@ -36,13 +36,18 @@ Your Models Junctions
                 <div class="modal-body" style="background-color: #DEF2F1">
                     <!-- Step 1: Junction Name and Lanes -->
                     <div class="step" id="step1">
+                        <p>Please provide the simulation data</p>
                         <div class="mb-3">
                             <label for="junctionName" class="form-label">Simulation Name</label>
-                            <input type="text" class="form-control" id="junctionName" name="junctionName" required>
+                            <input type="text" class="form-control" id="junctionName" name="junctionName" placeholder="Simulation Name" required>
                         </div>
                         <div class="mb-3">
                             <label for="junctionLanes" class="form-label">Number of Lanes</label>
-                            <input type="number" class="form-control" id="junctionLanes" name="junctionLanes" required>
+                            <input type="number" class="form-control" id="junctionLanes" name="junctionLanes" placeholder="Number of Lanes" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="junctionSideLength" class="form-label">Junction's Side Length</label>
+                            <input type="number" class="form-control" id="junctionSideLength" name="junctionSideLength" placeholder="Junction Side Length" required>
                         </div>
                     </div>
 
@@ -83,6 +88,7 @@ Your Models Junctions
 
                     <!-- Step 3: Adding directions order -->
                     <div class="step d-none" id="step3">
+                        <p>Please provide the traffic light ordering from each 4 directions</p>
                         <div class="mb-3">
                             <label for="northboundOrder" class="form-label">
                                 Enter the Northbound order
@@ -114,6 +120,7 @@ Your Models Junctions
 
                     <!-- Step 4: Adding directions duration -->
                     <div class="step d-none" id="step4">
+                        <p>Please provide the green traffic light duration for each 4 directions</p>
                         <div class="mb-3">
                             <label for="northboundDuration" class="form-label">
                                 Enter the Northbound Duration
@@ -142,7 +149,77 @@ Your Models Junctions
                             <input type="number" class="form-control" id="westboundDuration" name="westboundDuration" placeholder="Westbound Duration" required>
                         </div>
                     </div>
+
+                    <!-- Step 5: Adding different lanes -->
+                    <div class="step d-none" id="step5">
+                        <!-- left turn lane -->
+                        <div class="mb-3">
+                            <label class="form-label" for="leftTurnLane">
+                                Would you like to include a left turn lane?
+                            </label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="leftTurnLane" id="leftTurnLaneYes" value="yes" checked>
+                                <label class="form-check-label" for="leftTurnLaneYes">
+                                    Yes
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="leftTurnLane" id="leftTurnLaneNo" value="no">
+                                <label class="form-check-label" for="leftTurnLaneNo">
+                                    No
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- right turn lane -->
+                        <div class="mb-3">
+                            <label class="form-label" for="rightTurnLane">
+                                Would you like to include a right turn lane?
+                            </label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="rightTurnLane" id="rightTurnLaneYes" value="yes" checked>
+                                <label class="form-check-label" for="rightTurnLaneYes">
+                                    Yes
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="rightTurnLane" id="rightTurnLaneNo" value="no">
+                                <label class="form-check-label" for="rightTurnLaneNo">
+                                    No
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- bus/cycle lane -->
+                        <div class="mb-3">
+                            <label class="form-label" for="specialLane">
+                                Would you like to include a Bus/Cycle lane?
+                            </label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="specialLane" id="specialLaneYes" value="yes" checked>
+                                <label class="form-check-label" for="specialLaneYes">
+                                    Yes
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="specialLane" id="specialLaneNo" value="no">
+                                <label class="form-check-label" for="specialLaneNo">
+                                    No
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- special lane ratio -->
+                        <div class="mb-3">
+                            <label for="specialLaneRatio" class="form-label">
+                                Please enter the Bus/Cycle lane ratio
+                            </label>
+                            <input type="number" step="0.01" class="form-control" id="specialLaneRatio" name="specialLaneRatio" placeholder="Special Lane Ratio">
+                        </div>
+                    </div>
                 </div>
+
+
 
                 <!-- Modal Footer -->
                 <div class="modal-footer" style="background-color: #2B7A78">

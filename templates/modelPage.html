@@ -141,9 +141,9 @@ Your Models
                         </div>
                     </div>
 
-                    <!-- Step 6: Vehicle Info -->
+                    <!-- Step 6: Vehicle Info 1 -->
                     <div class="step d-none" id="step6">
-                        <p>Please provide information about the Vehicles</p>
+                        <p>Please provide information about the Vehicles Speed, Reaction Time, and Distance</p>
                         <div class="mb-3">
                             <label for="vehicleTopSpeed" class="form-label">
                                 Vehicle's Top Speed
@@ -164,8 +164,144 @@ Your Models
                         </div>
                     </div>
 
-                    <!-- Step 7: Weighting -->
+                    <!-- Step 7: Vehicle Info 2 -->
                     <div class="step d-none" id="step7">
+                        <p>Please provide information about the Vehicles Length and Length Fluctuation</p>
+                        <div class="mb-3">
+                            <label for="vehicleLength" class="form-label">
+                                Vehicle's Length
+                            </label>
+                            <input type="number" class="form-control" id="vehicleLength" name="vehicleLength" placeholder="Vehicle's Length" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="vehicleLengthFluctuation" class="form-label">
+                                Vehicle's Length Fluctuation
+                            </label>
+                            <input type="number" class="form-control" id="vehicleLengthFluctuation" name="vehicleLengthFluctuation" placeholder="Vehicle's Length Fluctuation" required>
+                        </div>                        
+                    </div>
+
+                    <!-- Step 8: Special Vehicle Info -->
+                    <div class="step d-none" id="step8">
+                        <p>If added, please provide information about Buses/Cycles</p>
+
+                        <div class="mb-3">
+                            <label for="vehicleTopSpeedSpecial" class="form-label">
+                                Buses/Cycles Top Speed
+                            </label>
+                            <input type="number" class="form-control" id="vehicleTopSpeedSpecial" name="vehicleTopSpeedSpecial" placeholder="Vehicle Top Speed" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="vehicleLengthSpecial" class="form-label">
+                                Buses/Cycles Length
+                            </label>
+                            <input type="number" class="form-control" id="vehicleLengthSpecial" name="vehicleLengthSpecial" placeholder="Vehicle's Length" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="vehicleLengthFluctuationSpecial" class="form-label">
+                                Buses/Cycles Length Fluctuation
+                            </label>
+                            <input type="number" class="form-control" id="vehicleLengthFluctuationSpecial" name="vehicleLengthFluctuationSpecial" placeholder="Vehicle's Length Fluctuation" required>
+                        </div>                        
+                    </div>
+
+                    <!-- Step 9: Special Northbound -->
+                    <div class="step d-none" id="step9">
+                        <p>If added, please provide buses/cycles heading Northbound</p>
+                        <div class="mb-3">
+                            <label for="northBoundNorthSpecial" class="form-label">
+                                Buses/Cycles heading North
+                            </label>
+                            <input type="number" class="form-control" id="northBoundNorthSpecial" name="northBoundNorthSpecial" placeholder="Northbound North" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="northBoundEastSpecial" class="form-label">
+                                Buses/Cycles turning East
+                            </label>
+                            <input type="number" class="form-control" id="northBoundEastSpecial" name="northBoundEastSpecial" placeholder="Northbound East" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="northBoundWestSpecial" class="form-label">
+                                Buses/Cycles turning West
+                            </label>
+                            <input type="number" class="form-control" id="northBoundWestSpecial" name="northBoundWestSpecial" placeholder="Northbound West" required>
+                        </div>
+                    </div>
+
+                    <!-- Step 10: Southbound -->
+                    <div class="step d-none" id="step10">
+                        <p>If added, please provide buses/cycles heading Southbound</p>
+                        <div class="mb-3">
+                            <label for="southBoundSouthSpecial" class="form-label">
+                                Buses/Cycles heading South
+                            </label>
+                            <input type="number" class="form-control" id="southBoundSouthSpecial" name="southBoundSouthSpecial" placeholder="Southbound South" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="southBoundEastSpecial" class="form-label">
+                                Buses/Cycles turning East
+                            </label>
+                            <input type="number" class="form-control" id="southBoundEastSpecial" name="southBoundEastSpecial" placeholder="Southbound East" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="southBoundWestSpecial" class="form-label">
+                                Buses/Cycles turning West
+                            </label>
+                            <input type="number" class="form-control" id="southBoundWestSpecial" name="southBoundWestSpecial" placeholder="Southbound West" required>
+                        </div>
+                    </div>
+
+                    <!-- Step 11: Westbound -->
+                    <div class="step d-none" id="step11">
+                        <p>If added, please provide buses/cycles heading Westbound</p>
+                        <div class="mb-3">
+                            <label for="westBoundWestSpecial" class="form-label">
+                                Buses/Cycles heading West
+                            </label>
+                            <input type="number" class="form-control" id="westBoundWestSpecial" name="westBoundWestSpecial" placeholder="Westbound West" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="westBoundNorthSpecial" class="form-label">
+                                Buses/Cycles turning North
+                            </label>
+                            <input type="number" class="form-control" id="westBoundNorthSpecial" name="westBoundNorthSpecial" placeholder="Westbound North" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="westBoundSouthSpecial" class="form-label">
+                                Buses/Cycles turning South
+                            </label>
+                            <input type="number" class="form-control" id="westBoundSouthSpecial" name="westBoundSouthSpecial" placeholder="Westbound South" required>
+                        </div>
+                    </div>
+
+                    <!-- Step 12: Eastbound -->
+                    <div class="step d-none" id="step12">
+                        <p>If added, please provide buses/cycles heading Eastbound</p>
+                        <div class="mb-3">
+                            <label for="eastBoundEastSpecial" class="form-label">
+                                Buses/Cycles heading East
+                            </label>
+                            <input type="number" class="form-control" id="eastBoundEastSpecial" name="eastBoundEastSpecial" placeholder="Eastbound East" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="eastBoundNorthSpecial" class="form-label">
+                                Buses/Cycles turning North
+                            </label>
+                            <input type="number" class="form-control" id="eastBoundNorthSpecial" name="eastBoundNorthSpecial" placeholder="Eastbound North" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="eastBoundSouthSpecial" class="form-label">
+                                Buses/Cycles turning South
+                            </label>
+                            <input type="number" class="form-control" id="eastBoundSouthSpecial" name="eastBoundSouthSpecial" placeholder="Eastbound South" required>
+                        </div>
+                    </div>
+
+                    <!-- Step 13: Weighting -->
+                    <div class="step d-none" id="step13">
                         <p>
                             The junctions will be ranked by Maximum Wait Time, Average Wait Time, and Maximum Queue Length.
                             Please provide the weighting for each factor (0 ~ 1).
