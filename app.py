@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for
+from enum import IntEnum
 from database.database import (
     insertModelTrafficFlowData,
     retrieveAllModelNames,
