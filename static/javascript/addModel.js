@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const modelCard = document.createElement("div");
         modelCard.className = "col";
         modelCard.innerHTML = `
-            <div class="card h-100 model-card" data-id="${model.id}" data-name="${model.name}">
+            <div class="card h-100 model-card" data-id="${model.id}" data-name="${model.name}" style="outline: 2px solid #2B7A78; background-color: #DEF2F1;">
                 <div class="card-body">
                     <h5 class="card-title">${model.name}</h5>
                 </div>

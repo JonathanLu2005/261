@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const junctionCard = document.createElement("div");
             junctionCard.className = "col";
             junctionCard.innerHTML = `
-                <div class="card h-100">
+                <div class="card h-100" style="outline: 2px solid #2B7A78; background-color: #DEF2F1;">
                     <div class="card-body">
                         <h5 class="card-title">${junction.junctionname}</h5>
                     </div>
