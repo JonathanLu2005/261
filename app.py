@@ -110,31 +110,32 @@ def addJunction():
     modelData = retrieveSimulationData(modelId)
 
     """
-    # run simulation - this will add the parameters to let the simulation run
-    simulationResults = runModel(20,
-            modelData["SimulationTime"], 1,
-            modelData["VehicleTopSpeed"], 5, modelData["VehicleStationaryDistance"], modelData["VehicleReactionTime"],
-            junctionData["junctionLanes"],
-            [
-                [modelData["NorthboundNorthVph"], modelData["NorthboundEastVph"], modelData["NorthboundWestVph"]],
-                [modelData["EastboundEastVph"], modelData["EastboundSouthVph"], modelData["EastboundNorthVph"]],
-                [modelData["SouthboundSouthVph"], modelData["SouthboundWestVph"], modelData["SouthboundEastVph"]],
-                [modelData["WestboundWestVph"], modelData["WestboundNorthVph"], modelData["WestboundSouthVph"]]
-            ],
-            False, False,
-            junctionData["pedestrianCrossingAdded"], junctionData["pedestrianCrossingDuration"], junctionData["pedestrianCrossingRequests"],
-            [
+    simulationResults = runModel(sideLengthOfJunction,
+        modelData["SimulationTime"], modelData["VehicleTopSpeed"], carLength, realisticLengthFluctuation,
+        modelData["VehicleStationaryDistance"], modelData["VehicleReactionTime"],
+        numberofgenerallanes, 
+        [
+            [modelData["NorthboundNorthVph"], modelData["NorthboundEastVph"], modelData["NorthboundWestVph"]],
+            [modelData["EastboundEastVph"], modelData["EastboundSouthVph"], modelData["EastboundNorthVph"]],
+            [modelData["SouthboundSouthVph"], modelData["SouthboundWestVph"], modelData["SouthboundEastVph"]],
+            [modelData["WestboundWestVph"], modelData["WestboundNorthVph"], modelData["WestboundSouthVph"]]
+        ],
+        hasleftturnlanes, hasrightturnlanes,
+        junctionData["pedestrianCrossingAdded"], junctionData["pedestrianCrossingDuration"], junctionData["pedestrianCrossingRequests"],
+        [
             junctionData["northboundOrder"], 
             junctionData["eastboundOrder"], 
             junctionData["southboundOrder"], 
             junctionData["westboundOrder"]
-            ],
-            [
+        ],
+        [
             junctionData["northboundDuration"], 
             junctionData["eastboundDuration"], 
             junctionData["southboundDuration"], 
             junctionData["westboundDuration"]
-            ])
+        ],
+        specialLength, specialSpeed, specialRealisticLengthFluctuation, hasSpecialVehicleLane, specialVehicleRatio, specialVPH
+    )
 
     # insert simulation results - get results from above and store it for visualisations section
     insertJunctionPerformance(

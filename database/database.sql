@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS modeltrafficflow (
     modelname VARCHAR(100) UNIQUE NOT NULL,
 
     -- How long simulation runs for
+    -- side length of junction go here
     simulationtime INTEGER NOT NULL,
     --SimulationSecondLength FLOAT NOT NULL,
 
@@ -36,10 +37,16 @@ CREATE TABLE IF NOT EXISTS modeltrafficflow (
 
     -- Vehicle top speed
     vehicletopspeed INTEGER NOT NULL,
+    -- car length go here
+    -- realistic number of lanes go here
 
     -- Vehicle reaction time and stationary distance
     vehiclereactiontime INTEGER NOT NULL,
     vehiclestationarydistance INTEGER NOT NULL,
+
+    -- special vehicle stuff
+    -- special lenegth, speical speed, special fluctiation
+    -- special vph
 
     -- Weightings for results
     maximumwaittimeweight FLOAT NOT NULL DEFAULT 0.33,
@@ -122,6 +129,10 @@ CREATE TABLE IF NOT EXISTS junctionconfigurations (
     southboundgreenlightduration INTEGER NOT NULL,
     westboundgreenlightduration INTEGER NOT NULL,
     eastboundgreenlightduration INTEGER NOT NULL,
+
+    -- has left or right turn lane go here
+
+    -- special vehiche lane, special vehicle ratio
 
     -- Reference to model for simulation details
     modelid INTEGER NOT NULL REFERENCES modeltrafficflow(modelid)
