@@ -105,5 +105,6 @@ def test_trafficcontrol_time_conversion():
     print_green("test_trafficcontrol_time_conversion: Test Passed")
 
 
-test_trafficcontrol_initialization()
+# Uncomment if running .py file independently
+#test_trafficcontrol_initialization()
 test_trafficcontrol_time_conversion()
