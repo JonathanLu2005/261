@@ -10,7 +10,8 @@ from database.database import (
     insertUserDetails,
     getUserID
 )
-
+from model.TrafficControl import TrafficControl, Direction
+import simpy
 from model.Results import ( 
     runModel
 )
