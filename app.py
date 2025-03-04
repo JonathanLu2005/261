@@ -11,6 +11,10 @@ from database.database import (
     getUserID
 )
 
+from model.Results import ( 
+    runModel
+)
+
 currentUserID = None
 
 # Create web app
@@ -139,7 +143,6 @@ def addJunction():
         South = junctionData["southboundOrder"], 
         West = junctionData["westboundOrder"]
 
-    """
     simulationResults = runModel(junctionData["junctionSideLength"],
         modelData["SimulationTime"], modelData["VehicleTopSpeed"], modelData["VehicleLength"], modelData["VehiceLengthFluctuation"],
         modelData["VehicleStationaryDistance"], modelData["VehicleReactionTime"],
@@ -183,7 +186,6 @@ def addJunction():
         simulationResults.westMaxWaitingTime, simulationResults.westMaxQueueLength, simulationResults.westAvgWaitingTime, simulationResults.westTotalVehiclesPassed,
         junctionData["junctionid"]
     )
-    """
 
     return getAllJunctions()
 
