@@ -10,7 +10,7 @@ def print_green(message):
     """Helper function to print text in green."""
     print(f"\033[92m{message}\033[0m")
 
-def test_trafficcontrol_initialization():
+def setup_traffic_control():
     side_length = 0.1
     sim_length = 360
     sim_time_unit = 0.01 # from TrafficControl - NOT PASSED AS PARAMETER
@@ -48,7 +48,7 @@ def test_trafficcontrol_initialization():
 
 def test_lane_initialization():
     # Initialize TrafficControl
-    test_trafficcontrol_initialization()
+    setup_traffic_control()
 
     # test initialization of Lane class
     junction_entrance = Direction.North
@@ -73,7 +73,7 @@ def test_lane_initialization():
 
 
 def test_lane_add_car():
-    test_trafficcontrol_initialization()
+    setup_traffic_control()
 
     # adding car to lane
     env = Environment()
@@ -103,7 +103,7 @@ def test_lane_add_car():
 
 
 def test_lane_leading_car_entering_junction():
-    test_trafficcontrol_initialization()
+    setup_traffic_control()
 
     # test leading car entering the junction
     env = Environment()
@@ -138,7 +138,7 @@ def test_lane_leading_car_entering_junction():
 
 
 def test_lane_add_special_vehicle():
-    test_trafficcontrol_initialization()
+    setup_traffic_control()
 
     env = Environment()
     junction_entrance = Direction.North
@@ -162,7 +162,7 @@ def test_lane_add_special_vehicle():
     print_green("test_lane_add_special_vehicle: Test Passed")
 
 def test_lane_time_until_junction_clear():
-    test_trafficcontrol_initialization()
+    setup_traffic_control()
 
     # adding car before timeUntilJunctionClear calculation
     env = Environment()
