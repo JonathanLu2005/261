@@ -6,15 +6,20 @@ from database.database import (
     insertJunctionConfigurationsData,
     retrieveAllModelJunctions,
     retrieveSimulationData,
-    insertJunctionPerformance
+    insertJunctionPerformance,
+    insertUserDetails,
+    getUserID
 )
+
+currentUserID = None
 
 # Create web app
 app = Flask(__name__)
 
 # Model page
-@app.route("/", methods=["GET"])
+@app.route("/modelPage", methods=["GET"])
 def modelPage():
+    print(currentUserID)
     return render_template("modelPage.html")
 
 # Show models to frontend
@@ -188,6 +193,30 @@ def addJunction():
 @app.route("/helpPage", methods=["POST", "GET"])
 def helpPage():
     return render_template("helpPage.html")
+
+# Help page
+@app.route("/", methods=["POST", "GET"])
+def account():
+    if request.method == "POST":
+        action = request.form.get('action')
+        username = request.form.get('username')
+        password = request.form.get('password')
+
+        print(action)
+        print(username)
+        print(password)
+            
+        if action == 'signup':
+            insertUserDetails(username, password)
+
+        userID = getUserID(username, password)
+        print(userID)
+        global currentUserID
+        currentUserID = userID
+
+        return redirect(url_for('modelPage'))
+
+    return render_template("account.html")
 
 # Ensures framework works
 if __name__ == "__main__":

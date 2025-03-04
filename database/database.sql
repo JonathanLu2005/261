@@ -1,3 +1,34 @@
+-- User Table 
+CREATE TABLE IF NOT EXISTS users (
+    userid SERIAL PRIMARY KEY,
+    username VARCHAR(100) NOT NULL,
+    password VARCHAR(100) NOT NULL
+);
+
+-- Insert
+CREATE OR REPLACE FUNCTION insertUser(InputUsername VARCHAR, InputPassword VARCHAR) RETURNS VOID AS $$
+BEGIN
+    INSERT INTO users(username, password) 
+    VALUES(InputUsername, InputPassword);
+END;
+$$ LANGUAGE plpgsql;
+
+-- Retrieve ID
+CREATE OR REPLACE FUNCTION getUserID(InputUsername VARCHAR, InputPassword VARCHAR) 
+RETURNS INTEGER AS $$
+DECLARE
+    selecteduserid INTEGER;
+BEGIN
+    -- Get the user ID for the given username and password
+    SELECT userid INTO selecteduserid 
+    FROM users 
+    WHERE users.username = InputUsername AND users.password = InputPassword;
+
+    -- Return the user ID
+    RETURN selecteduserid; 
+END;
+$$ LANGUAGE plpgsql;
+
 -- Model Table
 CREATE TABLE IF NOT EXISTS modeltrafficflow (
     -- Main model info

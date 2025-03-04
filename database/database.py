@@ -305,3 +305,41 @@ def retrieveJunctionPerformance(InputJunctionID):
         return []
     finally:
         closeDatabaseConnection(connection, cursor)
+
+# Insert user details
+def insertUserDetails(InputUsername, InputPassword):
+    connection, cursor = getDatabaseConnection()
+
+    if connection is None or cursor is None:
+        print("Failed to connect to the database.")
+        return [] 
+    
+    try: 
+        cursor.execute(""" 
+        SELECT insertUser(%s, %s)
+        """, (InputUsername, InputPassword))
+
+        connection.commit()
+    except Exception as e:
+        print(f"Error: {e}")
+        connection.rollback()
+    finally:
+        closeDatabaseConnection(connection, cursor)
+
+# Retrieve user id
+def getUserID(InputUsername, InputPassword):
+    connection, cursor = getDatabaseConnection()
+
+    if connection is None or cursor is None:
+        print("Failed to connect to the database.")
+        return []
+    
+    try: 
+        cursor.execute("SELECT * FROM getUserID(%s, %s);", (InputUsername, InputPassword,))
+        userID = cursor.fetchall()
+        return userID[0][0]
+    except Exception as e:
+        print(f"Error: {e}")
+        return []
+    finally:
+        closeDatabaseConnection(connection, cursor)
