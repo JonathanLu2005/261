@@ -102,7 +102,10 @@ CREATE TABLE IF NOT EXISTS modeltrafficflow (
     -- Weightings for results
     maximumwaittimeweight FLOAT NOT NULL DEFAULT 0.33,
     averagewaittimeweight FLOAT NOT NULL DEFAULT 0.33,
-    maximumqueuelengthweight FLOAT NOT NULL DEFAULT 0.33
+    maximumqueuelengthweight FLOAT NOT NULL DEFAULT 0.33,
+
+    -- Refer to user table
+    userid INTEGER NOT NULL REFERENCES users(userid)
 );
 
 -- Model - Add data
@@ -123,7 +126,9 @@ CREATE OR REPLACE FUNCTION insertModelTrafficFlow(InputModelName VARCHAR, InputS
                                                 InputEastboundEastSpecial INTEGER, InputEastboundNorthSpecial INTEGER, InputEastboundSouthSpecial INTEGER,
                                                 InputWestboundWestSpecial INTEGER, InputWestboundNorthSpecial INTEGER, InputWestboundSouthSpecial INTEGER,
 
-                                                InputMaximumWaitTimeWeight FLOAT, InputAverageWaitTimeWeight FLOAT, InputMaximumQueueLengthWeight FLOAT)
+                                                InputMaximumWaitTimeWeight FLOAT, InputAverageWaitTimeWeight FLOAT, InputMaximumQueueLengthWeight FLOAT,
+                                                
+                                                InputUserID INTEGER)
                                                 RETURNS VOID AS $$
 BEGIN
     INSERT INTO modeltrafficflow (modelname, simulationtime,
@@ -144,7 +149,9 @@ BEGIN
                                 eastboundeastvphspecial, eastboundnorthvphspecial, eastboundsouthvphspecial,
                                 westboundwestvphspecial, westboundnorthvphspecial, westboundsouthvphspecial,                                
 
-                                maximumwaittimeweight, averagewaittimeweight, maximumqueuelengthweight)
+                                maximumwaittimeweight, averagewaittimeweight, maximumqueuelengthweight,
+                                
+                                userid)
     VALUES(InputModelName, InputSimulationTime,
 
     InputNorthboundNorth + InputNorthboundEast + InputNorthboundWest,
@@ -167,15 +174,18 @@ BEGIN
     InputEastboundEastSpecial, InputEastboundNorthSpecial, InputEastboundSouthSpecial,
     InputWestboundWestSpecial, InputWestboundNorthSpecial, InputWestboundSouthSpecial,
 
-    InputMaximumWaitTimeWeight, InputAverageWaitTimeWeight, InputMaximumQueueLengthWeight);
+    InputMaximumWaitTimeWeight, InputAverageWaitTimeWeight, InputMaximumQueueLengthWeight,
+    
+    InputUserID);
 END;
 $$ LANGUAGE plpgsql;
 
 -- Model - Retrieve data 
-CREATE OR REPLACE FUNCTION retrieveAllModelNames() RETURNS TABLE(modelid INTEGER, modelname VARCHAR) AS $$
+CREATE OR REPLACE FUNCTION retrieveAllModelNames(InputUserID INTEGER) RETURNS TABLE(modelid INTEGER, modelname VARCHAR) AS $$
 BEGIN 
     RETURN QUERY
-    SELECT modeltrafficflow.modelid, modeltrafficflow.modelname FROM modeltrafficflow;
+    SELECT modeltrafficflow.modelid, modeltrafficflow.modelname FROM modeltrafficflow
+    WHERE modeltrafficflow.userid = InputUserID;
 END;
 $$ LANGUAGE plpgsql;
 

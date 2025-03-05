@@ -30,7 +30,7 @@ def modelPage():
 # Show models to frontend
 @app.route("/api/models", methods=["GET"])
 def getAllModels():
-    AllModels = retrieveAllModelNames()
+    AllModels = retrieveAllModelNames(currentUserID)
 
     if not AllModels:
         return jsonify([])
@@ -65,6 +65,8 @@ def addModel():
             ModelInformation.append(float(value))
         else:
             ModelInformation.append(int(value))
+
+    ModelInformation.append(currentUserID)
 
     insertModelTrafficFlowData(*ModelInformation)
     return getAllModels()
