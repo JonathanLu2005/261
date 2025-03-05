@@ -1,3 +1,34 @@
+-- User Table 
+CREATE TABLE IF NOT EXISTS users (
+    userid SERIAL PRIMARY KEY,
+    username VARCHAR(100) NOT NULL,
+    password VARCHAR(100) NOT NULL
+);
+
+-- Insert
+CREATE OR REPLACE FUNCTION insertUser(InputUsername VARCHAR, InputPassword VARCHAR) RETURNS VOID AS $$
+BEGIN
+    INSERT INTO users(username, password) 
+    VALUES(InputUsername, InputPassword);
+END;
+$$ LANGUAGE plpgsql;
+
+-- Retrieve ID
+CREATE OR REPLACE FUNCTION getUserID(InputUsername VARCHAR, InputPassword VARCHAR) 
+RETURNS INTEGER AS $$
+DECLARE
+    selecteduserid INTEGER;
+BEGIN
+    -- Get the user ID for the given username and password
+    SELECT userid INTO selecteduserid 
+    FROM users 
+    WHERE users.username = InputUsername AND users.password = InputPassword;
+
+    -- Return the user ID
+    RETURN selecteduserid; 
+END;
+$$ LANGUAGE plpgsql;
+
 -- Model Table
 CREATE TABLE IF NOT EXISTS modeltrafficflow (
     -- Main model info
@@ -71,7 +102,10 @@ CREATE TABLE IF NOT EXISTS modeltrafficflow (
     -- Weightings for results
     maximumwaittimeweight FLOAT NOT NULL DEFAULT 0.33,
     averagewaittimeweight FLOAT NOT NULL DEFAULT 0.33,
-    maximumqueuelengthweight FLOAT NOT NULL DEFAULT 0.33
+    maximumqueuelengthweight FLOAT NOT NULL DEFAULT 0.33,
+
+    -- Refer to user table
+    userid INTEGER NOT NULL REFERENCES users(userid)
 );
 
 -- Model - Add data
@@ -92,7 +126,9 @@ CREATE OR REPLACE FUNCTION insertModelTrafficFlow(InputModelName VARCHAR, InputS
                                                 InputEastboundEastSpecial INTEGER, InputEastboundNorthSpecial INTEGER, InputEastboundSouthSpecial INTEGER,
                                                 InputWestboundWestSpecial INTEGER, InputWestboundNorthSpecial INTEGER, InputWestboundSouthSpecial INTEGER,
 
-                                                InputMaximumWaitTimeWeight FLOAT, InputAverageWaitTimeWeight FLOAT, InputMaximumQueueLengthWeight FLOAT)
+                                                InputMaximumWaitTimeWeight FLOAT, InputAverageWaitTimeWeight FLOAT, InputMaximumQueueLengthWeight FLOAT,
+                                                
+                                                InputUserID INTEGER)
                                                 RETURNS VOID AS $$
 BEGIN
     INSERT INTO modeltrafficflow (modelname, simulationtime,
@@ -113,7 +149,9 @@ BEGIN
                                 eastboundeastvphspecial, eastboundnorthvphspecial, eastboundsouthvphspecial,
                                 westboundwestvphspecial, westboundnorthvphspecial, westboundsouthvphspecial,                                
 
-                                maximumwaittimeweight, averagewaittimeweight, maximumqueuelengthweight)
+                                maximumwaittimeweight, averagewaittimeweight, maximumqueuelengthweight,
+                                
+                                userid)
     VALUES(InputModelName, InputSimulationTime,
 
     InputNorthboundNorth + InputNorthboundEast + InputNorthboundWest,
@@ -136,15 +174,18 @@ BEGIN
     InputEastboundEastSpecial, InputEastboundNorthSpecial, InputEastboundSouthSpecial,
     InputWestboundWestSpecial, InputWestboundNorthSpecial, InputWestboundSouthSpecial,
 
-    InputMaximumWaitTimeWeight, InputAverageWaitTimeWeight, InputMaximumQueueLengthWeight);
+    InputMaximumWaitTimeWeight, InputAverageWaitTimeWeight, InputMaximumQueueLengthWeight,
+    
+    InputUserID);
 END;
 $$ LANGUAGE plpgsql;
 
 -- Model - Retrieve data 
-CREATE OR REPLACE FUNCTION retrieveAllModelNames() RETURNS TABLE(modelid INTEGER, modelname VARCHAR) AS $$
+CREATE OR REPLACE FUNCTION retrieveAllModelNames(InputUserID INTEGER) RETURNS TABLE(modelid INTEGER, modelname VARCHAR) AS $$
 BEGIN 
     RETURN QUERY
-    SELECT modeltrafficflow.modelid, modeltrafficflow.modelname FROM modeltrafficflow;
+    SELECT modeltrafficflow.modelid, modeltrafficflow.modelname FROM modeltrafficflow
+    WHERE modeltrafficflow.userid = InputUserID;
 END;
 $$ LANGUAGE plpgsql;
 

@@ -35,36 +35,6 @@ def closeDatabaseConnection(connection, cursor):
     except Exception as e:
         print(f"Error closing the connection: {e}")
 
-# Function to fetch all tables from the database
-def fetchAllTables():
-    connection, cursor = getDatabaseConnection()
-
-    if connection is None or cursor is None:
-        print("Failed to connect to the database.")
-        return []
-
-    try:
-        # Example query to fetch all tables in the public schema
-        cursor.execute("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';")
-        
-        # Fetch all results from the query
-        tables = cursor.fetchall()
-
-        # Output the table names
-        print("Tables in the database:")
-        for table in tables:
-            print(table[0])
-
-        return tables
-
-    except Exception as e:
-        print(f"Error fetching tables: {e}")
-        return []
-
-    finally:
-        # Ensure the connection is closed properly
-        closeDatabaseConnection(connection, cursor)
-
 # Insert model traffic flow data
 def insertModelTrafficFlowData(InputModelName, InputSimulationTime,
                             InputNorthboundNorth, InputNorthboundEast, InputNorthboundWest, 
@@ -78,7 +48,8 @@ def insertModelTrafficFlowData(InputModelName, InputSimulationTime,
                             InputSouthboundSouthSpecial, InputSouthboundEastSpecial, InputSouthboundWestSpecial,
                             InputEastboundEastSpecial, InputEastboundNorthSpecial, InputEastboundSouthSpecial,
                             InputWestboundWestSpecial, InputWestboundNorthSpecial, InputWestboundSouthSpecial,
-                            InputMaximumWaitTimeWeight, InputAverageWaitTimeWeight, InputMaximumQueueLengthWeight):
+                            InputMaximumWaitTimeWeight, InputAverageWaitTimeWeight, InputMaximumQueueLengthWeight,
+                            InputUserID):
     connection, cursor = getDatabaseConnection()
 
     if connection is None or cursor is None:
@@ -99,7 +70,8 @@ def insertModelTrafficFlowData(InputModelName, InputSimulationTime,
             %s, %s, %s,
             %s, %s, %s,
             %s, %s, %s,          
-            %s, %s, %s)
+            %s, %s, %s, 
+            %s)
             """, (
             InputModelName, InputSimulationTime,
             InputNorthboundNorth, InputNorthboundEast, InputNorthboundWest, 
@@ -113,7 +85,8 @@ def insertModelTrafficFlowData(InputModelName, InputSimulationTime,
             InputSouthboundSouthSpecial, InputSouthboundEastSpecial, InputSouthboundWestSpecial,
             InputEastboundEastSpecial, InputEastboundNorthSpecial, InputEastboundSouthSpecial,
             InputWestboundWestSpecial, InputWestboundNorthSpecial, InputWestboundSouthSpecial,
-            InputMaximumWaitTimeWeight, InputAverageWaitTimeWeight, InputMaximumQueueLengthWeight
+            InputMaximumWaitTimeWeight, InputAverageWaitTimeWeight, InputMaximumQueueLengthWeight,
+            InputUserID
         ))
 
         connection.commit()
@@ -124,7 +97,7 @@ def insertModelTrafficFlowData(InputModelName, InputSimulationTime,
         closeDatabaseConnection(connection, cursor)
 
 # Retrieve all model names
-def retrieveAllModelNames():
+def retrieveAllModelNames(InputUserID):
     connection, cursor = getDatabaseConnection()
 
     if connection is None or cursor is None:
@@ -132,7 +105,7 @@ def retrieveAllModelNames():
         return []
     
     try:
-        cursor.execute("SELECT * FROM retrieveAllModelNames();")
+        cursor.execute("SELECT * FROM retrieveAllModelNames(%s);", (InputUserID,))
 
         allModelInformation = cursor.fetchall()
 
@@ -300,6 +273,44 @@ def retrieveJunctionPerformance(InputJunctionID):
         junctionSimulationDataHashmap = dict(zip(junctionKeys, junctionPerformanceData[0]))
 
         return junctionSimulationDataHashmap
+    except Exception as e:
+        print(f"Error: {e}")
+        return []
+    finally:
+        closeDatabaseConnection(connection, cursor)
+
+# Insert user details
+def insertUserDetails(InputUsername, InputPassword):
+    connection, cursor = getDatabaseConnection()
+
+    if connection is None or cursor is None:
+        print("Failed to connect to the database.")
+        return [] 
+    
+    try: 
+        cursor.execute(""" 
+        SELECT insertUser(%s, %s)
+        """, (InputUsername, InputPassword))
+
+        connection.commit()
+    except Exception as e:
+        print(f"Error: {e}")
+        connection.rollback()
+    finally:
+        closeDatabaseConnection(connection, cursor)
+
+# Retrieve user id
+def getUserID(InputUsername, InputPassword):
+    connection, cursor = getDatabaseConnection()
+
+    if connection is None or cursor is None:
+        print("Failed to connect to the database.")
+        return []
+    
+    try: 
+        cursor.execute("SELECT * FROM getUserID(%s, %s);", (InputUsername, InputPassword,))
+        userID = cursor.fetchall()
+        return userID[0][0]
     except Exception as e:
         print(f"Error: {e}")
         return []
