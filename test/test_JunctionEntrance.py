@@ -6,6 +6,13 @@ from simpy import Environment
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from model.TrafficControl import JunctionEntrance, TrafficControl, Direction, Lane, Car
 
+
+''' NOTE: Static testing for JunctionEntraceCarGenerator, Dynamic testing not suitable'''
+
+
+''' ADD getTimeUntilJunctionClearsCars() test, getTimeUntilJunctionClearSpecial test
+    bus/cycle and car generator'''
+
 def print_green(message):
     """Helper function to print text in green."""
     print(f"\033[92m{message}\033[0m")
