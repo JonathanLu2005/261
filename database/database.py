@@ -212,6 +212,9 @@ def retrieveSimulationData(InputModelID):
 
         modelSimulationDataHashmap = dict(zip(modelKeys, modelSimulationData[0]))
 
+        print("database model data hashmap")
+        print(modelSimulationDataHashmap)
+
         return modelSimulationDataHashmap
     except Exception as e:
         print(f"Error: {e}")

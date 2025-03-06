@@ -24,7 +24,6 @@ app = Flask(__name__)
 # Model page
 @app.route("/modelPage", methods=["GET"])
 def modelPage():
-    print(currentUserID)
     return render_template("modelPage.html")
 
 # Show models to frontend
@@ -45,8 +44,6 @@ def getAllModels():
 @app.route('/addModel', methods=["POST"])
 def addModel():
     modelData = request.json 
-
-    print(modelData)
 
     if not modelData or 'name' not in modelData: 
         return jsonify({"Error": "Invalid Data"}), 400 
@@ -99,12 +96,7 @@ def getAllJunctions():
 @app.route("/addJunction", methods=["POST"])
 def addJunction():
     junctionData = request.json
-
-    print(junctionData)
-    print("Received junction data:", junctionData)  # Add this line for debugging
-
     if not junctionData:
-        print("Error: Invalid data received.")  # Debugging
         return jsonify({"Error": "Invalid Data"}), 400
 
     junctionInformation = []
@@ -137,7 +129,11 @@ def addJunction():
     insertJunctionConfigurationsData(*junctionInformation)
 
     # Once junction is added, it is time to start simulating it
-    modelId = request.args.get("modelId") 
+
+    modelId = int(junctionData["modelId"])
+    #print("Model id is " + str(modelId))
+    #print(request.url)
+    #print(request.args)
     modelData = retrieveSimulationData(modelId)
 
     class Direction(IntEnum):
@@ -146,10 +142,14 @@ def addJunction():
         South = junctionData["southboundOrder"], 
         West = junctionData["westboundOrder"]
 
-    simulationResults = runModel(junctionData["junctionSideLength"],
+    #print("data to run model")
+    #print(modelData)
+    #print(junctionData)
+
+    simulationResults = runModel(int(junctionData["junctionSideLength"]),
         modelData["SimulationTime"], modelData["VehicleTopSpeed"], modelData["VehicleLength"], modelData["VehiceLengthFluctuation"],
         modelData["VehicleStationaryDistance"], modelData["VehicleReactionTime"],
-        junctionData["junctionLanes"], 
+        int(junctionData["junctionLanes"]), 
         [
             [modelData["NorthboundNorthVph"], modelData["NorthboundEastVph"], modelData["NorthboundWestVph"]],
             [modelData["EastboundEastVph"], modelData["EastboundSouthVph"], modelData["EastboundNorthVph"]],
@@ -157,7 +157,7 @@ def addJunction():
             [modelData["WestboundWestVph"], modelData["WestboundNorthVph"], modelData["WestboundSouthVph"]]
         ],
         junctionData["leftTurnLane"], junctionData["rightTurnLane"],
-        junctionData["pedestrianCrossingAdded"], junctionData["pedestrianCrossingDuration"], junctionData["pedestrianCrossingRequests"],
+        junctionData["pedestrianCrossingAdded"], int(junctionData["pedestrianCrossingDuration"]), int(junctionData["pedestrianCrossingRequests"]),
         [
             Direction.North,
             Direction.East,
@@ -165,14 +165,14 @@ def addJunction():
             Direction.West
         ],
         [
-            junctionData["northboundDuration"], 
-            junctionData["eastboundDuration"], 
-            junctionData["southboundDuration"], 
-            junctionData["westboundDuration"]
+            int(junctionData["northboundDuration"]), 
+            int(junctionData["eastboundDuration"]), 
+            int(junctionData["southboundDuration"]), 
+            int(junctionData["westboundDuration"])
         ],
         modelData["VehicleLengthSpecial"], modelData["VehicleTopSpeedSpecial"], 
         modelData["VehicleLengthFluctuationSpecial"], junctionData["specialLane"], 
-        junctionData["specialLaneRatio"],
+        float(junctionData["specialLaneRatio"]),
         [
             [modelData["NorthboundNorthVphSpecial"], modelData["NorthboundEastVphSpecial"], modelData["NorthboundWestVphSpecial"]],
             [modelData["EastboundEastVphSpecial"], modelData["EastboundSouthVphSpecial"], modelData["EastboundNorthVphSpecial"]],
@@ -182,6 +182,9 @@ def addJunction():
     )
 
     # insert simulation results - get results from above and store it for visualisations section
+    #print("simulation results")
+    #print(simulationResults)
+    #print(simulationResults.northMaxWaitingTime)
     insertJunctionPerformance(
         simulationResults.northMaxWaitingTime, simulationResults.northMaxQueueLength, simulationResults.northAvgWaitingTime, simulationResults.northTotalVehiclesPassed, 
         simulationResults.eastMaxWaitingTime, simulationResults.eastMaxQueueLength, simulationResults.eastAvgWaitingTime, simulationResults.eastTotalVehiclesPassed,
@@ -207,15 +210,10 @@ def account():
         username = request.form.get('username')
         password = request.form.get('password')
 
-        print(action)
-        print(username)
-        print(password)
-            
         if action == 'signup':
             insertUserDetails(username, password)
 
         userID = getUserID(username, password)
-        print(userID)
         global currentUserID
         currentUserID = userID
 
