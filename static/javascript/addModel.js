@@ -1,30 +1,26 @@
-// static/javascript/addModel.js
-
 document.addEventListener("DOMContentLoaded", async () => {
-  //load some important elements
   const modelForm = document.getElementById("addModelForm");
   const nextButton = document.getElementById("next");
   const submitButton = document.getElementById("submitModel");
-  const modelsFolder = document.getElementById("modelsFolder"); 
+  const modelsFolder = document.getElementById("modelsFolder");
 
-  //render function
+  // Render models function
   function renderModels(models) {
     modelsFolder.innerHTML = "";
-
     models.forEach((model) => {
-        const modelCard = document.createElement("div");
-        modelCard.className = "col";
-        modelCard.innerHTML = `
+      const modelCard = document.createElement("div");
+      modelCard.className = "col";
+      modelCard.innerHTML = `
             <div class="card h-100 model-card" data-id="${model.id}" data-name="${model.name}" style="outline: 2px solid #2B7A78; background-color: #DEF2F1;">
                 <div class="card-body">
                     <h5 class="card-title">${model.name}</h5>
                 </div>
             </div>`;
-        modelsFolder.appendChild(modelCard);
+      modelsFolder.appendChild(modelCard);
     });
   }
 
-
+  // Initial fetch of models
   try {
     const response = await fetch("/api/models");
     const models = await response.json();
@@ -33,40 +29,70 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.error("Error fetching models:", error);
   }
 
-  // define the limits
+  //define the limits
   const limits = {
-    vehicleTopSpeed: { min: 0, max: 30 },
+    simulationTime: { min: 0 },
 
+    northBoundNorth: { min: 0, integer: true },
+    northBoundEast: { min: 0, integer: true },
+    northBoundWest: { min: 0, integer: true },
+
+    southBoundSouth: { min: 0, integer: true },
+    southBoundEast: { min: 0, integer: true },
+    southBoundWest: { min: 0, integer: true },
+
+    westBoundWest: { min: 0, integer: true },
+    westBoundNorth: { min: 0, integer: true },
+    westBoundSouth: { min: 0, integer: true },
+
+    eastBoundEast: { min: 0, integer: true },
+    eastBoundNorth: { min: 0, integer: true },
+    eastBoundSouth: { min: 0, integer: true },
+
+    vehicleTopSpeed: { min: 1, max: 30, integer: true },
+    vehicleReactionTime: { min: 0 },
+    vehicleStationaryDistance: { min: 0.5 },
+
+    vehicleLength: { min: 1.5 },
+    // For vehicleLengthFluctuation, we only check it's >= 0.
+    // Dynamic check: value must be <= (vehicleLength - 1.5) will be done separately.
+    vehicleLengthFluctuation: { min: 0 },
+
+    vehicleTopSpeedSpecial: { min: 1, integer: true },
+    vehicleLengthSpecial: { min: 1 },
+    // For vehicleLengthFluctuationSpecial, dynamic check: <= (vehicleLengthSpecial - 1)
+    vehicleLengthFluctuationSpecial: { min: 0 },
+
+    northBoundNorthSpecial: { min: 0, integer: true },
+    northBoundEastSpecial: { min: 0, integer: true },
+    northBoundWestSpecial: { min: 0, integer: true },
+
+    southBoundSouthSpecial: { min: 0, integer: true },
+    southBoundEastSpecial: { min: 0, integer: true },
+    southBoundWestSpecial: { min: 0, integer: true },
+
+    westBoundWestSpecial: { min: 0, integer: true },
+    westBoundNorthSpecial: { min: 0, integer: true },
+    westBoundSouthSpecial: { min: 0, integer: true },
+
+    eastBoundEastSpecial: { min: 0, integer: true },
+    eastBoundNorthSpecial: { min: 0, integer: true },
+    eastBoundSouthSpecial: { min: 0, integer: true },
+
+    // Weighting factors: must be in [0, 1]
     maxWaitTimeWeight: { min: 0, max: 1 },
     averageWaitTimeWeight: { min: 0, max: 1 },
-    maxQueueLengthWeight: { min: 0, max: 1 },
-
-    simulationTime: { min: 0, max: 99999 },
-    northBoundNorth: { min: 0, max: 99999 },
-    northBoundEast: { min: 0, max: 99999 },
-    northBoundWest: { min: 0, max: 99999 },
-    southBoundSouth: { min: 0, max: 99999 },
-    southBoundEast: { min: 0, max: 99999 },
-    southBoundWest: { min: 0, max: 99999 },
-    westBoundWest: { min: 0, max: 99999 },
-    westBoundNorth: { min: 0, max: 99999 },
-    westBoundSouth: { min: 0, max: 99999 },
-    eastBoundEast: { min: 0, max: 99999 },
-    eastBoundNorth: { min: 0, max: 99999 },
-    eastBoundSouth: { min: 0, max: 99999 },
-
-    vehicleReactionTime: { min: 0, max: 99999 },
-    vehicleStationaryDistance: { min: 0, max: 99999 }
+    maxQueueLengthWeight: { min: 0, max: 1 }
   };
 
-  //get the input fields at current step and use it to validate
+  // Helper: get currently visible step's number inputs
   function getActiveStepInputFields() {
     const activeStep = document.querySelector(".step:not(.d-none)");
     if (!activeStep) return [];
     return activeStep.querySelectorAll("input[type='number']");
   }
 
-  //validate current step
+  // Validate current step fields in real time
   function validateCurrentStep() {
     let allValid = true;
     const fields = getActiveStepInputFields();
@@ -74,9 +100,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     fields.forEach((input) => {
       const valueStr = input.value.trim();
       const fieldId = input.id;
-      const limit = limits[fieldId] || { min: 0, max: 99999 };
+      const limit = limits[fieldId] || { min: 0,};
 
-      //create warning message
       let warningMessage = input.nextElementSibling;
       if (!warningMessage || !warningMessage.classList.contains("warning-message")) {
         warningMessage = document.createElement("p");
@@ -94,17 +119,59 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
 
       const value = parseFloat(valueStr);
-      if (isNaN(value) || value < limit.min || value > limit.max) {
-        warningMessage.innerText = `Value must be between ${limit.min} and ${limit.max}`;
+      if (isNaN(value) || value < limit.min || (limit.max !== undefined && value > limit.max)) {
+        if (limit.max !== undefined) {
+          warningMessage.innerText = `Value must be between ${limit.min} and ${limit.max}`;
+        } else {
+          warningMessage.innerText = `Value must be greater than ${limit.min}`;
+        }
         warningMessage.style.display = "block";
         input.style.border = "2px solid red";
         allValid = false;
       } else {
-        warningMessage.style.display = "none";
-        input.style.border = "";
+        // For vehicleLengthFluctuation: value must be <= (vehicleLength - 1.5)
+        if (fieldId === "vehicleLengthFluctuation") {
+          const vehicleLengthInput = document.getElementById("vehicleLength");
+          const vehicleLengthVal = parseFloat(vehicleLengthInput.value.trim());
+          if (!isNaN(vehicleLengthVal) && value > (vehicleLengthVal - 1.5)) {
+            warningMessage.innerText = `Value must be no more than vehicleLength - 1.5 (${vehicleLengthVal - 1.5})`;
+            warningMessage.style.display = "block";
+            input.style.border = "2px solid red";
+            allValid = false;
+          } else {
+            warningMessage.style.display = "none";
+            input.style.border = "";
+          }
+        }
+        // For vehicleLengthFluctuationSpecial: value must be <= (vehicleLengthSpecial - 1)
+        if (fieldId === "vehicleLengthFluctuationSpecial") {
+          const vehicleLengthSpecialInput = document.getElementById("vehicleLengthSpecial");
+          const vehicleLengthSpecialVal = parseFloat(vehicleLengthSpecialInput.value.trim());
+          if (!isNaN(vehicleLengthSpecialVal) && value > (vehicleLengthSpecialVal - 1)) {
+            warningMessage.innerText = `Value must be no more than vehicleLengthSpecial - 1 (${vehicleLengthSpecialVal - 1})`;
+            warningMessage.style.display = "block";
+            input.style.border = "2px solid red";
+            allValid = false;
+          } else {
+            warningMessage.style.display = "none";
+            input.style.border = "";
+          }
+        }
+        //check if it's integer
+        if (limit.integer && !Number.isInteger(value)) {
+          warningMessage.innerText = "Value must be an integer.";
+          warningMessage.style.display = "block";
+          input.style.border = "2px solid red";
+          allValid = false;
+        }
+        if (allValid) {
+          warningMessage.style.display = "none";
+          input.style.border = "";
+        }
       }
     });
 
+    //update next button
     nextButton.disabled = !allValid;
     nextButton.style.backgroundColor = allValid ? "" : "#d3d3d3";
     nextButton.style.cursor = allValid ? "pointer" : "not-allowed";
@@ -112,7 +179,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     return allValid;
   }
 
-  //check the input fields all the time
+  //update next button
   const allNumberInputs = modelForm.querySelectorAll("input[type='number']");
   allNumberInputs.forEach((input) => {
     input.addEventListener("input", () => {
@@ -120,19 +187,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   });
 
+  // Expose validation function for navigation modules if needed
   window.validateCurrentStep = validateCurrentStep;
 
-  //saving the model
+  // Handle form submission
   modelForm.addEventListener("submit", async (event) => {
-
+    event.preventDefault();
     const valid = validateCurrentStep();
     if (!valid) {
-      event.preventDefault();
       alert("Please correct the errors before submitting.");
       return;
     }
-
-    event.preventDefault();
     const modelFormData = new FormData(modelForm);
     const modelData = Object.fromEntries(modelFormData);
 
@@ -142,11 +207,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(modelData),
       });
-
       if (response.ok) {
         const updatedModels = await response.json();
         renderModels(updatedModels);
-
         modelForm.reset();
         const modelModal = document.getElementById("addModelModal");
         const modalInstance = bootstrap.Modal.getInstance(modelModal);
@@ -161,4 +224,5 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 });
+
 
