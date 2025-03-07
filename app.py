@@ -195,14 +195,31 @@ def addJunction():
 
     return getAllJunctions()
 
+@app.route("/api/receiveJunctionData", methods=["POST"])
+def receiveJunctionData():
+    data = request.json
 
+    if not data:
+        return jsonify({"Error": "No data received"}), 400
+
+    model_id = data.get("modelId")
+    junction_id = data.get("junctionId")
+
+    if not model_id or not junction_id:
+        return jsonify({"Error": "Missing modelId or junctionId"}), 400
+
+    print(f"Received modelId: {model_id}, junctionId: {junction_id}")
+
+    # INTEGRATE GRAPHIC CODE HERE, THE ABOVE PROVIDES THE JUNCTION AND MODEL ID NEEDED
+
+    return jsonify({"Message": "Data received successfully"}), 200
 
 # Help page
 @app.route("/helpPage", methods=["POST", "GET"])
 def helpPage():
     return render_template("helpPage.html")
 
-# Help page
+# Account page
 @app.route("/", methods=["POST", "GET"])
 def account():
     if request.method == "POST":
