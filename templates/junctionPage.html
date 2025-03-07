@@ -20,12 +20,31 @@ Your Models Junctions
         />
     </div>
 
-    <!-- Junctions Grid -->
-    <div id="junctionsFolder" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
-        <!-- Junction cards dynamically populated here -->
-    </div>  
+    <div id="junctionsFolder" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4"
+    data-bs-toggle="modal" data-bs-target="#junctionDetailsModal">
+        <!-- Dynamically populated -->
+    </div>
 </div>
 
+<!-- Junction Details Modal -->
+<div class="modal fade" id="junctionDetailsModal" tabindex="-1" aria-labelledby="junctionDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: #2B7A78;">
+                <h5 class="modal-title text-white" id="junctionDetailsModalLabel">Junction Results</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="background-color: #DEF2F1;">
+                <center>
+                    <img src="static/example.jpg" class="img-fluid" alt="Junction Image">
+                </center>
+            </div>
+            <div class="modal-footer" style="background-color: #2B7A78;">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 <!-- Modal for adding junction -->
@@ -248,6 +267,6 @@ Your Models Junctions
 <script src="{{ url_for('static', filename='javascript/junctionFormSent.js') }}"></script>
 <script src="{{ url_for('static', filename='javascript/addJunctions.js') }}"></script>
 <script src="{{ url_for('static', filename='javascript/junctionSearchBar.js') }}"></script>
-<script src="{{ url_for('static', filename='javascript/junctionImage.js') }}"></script>
+<script src="{{ url_for('static', filename='javascript/junctionData.js') }}"></script>
 {% endblock %}
 

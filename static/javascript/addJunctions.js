@@ -1,47 +1,61 @@
 document.addEventListener("DOMContentLoaded", async () => {
     const junctionForm = document.getElementById("addJunctionForm");
     const junctionsFolder = document.getElementById("junctionsFolder");
-  
-    // Render models function
-    const renderJunctions = (junctions) => {
-      junctionsFolder.innerHTML = "";
-      junctions.forEach((junction) => {
-        const junctionCard = document.createElement("div");
-        junctionCard.className = "col";
-        junctionCard.innerHTML = `
-          <div class="card h-100" style="outline: 2px solid #2B7A78; background-color: #DEF2F1;">
-            <div class="card-body">
-              <h5 class="card-title">${junction.junctionname}</h5>
-            </div>
-          </div>`;
-        junctionsFolder.appendChild(junctionCard);
-      });
-    };
-  
 
-    // get junction information
-    const fetchJunctions = async () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const modelId = urlParams.get("modelId");
-      if (!modelId) {
-        console.error("Missing modelId in URL");
-        return;
-      }
-      try {
-        const response = await fetch(`/api/junctions?modelId=${modelId}`);
-        if (response.ok) {
-          const junctions = await response.json();
-          renderJunctions(junctions);
-        } else {
-          console.error("Error fetching junctions:", await response.text());
+    document.addEventListener("DOMContentLoaded", async () => {
+      const junctionsFolder = document.getElementById("junctionsFolder");
+  
+      // Check if junctionsFolder is available
+      console.log("junctionsFolder element:", junctionsFolder);
+  
+      // Render junctions function
+      const renderJunctions = (junctions) => {
+        // Check if junctions are being passed correctly
+        console.log("Junctions to render:", junctions);
+        junctionsFolder.innerHTML = "";
+        junctions.forEach((junction) => {
+          const junctionCard = document.createElement("div");
+          junctionCard.className = "col";
+          junctionCard.innerHTML = `
+            <div class="card h-100" style="outline: 2px solid #2B7A78;">
+              <div class="card-body">
+                <h5 class="card-title">${junction.junctionname}</h5>
+              </div>
+            </div>`;
+  
+          // Append card to the container
+          junctionsFolder.appendChild(junctionCard);
+
+        });
+      };
+  
+      // Fetch junction data from your API
+      const fetchJunctions = async () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const modelId = urlParams.get("modelId");
+        if (!modelId) {
+          console.error("Missing modelId in URL");
+          return;
         }
-      } catch (error) {
-        console.error("Error fetching junctions:", error);
-      }
-    };
-  
+        try {
+          const response = await fetch(`/api/junctions?modelId=${modelId}`);
+          if (response.ok) {
+            const junctions = await response.json();
+            renderJunctions(junctions);
+          } else {
+            console.error("Error fetching junctions:", await response.text());
+          }
+        } catch (error) {
+          console.error("Error fetching junctions:", error);
+        }
+      };
+      
+      // Call the function
+      fetchJunctions();
+    });
+
     fetchJunctions();
-  
+
     // define the limits
     const limits = {
       junctionLanes: { min: 1, integer: true },
@@ -239,21 +253,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   
     // 将验证函数暴露到全局，方便多步导航脚本调用
     window.validateCurrentStep = validateCurrentStep;
-  
+    
     // ---------------------------
     // 6. 处理表单提交（Save 按钮）
     // ---------------------------
+
+    // Handle form submission (for adding a junction)
     junctionForm.addEventListener("submit", async (event) => {
       event.preventDefault();
-      const valid = validateCurrentStep();
-      if (!valid) {
-        alert("Please correct the errors before submitting.");
-        return;
-      }
       const formData = new FormData(junctionForm);
       const junctionData = Object.fromEntries(formData);
-  
-      // 附加 URL 中的 modelId
+
+      // Get modelId from URL
       const urlParams = new URLSearchParams(window.location.search);
       const modelId = urlParams.get("modelId");
       if (!modelId) {
@@ -262,16 +273,16 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }
       junctionData.modelId = modelId;
-  
+
       try {
         const response = await fetch("/addJunction", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(junctionData),
         });
-  
+
         if (response.ok) {
-          await fetchJunctions(); // 刷新 junction 列表
+          await fetchJunctions(); // Refresh junction list
           junctionForm.reset();
           const junctionModal = document.getElementById("addJunctionModal");
           const modalInstance = bootstrap.Modal.getInstance(junctionModal);
@@ -285,5 +296,5 @@ document.addEventListener("DOMContentLoaded", async () => {
         console.error("Error adding junction:", error);
       }
     });
-  });
+});
 

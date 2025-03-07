@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for
+from flask import Flask, render_template, request, jsonify, redirect, url_for, send_file, send_from_directory
+import os
 from enum import IntEnum
 from database.database import (
     insertModelTrafficFlowData,
@@ -202,17 +203,25 @@ def receiveJunctionData():
     if not data:
         return jsonify({"Error": "No data received"}), 400
 
-    model_id = data.get("modelId")
-    junction_id = data.get("junctionId")
+    modelID = data.get("modelId")
+    junctionID = data.get("junctionId")
 
-    if not model_id or not junction_id:
+    if not modelID or not junctionID:
         return jsonify({"Error": "Missing modelId or junctionId"}), 400
 
-    print(f"Received modelId: {model_id}, junctionId: {junction_id}")
+    print(f"Received modelId: {modelID}, junctionId: {junctionID}")
 
     # INTEGRATE GRAPHIC CODE HERE, THE ABOVE PROVIDES THE JUNCTION AND MODEL ID NEEDED
 
     return jsonify({"Message": "Data received successfully"}), 200
+
+@app.route("/getJunctionImage", methods=["GET"])
+def getJunctionImage():
+    try:
+        # Serve the image from the static folder
+        return send_from_directory(os.path.join(app.root_path, 'static'), 'example.jpg', mimetype='image/jpeg')
+    except FileNotFoundError:
+        return jsonify({"Error": "Image not found"}), 404
 
 # Help page
 @app.route("/helpPage", methods=["POST", "GET"])
