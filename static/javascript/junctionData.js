@@ -45,25 +45,42 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    /* Sends model id and junction to backend */
+    /* Sends model id and junction id to backend */
     async function sendJunctionDataToBackend(modelId, junctionId) {
-        const response = await fetch(`/api/receiveJunctionData`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ modelId, junctionId }),
-        });
+        try {
+            /* Send data to backend */
+            const response = await fetch(`/api/receiveJunctionData`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ modelId, junctionId }),
+            });
 
-        if (response.ok) {
-            const data = await response.json(); 
-            console.log("Data sent successfully to backend");
-            if (data.image_path) { 
-                console.log(data.image_path)
-                document.querySelector("junctionImage").src = data.image_path;
-        }
-        } else {
-            console.error("Failed to send data to backend");
+            if (response.ok) {
+                const data = await response.json(); 
+                console.log("Data sent successfully to backend");
+                
+                /* Retrieve images from backend */
+                if (data.images) {
+                    const { maximumwaittime, averagewaittime, maximumqueuelength } = data.images;
+
+                    /* Update images on frontend */
+                    document.getElementById("maxWaitTimeImage").src = maximumwaittime || "static/placeholder.jpg";
+                    document.getElementById("avgWaitTimeImage").src = averagewaittime || "static/placeholder.jpg";
+                    document.getElementById("maxQueueLengthImage").src = maximumqueuelength || "static/placeholder.jpg";
+
+                    /* Show it */
+                    const junctionModal = new bootstrap.Modal(document.getElementById("junctionDetailsModal"));
+                    junctionModal.show();
+                } else {
+                    console.error("No images returned from backend");
+                }
+            } else {
+                console.error("Failed to send data to backend");
+            }
+        } catch (error) {
+            console.error("Error sending data to backend:", error);
         }
     }
 

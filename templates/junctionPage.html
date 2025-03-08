@@ -28,9 +28,9 @@ Your Models Junctions
     </div>
 </div>
 
-<!-- Junction modal - when clicked on, will show an image of the junctions performance -->
+<!-- Junction modal -->
 <div class="modal fade" id="junctionDetailsModal" tabindex="-1" aria-labelledby="junctionDetailsModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <!-- Header -->
             <div class="modal-header" style="background-color: #2B7A78;">
@@ -38,11 +38,39 @@ Your Models Junctions
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
-            <!-- Image -->
+            <!-- Body with tabs -->
             <div class="modal-body" style="background-color: #DEF2F1;">
-                <center>
-                    <img id="junctionImage" src="static/example.jpg" class="img-fluid" alt="Junction Image">
-                </center>
+                <!-- Buttons to navigate between the 3 images -->
+                <ul class="nav nav-tabs" id="imageTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active text-black" id="maxWaitTab" data-bs-toggle="tab" data-bs-target="#maxWaitContent" type="button" role="tab" aria-controls="maxWaitContent" aria-selected="true">
+                            Maximum Wait Time
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link text-black" id="avgWaitTab" data-bs-toggle="tab" data-bs-target="#avgWaitContent" type="button" role="tab" aria-controls="avgWaitContent" aria-selected="false">
+                            Average Wait Time
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link text-black" id="maxQueueTab" data-bs-toggle="tab" data-bs-target="#maxQueueContent" type="button" role="tab" aria-controls="maxQueueContent" aria-selected="false">
+                            Maximum Queue Length
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Will show the images here, however, have plceholders whilst wait for images to be generated -->
+                <div class="tab-content mt-3">
+                    <div class="tab-pane fade show active" id="maxWaitContent" role="tabpanel" aria-labelledby="maxWaitTab">
+                        <center><img id="maxWaitTimeImage" src="static/placeholder.jpg" class="img-fluid" alt="Maximum Wait Time Image"></center>
+                    </div>
+                    <div class="tab-pane fade" id="avgWaitContent" role="tabpanel" aria-labelledby="avgWaitTab">
+                        <center><img id="avgWaitTimeImage" src="static/placeholder.jpg" class="img-fluid" alt="Average Wait Time Image"></center>
+                    </div>
+                    <div class="tab-pane fade" id="maxQueueContent" role="tabpanel" aria-labelledby="maxQueueTab">
+                        <center><img id="maxQueueLengthImage" src="static/placeholder.jpg" class="img-fluid" alt="Maximum Queue Length Image"></center>
+                    </div>
+                </div>
             </div>
 
             <!-- Footer -->

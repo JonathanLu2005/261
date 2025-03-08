@@ -219,7 +219,7 @@ def addJunction():
     # After adding the new junction, call this to show the junctions and the new one to user
     return getAllJunctions()
 
-# Receiving data to create visualisations
+# Visualisation code
 @app.route("/api/receiveJunctionData", methods=["POST"])
 def receiveJunctionData():
     # Retrieve data from the junction
@@ -235,19 +235,27 @@ def receiveJunctionData():
     if not modelID or not junctionID:
         return jsonify({"Error": "Missing modelId or junctionId"}), 400
 
-    # INTEGRATE GRAPHIC CODE HERE, THE ABOVE PROVIDES THE JUNCTION AND MODEL ID NEEDED
-
     conn, cursor = getDatabaseConnection()
-    if (conn != None and cursor != None):
-        cursor.execute("SELECT junctionname FROM junctionconfigurations WHERE junctionid = %s", (junctionID,))
+    # Calls visualiastion code, generates the images and send the file paths to frontend to use
+    if conn is not None and cursor is not None:
+        cursor.execute("SELECT junctionname FROM junctionconfigurations WHERE junctionid = %s", (junctionID,),)
         junction_name = cursor.fetchone()
-        if junctionID:
-            image_path = plot_current_junction(junctionID, junction_name, conn, "maximumwaittime", "Maximum Wait Time (seconds)", "Maximum Wait Time per Direction")
-            plot_current_junction(junctionID, junction_name, conn, "averagewaittime", "Average Wait Time (seconds)", "Average Wait Time per Direction")
-            plot_current_junction(junctionID, junction_name, conn, "maximumqueuelength", "Maximum Queue Length (cars)", "Maximum Queue Length per Direction")
 
-    # Generates image and is stored in static, to show to frontend when user clicks on junction and want to see performance visualisations
-    return jsonify({"Message": "Data received successfully", "image_path": f"/{image_path}" if image_path else None }), 200
+        if junction_name:
+            # Generates images and store the file paths
+            max_wait_image = plot_current_junction(junctionID, junction_name, conn, "maximumwaittime", "Maximum Wait Time (seconds)", "Maximum Wait Time per Direction",)
+            avg_wait_image = plot_current_junction(junctionID, junction_name, conn, "averagewaittime", "Average Wait Time (seconds)", "Average Wait Time per Direction",)
+            max_queue_image = plot_current_junction(junctionID, junction_name, conn, "maximumqueuelength", "Maximum Queue Length (cars)", "Maximum Queue Length per Direction",)
+
+            # Return all image paths
+            return jsonify({"Message": "Data received successfully",
+                "images": {
+                    "maximumwaittime": f"/{max_wait_image}" if max_wait_image else None,
+                    "averagewaittime": f"/{avg_wait_image}" if avg_wait_image else None,
+                    "maximumqueuelength": f"/{max_queue_image}" if max_queue_image else None,
+                },}), 200
+
+    return jsonify({"Error": "Failed to process request"}), 500
 
 # Help page - returns the help section 
 @app.route("/helpPage", methods=["POST", "GET"])

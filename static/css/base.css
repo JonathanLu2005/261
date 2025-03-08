@@ -17,6 +17,19 @@ body {
     top: 0;
     z-index: 1030;
 }
+
+/* Removes modal backdrop */
+.modal-backdrop {
+    display: none !important;
+    opacity: 0 !important;
+}
+
+/* Body scroll for modal */
+body.modal-open {
+    overflow: auto !important;
+    padding-right: 0 !important;
+}
+
   
 /* Shrink hover effect */
 .hvr-shrink {
