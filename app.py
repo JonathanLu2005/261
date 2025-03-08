@@ -3,6 +3,7 @@ from flask import Flask, render_template, request, jsonify, redirect, url_for, s
 import os
 # Enum for directions for the model
 from enum import IntEnum
+from database.database import getDatabaseConnection
 # Importing inbuilt database method to retrieve and insert data
 from database.database import (
     insertModelTrafficFlowData,
@@ -21,6 +22,7 @@ import simpy
 from model.Results import ( 
     runModel
 )
+from PresentingResultsAnalysis import plot_current_junction
 
 # Global variable holds the ID of the user to fetch the correct models and junctions belonging to the user
 currentUserID = None
@@ -235,10 +237,19 @@ def receiveJunctionData():
 
     # INTEGRATE GRAPHIC CODE HERE, THE ABOVE PROVIDES THE JUNCTION AND MODEL ID NEEDED
 
-    # Generates image and is stored in static, to show to frontend when user clicks on junction and want to see performance visualisations
-    return jsonify({"Message": "Data received successfully"}), 200
+    conn, cursor = getDatabaseConnection()
+    if (conn != None and cursor != None):
+        cursor.execute("SELECT junctionname FROM junctionconfigurations WHERE junctionid = %s", (junctionID,))
+        junction_name = cursor.fetchone()
+        if junctionID:
+            image_path = plot_current_junction(junctionID, junction_name, conn, "maximumwaittime", "Maximum Wait Time (seconds)", "Maximum Wait Time per Direction")
+            plot_current_junction(junctionID, junction_name, conn, "averagewaittime", "Average Wait Time (seconds)", "Average Wait Time per Direction")
+            plot_current_junction(junctionID, junction_name, conn, "maximumqueuelength", "Maximum Queue Length (cars)", "Maximum Queue Length per Direction")
 
-# Help page - returns the help section
+    # Generates image and is stored in static, to show to frontend when user clicks on junction and want to see performance visualisations
+    return jsonify({"Message": "Data received successfully", "image_path": f"/{image_path}" if image_path else None }), 200
+
+# Help page - returns the help section 
 @app.route("/helpPage", methods=["POST", "GET"])
 def helpPage():
     return render_template("helpPage.html")

@@ -56,7 +56,12 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         if (response.ok) {
+            const data = await response.json(); 
             console.log("Data sent successfully to backend");
+            if (data.image_path) { 
+                console.log(data.image_path)
+                document.querySelector("junctionImage").src = data.image_path;
+        }
         } else {
             console.error("Failed to send data to backend");
         }

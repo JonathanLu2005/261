@@ -1,4 +1,6 @@
 import psycopg2
+import matplotlib
+matplotlib.use('Agg')  # Ensures plots are saved without a GUI
 import matplotlib.pyplot as plt
 import os
 import numpy as np
@@ -58,12 +60,14 @@ def plot_current_junction(junction_id, junction_name, conn, metric, ylabel, titl
         plt.grid(axis='y', linestyle='--', alpha=0.7)
 
         # Save as a png file
-        filename = f"{junction_name}_{metric}.png"
+        filename = f"static/images/{junction_name}_{metric}.png"
         plt.savefig(filename, bbox_inches='tight', dpi=300)
+        plt.close()
         print(f"Graph saved as {filename}")
-
+        return filename
     else:
         print(f"No data found for junction: {junction_id}")
+        return None
 
 def plot_all_junctions(model_id, conn, metric, ylabel, title):
     # Generic function to plot performance metrics for all junctions in a model.
@@ -112,6 +116,7 @@ def plot_all_junctions(model_id, conn, metric, ylabel, title):
         # Save as a png file
         filename = f"Model_{model_id}_{metric}.png"
         plt.savefig(filename, bbox_inches='tight', dpi=300)
+        plt.close()
         print(f"Graph saved as {filename}")
 
     else:
@@ -245,6 +250,7 @@ def plot_junction_rankings_for_model(modelid):
         
     # Save the plot
     plt.savefig("Junction_Rating_Graph.jpg", bbox_inches='tight', dpi=300)
+    plt.close()
 
 
 
