@@ -1,0 +1,29 @@
+# README
+
+## Installation Steps
+
+Download the project files
+
+Make sure Python 3.6 or later is installed on your system. You can download it from [python.org](https://www.python.org/downloads/).
+
+Run below to install all dependencies required
+```bash
+pip install pytest simpy psycopg2 flask matplotlib numpy
+```
+
+## Running the Application
+
+Open a terminal
+
+Navigate to the project's root directory
+
+Run the application
+
+```bash
+python app.py
+```
+
+Once the application is running, you can access it by this link
+```
+http://127.0.0.1:5000/
+```
