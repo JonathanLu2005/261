@@ -194,6 +194,29 @@ def retrieveAllModelJunctions(InputModelID):
         # Close connection
         closeDatabaseConnection(connection, cursor)
 
+# Retrieve latest junction ID
+def retrieveLatestJunctionID():
+    # Get connection and cursor
+    connection, cursor = getDatabaseConnection()   
+
+    if connection is None or cursor is None:
+        print("Failed to connect to the database.")
+        return []
+
+    try:
+        # Get latest junction ID
+        cursor.execute("SELECT * FROM getLatestJunctionID();")
+        latestJunctionID = cursor.fetchone()
+
+        # Send to app.py
+        return latestJunctionID[0]
+    except Exception as e:
+        print(f"Error: {e}")
+        return []
+    finally:
+        # Close connection
+        closeDatabaseConnection(connection, cursor)
+
 # Retrieve data for simulation
 def retrieveSimulationData(InputModelID):
     # Get connection and cursor

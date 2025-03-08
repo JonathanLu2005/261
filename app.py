@@ -12,7 +12,8 @@ from database.database import (
     retrieveSimulationData,
     insertJunctionPerformance,
     insertUserDetails,
-    getUserID
+    getUserID,
+    retrieveLatestJunctionID
 )
 # Importing whats required for the simulation code to run
 from model.TrafficControl import TrafficControl, Direction
@@ -202,13 +203,15 @@ def addJunction():
         ],
     )
 
+    junctionID = retrieveLatestJunctionID()
+
     # Receive the results of the junction and insert into database
     insertJunctionPerformance(
-        simulationResults.northMaxWaitingTime, simulationResults.northMaxQueueLength, simulationResults.northAvgWaitingTime, simulationResults.northTotalVehiclesPassed, 
-        simulationResults.eastMaxWaitingTime, simulationResults.eastMaxQueueLength, simulationResults.eastAvgWaitingTime, simulationResults.eastTotalVehiclesPassed,
-        simulationResults.southMaxWaitingTime, simulationResults.southMaxQueueLength, simulationResults.southAvgWaitingTime, simulationResults.southTotalVehiclesPassed,
-        simulationResults.westMaxWaitingTime, simulationResults.westMaxQueueLength, simulationResults.westAvgWaitingTime, simulationResults.westTotalVehiclesPassed,
-        junctionData["junctionid"]
+        float(simulationResults.northMaxWaitingTime), float(simulationResults.northMaxQueueLength), float(simulationResults.northAvgWaitingTime), float(simulationResults.northTotalVehiclesPassed), 
+        float(simulationResults.eastMaxWaitingTime), float(simulationResults.eastMaxQueueLength), float(simulationResults.eastAvgWaitingTime), float(simulationResults.eastTotalVehiclesPassed),
+        float(simulationResults.southMaxWaitingTime), float(simulationResults.southMaxQueueLength), float(simulationResults.southAvgWaitingTime), float(simulationResults.southTotalVehiclesPassed),
+        float(simulationResults.westMaxWaitingTime), float(simulationResults.westMaxQueueLength), float(simulationResults.westAvgWaitingTime), float(simulationResults.westTotalVehiclesPassed),
+        junctionID
     )
 
     # After adding the new junction, call this to show the junctions and the new one to user

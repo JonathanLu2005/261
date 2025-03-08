@@ -229,6 +229,21 @@ CREATE TABLE IF NOT EXISTS junctionconfigurations (
     modelid INTEGER NOT NULL REFERENCES modeltrafficflow(modelid)
 );
 
+-- Junction, retrieve most recent added junction ID
+CREATE OR REPLACE FUNCTION getLatestJunctionID()
+RETURNS INTEGER AS $$
+DECLARE
+    latestJunctionID INTEGER;
+BEGIN
+    -- Retrieve the maximum junctionid
+    SELECT MAX(junctionid) INTO latestJunctionID
+    FROM junctionconfigurations;
+
+    -- Return the result
+    RETURN latestJunctionID;
+END;
+$$ LANGUAGE plpgsql;
+
 -- Junction - Add data
 CREATE OR REPLACE FUNCTION insertJunctionConfigurations(InputJunctionName VARCHAR, InputNumberOfLanes INTEGER, InputJunctionSideLength INTEGER,
                                                         InputPedestrianCrossingAdded BOOLEAN, InputPedestrianCrossingDuration INTEGER, InputPedestrianRequestsPerHour INTEGER,
@@ -316,38 +331,38 @@ CREATE TABLE IF NOT EXISTS junctionperformance (
     --overalljunctionscore FLOAT NOT NULL,
 
     -- North results
-    northmaximumwaittime INTEGER NOT NULL,
-    northaveragewaittime INTEGER NOT NULL,
-    northmaximumqueuelength INTEGER NOT NULL,
-    northtotalvehiclespassed INTEGER NOT NULL,
+    northmaximumwaittime FLOAT NOT NULL,
+    northaveragewaittime FLOAT NOT NULL,
+    northmaximumqueuelength FLOAT NOT NULL,
+    northtotalvehiclespassed FLOAT NOT NULL,
 
     -- South results
-    southmaximumwaittime INTEGER NOT NULL,
-    southaveragewaittime INTEGER NOT NULL,
-    southmaximumqueuelength INTEGER NOT NULL,
-    southtotalvehiclespassed INTEGER NOT NULL,
+    southmaximumwaittime FLOAT NOT NULL,
+    southaveragewaittime FLOAT NOT NULL,
+    southmaximumqueuelength FLOAT NOT NULL,
+    southtotalvehiclespassed FLOAT NOT NULL,
 
     -- East results
-    eastmaximumwaittime INTEGER NOT NULL,
-    eastaveragewaittime INTEGER NOT NULL,
-    eastmaximumqueuelength INTEGER NOT NULL,
-    easttotalvehiclespassed INTEGER NOT NULL,
+    eastmaximumwaittime FLOAT NOT NULL,
+    eastaveragewaittime FLOAT NOT NULL,
+    eastmaximumqueuelength FLOAT NOT NULL,
+    easttotalvehiclespassed FLOAT NOT NULL,
 
     -- West results
-    westmaximumwaittime INTEGER NOT NULL,
-    westaveragewaittime INTEGER NOT NULL,
-    westmaximumqueuelength INTEGER NOT NULL,
-    westtotalvehiclespassed INTEGER NOT NULL,
+    westmaximumwaittime FLOAT NOT NULL,
+    westaveragewaittime FLOAT NOT NULL,
+    westmaximumqueuelength FLOAT NOT NULL,
+    westtotalvehiclespassed FLOAT NOT NULL,
 
     -- Refer to what junction performance belongs to
     junctionid INTEGER NOT NULL REFERENCES junctionconfigurations(junctionid)
 );
 
 -- Insert into junction performance 
-CREATE OR REPLACE FUNCTION insertJunctionPerformance(InputNorthMaxWait INTEGER, InputNorthAverageWait INTEGER, InputNorthMaxQueue INTEGER, InputNorthTotal INTEGER,
-                                                    InputSouthMaxWait INTEGER, InputSouthAverageWait INTEGER, InputSouthMaxQueue INTEGER, InputSouthTotal INTEGER,
-                                                    InputEastMaxWait INTEGER, InputEastAverageWait INTEGER, InputEastMaxQueue INTEGER, InputEastTotal INTEGER,
-                                                    InputWestMaxWait INTEGER, InputWestAverageWait INTEGER, InputWestMaxQueue INTEGER, InputWestTotal INTEGER,
+CREATE OR REPLACE FUNCTION insertJunctionPerformance(InputNorthMaxWait FLOAT, InputNorthAverageWait FLOAT, InputNorthMaxQueue FLOAT, InputNorthTotal FLOAT,
+                                                    InputSouthMaxWait FLOAT, InputSouthAverageWait FLOAT, InputSouthMaxQueue FLOAT, InputSouthTotal FLOAT,
+                                                    InputEastMaxWait FLOAT, InputEastAverageWait FLOAT, InputEastMaxQueue FLOAT, InputEastTotal FLOAT,
+                                                    InputWestMaxWait FLOAT, InputWestAverageWait FLOAT, InputWestMaxQueue FLOAT, InputWestTotal FLOAT,
                                                     InputJunctionID INTEGER)
                                                     RETURNS VOID AS $$
 BEGIN 
@@ -369,10 +384,10 @@ $$ LANGUAGE plpgsql;
 -- Get junction performance data
 CREATE OR REPLACE FUNCTION retrieveJunctionPerformance(InputJunctionID INTEGER)
 RETURNS TABLE (
-    northmaximumwaittime INTEGER, northaveragewaittime INTEGER, northmaximumqueuelength INTEGER, northtotalvehiclespassed INTEGER,
-    southmaximumwaittime INTEGER, southaveragewaittime INTEGER, southmaximumqueuelength INTEGER, southtotalvehiclespassed INTEGER,
-    eastmaximumwaittime INTEGER, eastaveragewaittime INTEGER, eastmaximumqueuelength INTEGER, easttotalvehiclespassed INTEGER,
-    westmaximumwaittime INTEGER, westaveragewaittime INTEGER, westmaximumqueuelength INTEGER, westtotalvehiclespassed INTEGER
+    northmaximumwaittime FLOAT, northaveragewaittime FLOAT, northmaximumqueuelength FLOAT, northtotalvehiclespassed FLOAT,
+    southmaximumwaittime FLOAT, southaveragewaittime FLOAT, southmaximumqueuelength FLOAT, southtotalvehiclespassed FLOAT,
+    eastmaximumwaittime FLOAT, eastaveragewaittime FLOAT, eastmaximumqueuelength FLOAT, easttotalvehiclespassed FLOAT,
+    westmaximumwaittime FLOAT, westaveragewaittime FLOAT, westmaximumqueuelength FLOAT, westtotalvehiclespassed FLOAT
 ) AS
 $$
 BEGIN
