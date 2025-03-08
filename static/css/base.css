@@ -5,40 +5,7 @@
     box-sizing: border-box;
 }
   
-/* For hero image */
-.hero-image {
-    background-size: cover; 
-    background-position: center; 
-    height: 400px; 
-    width: 100vw; 
-    position: relative; 
-    margin-bottom: 0; 
-}
-  
-.hero-image .mask {
-    background-color: rgba(0, 0, 0, 0.6); 
-    height: 100%; 
-    width: 100%; 
-    position: absolute; 
-    top: 0; 
-    left: 0; 
-}
-  
-.hero-image .d-flex {
-    position: relative; 
-    z-index: 1; 
-}
-  
-/* Border below hero image */
-.border-bottom {
-    height: 8px; 
-    background-color: #2B7A78; 
-    width: 100vw; 
-    position: relative;
-    margin: 0; 
-}
-  
-/* Stops banner image from overflowing */
+/* Stops overflowing */
 body {
     overflow-x: hidden; 
     overflow-y: auto;   
@@ -85,22 +52,6 @@ body {
     transform: scale(1.2);
     -webkit-transition-timing-function: cubic-bezier(0.47, 2.02, 0.31, -0.36);
     transition-timing-function: cubic-bezier(0.47, 2.02, 0.31, -0.36);
-}
-  
-/* Glow hover effect for exec */
-.hvr-glow-exec {
-    display: inline-block;
-    vertical-align: middle;
-    -webkit-transform: perspective(1px) translateZ(0);
-    transform: perspective(1px) translateZ(0);
-    box-shadow: 0 0 1px rgba(0, 0, 0, 0);
-    -webkit-transition-duration: 0.3s;
-    transition-duration: 0.3s;
-    -webkit-transition-property: box-shadow;
-    transition-property: box-shadow;
-}
-.hvr-glow-exec:hover, .hvr-glow-exec:focus, .hvr-glow-exec:active {
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.6);
 }
   
 /* Glow hover effect */
@@ -359,26 +310,6 @@ body {
     transform: scale(1.1);
 }
   
-/* Grow hover effect for execs */
-.hvr-grow-exec {
-    display: inline-block;
-    vertical-align: middle;
-    -webkit-transform: perspective(1px) translateZ(0);
-    transform: perspective(1px) translateZ(0);
-    box-shadow: 0 0 1px rgba(0, 0, 0, 0);
-    -webkit-transition-duration: 0.3s;
-    transition-duration: 0.3s;
-    -webkit-transition-property: transform;
-    transition-property: transform;
-}
-  
-.hvr-grow-exec:hover,
-.hvr-grow-exec:focus,
-.hvr-grow-exec:active {
-    -webkit-transform: scale(1.1);
-    transform: scale(1.1);
-}
-  
 /* Underline From Center */
 .hvr-underline-from-center {
     display: inline-block;
@@ -412,7 +343,7 @@ body {
   
 /* For drop menu responsiveness */ 
 .dropdown-menu {
-    background-color: #0c154a; 
+    background-color: #DEF2F1; 
 }
   
 .dropdown-item {
@@ -423,7 +354,7 @@ body {
   
 .dropdown-item:hover,
 .dropdown-item:focus {
-    background-color: #17252A;
+    background-color: #DEF2F1;
     color: #ffffff; 
 }
   

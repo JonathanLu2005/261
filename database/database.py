@@ -1,6 +1,6 @@
 import psycopg2
 
-# Connection parameters
+# Connection parameters for render cloud database
 host = "dpg-cuo9l73qf0us738ub4gg-a.frankfurt-postgres.render.com"
 port = "5432"
 database = "db_261database"
@@ -50,6 +50,7 @@ def insertModelTrafficFlowData(InputModelName, InputSimulationTime,
                             InputWestboundWestSpecial, InputWestboundNorthSpecial, InputWestboundSouthSpecial,
                             InputMaximumWaitTimeWeight, InputAverageWaitTimeWeight, InputMaximumQueueLengthWeight,
                             InputUserID):
+    # Get connection and cursor
     connection, cursor = getDatabaseConnection()
 
     if connection is None or cursor is None:
@@ -57,6 +58,7 @@ def insertModelTrafficFlowData(InputModelName, InputSimulationTime,
         return []
     
     try:
+        # Call SQL method and insert model data
         cursor.execute("""
             SELECT insertModelTrafficFlow(%s, %s,
             %s, %s, %s,
@@ -89,15 +91,19 @@ def insertModelTrafficFlowData(InputModelName, InputSimulationTime,
             InputUserID
         ))
 
+        # Add to database
         connection.commit()
     except Exception as e:
+        # Any errors can rollback
         print(f"Error: {e}")
         connection.rollback()
     finally:
+        # Close connection
         closeDatabaseConnection(connection, cursor)
 
 # Retrieve all model names
 def retrieveAllModelNames(InputUserID):
+    # Get connection and cursor
     connection, cursor = getDatabaseConnection()
 
     if connection is None or cursor is None:
@@ -105,15 +111,18 @@ def retrieveAllModelNames(InputUserID):
         return []
     
     try:
+        # Get all models belonging to the user
         cursor.execute("SELECT * FROM retrieveAllModelNames(%s);", (InputUserID,))
 
         allModelInformation = cursor.fetchall()
 
+        # Return to app.py to use
         return allModelInformation
     except Exception as e:
         print(f"Error: {e}")
         return []
     finally:
+        # Close connection
         closeDatabaseConnection(connection, cursor)
 
 # Insert junction configurations data
@@ -124,6 +133,7 @@ def insertJunctionConfigurationsData(InputJunctionName, InputNumberOfLanes, Inpu
                                      InputLeftTurnLane, InputRightTurnLane,
                                      InputSpecialLane, InputSpecialLaneRatio,
                                      InputModelID):
+    # Get connection and cursor
     connection, cursor = getDatabaseConnection()
 
     if connection is None or cursor is None:
@@ -131,6 +141,7 @@ def insertJunctionConfigurationsData(InputJunctionName, InputNumberOfLanes, Inpu
         return []
     
     try:
+        # Insert junction design 
         cursor.execute("""
             SELECT insertJunctionConfigurations(%s, %s, %s,
             %s, %s, %s,
@@ -149,15 +160,19 @@ def insertJunctionConfigurationsData(InputJunctionName, InputNumberOfLanes, Inpu
             InputModelID
         ))
 
+        # Add to database
         connection.commit()
     except Exception as e:
+        # Any errors can rollback
         print(f"Error: {e}")
         connection.rollback()
     finally:
+        # Close connection
         closeDatabaseConnection(connection, cursor)
 
 # Retrieve all junctions
 def retrieveAllModelJunctions(InputModelID):
+    # Get connection and cursor
     connection, cursor = getDatabaseConnection()
 
     if connection is None or cursor is None:
@@ -165,22 +180,23 @@ def retrieveAllModelJunctions(InputModelID):
         return []
 
     try:
-        # Execute the function call with the provided modelid
+        # Get model information for given model
         cursor.execute("SELECT * FROM retrieveAllModelJunctions(%s);", (InputModelID,))
 
-        # Fetch all results from the function call
         allJunctionInformation = cursor.fetchall()
 
+        # Send to app.py
         return allJunctionInformation
     except Exception as e:
         print(f"Error: {e}")
         return []
     finally:
-        # Make sure to close the connection properly
+        # Close connection
         closeDatabaseConnection(connection, cursor)
 
 # Retrieve data for simulation
 def retrieveSimulationData(InputModelID):
+    # Get connection and cursor
     connection, cursor = getDatabaseConnection()
 
     if connection is None or cursor is None:
@@ -188,11 +204,12 @@ def retrieveSimulationData(InputModelID):
         return []
 
     try:
-        # Execute the function call with the provided modelid
+        # Get data for simulation to run
         cursor.execute("SELECT * FROM dataForSimulation(%s);", (InputModelID,))  
 
         modelSimulationData = cursor.fetchall()
         
+        # Keys to make a hashmap with the model data to make access easier on app.py
         modelKeys = [
             "ModelID", "SimulationTime",
             "NorthboundVphTotal", "SouthboundVphTotal", "EastboundVphTotal", "WestboundVphTotal",
@@ -210,16 +227,16 @@ def retrieveSimulationData(InputModelID):
             "MaximumWaitTimeWeight", "AverageWaitTimeWeight", "MaximumQueueLengthWeight"
         ]
 
+        # Create hashmap with keys and the model data
         modelSimulationDataHashmap = dict(zip(modelKeys, modelSimulationData[0]))
 
-        print("database model data hashmap")
-        print(modelSimulationDataHashmap)
-
+        # Return to app.py
         return modelSimulationDataHashmap
     except Exception as e:
         print(f"Error: {e}")
         return []
     finally:
+        # Close connection and cursor
         closeDatabaseConnection(connection, cursor)
 
 # Insert data to junction performance
@@ -228,6 +245,7 @@ def insertJunctionPerformance(InputNorthMaxWait, InputNorthAverageWait, InputNor
                             InputEastMaxWait, InputEastAverageWait, InputEastMaxQueue, InputEastTotal,
                             InputWestMaxWait, InputWestAverageWait, InputWestMaxQueue, InputWestTotal,
                             InputJunctionID):
+    # Get connection and cursor
     connection, cursor = getDatabaseConnection()
 
     if connection is None or cursor is None:
@@ -235,6 +253,7 @@ def insertJunctionPerformance(InputNorthMaxWait, InputNorthAverageWait, InputNor
         return []
     
     try:
+        # Insert the junction performance to table
         cursor.execute(""" 
             SELECT insertJunctionPerformance(
                 %s, %s, %s, %s,
@@ -248,15 +267,19 @@ def insertJunctionPerformance(InputNorthMaxWait, InputNorthAverageWait, InputNor
             InputWestMaxWait, InputWestAverageWait, InputWestMaxQueue, InputWestTotal,
             InputJunctionID))
         
+        # Add to database
         connection.commit()
     except Exception as e:
+        # If error rollback
         print(f"Error: {e}")
         connection.rollback()
     finally:
+        # Close connection and cursor
         closeDatabaseConnection(connection, cursor)
 
 # Retrieve data from junction performance
 def retrieveJunctionPerformance(InputJunctionID):
+    # Get connection and cursor
     connection, cursor = getDatabaseConnection()
 
     if connection is None or cursor is None:
@@ -264,26 +287,33 @@ def retrieveJunctionPerformance(InputJunctionID):
         return []
     
     try:
+        # Retrieve junction performance
         cursor.execute("SELECT * FROM retrieveJunctionPerformance(%s);", (InputJunctionID,))
         junctionPerformanceData = cursor.fetchall()
-
+        
+        # Keys to create hashmap with junction performance to make it easier to use in app.py
         junctionKeys = [
             "InputNorthMaxWait", "InputNorthAverageWait", "InputNorthMaxQueue", "InputNorthTotal",
             "InputSouthMaxWait", "InputSouthAverageWait", "InputSouthMaxQueue", "InputSouthTotal",
             "InputEastMaxWait", "InputEastAverageWait", "InputEastMaxQueue", "InputEastTotal",
             "InputWestMaxWait", "InputWestAverageWait", "InputWestMaxQueue", "InputWestTotal"
         ]
+
+        # Create hashmap
         junctionSimulationDataHashmap = dict(zip(junctionKeys, junctionPerformanceData[0]))
 
+        # Return to app.py
         return junctionSimulationDataHashmap
     except Exception as e:
         print(f"Error: {e}")
         return []
     finally:
+        # Close connection and cursor
         closeDatabaseConnection(connection, cursor)
 
 # Insert user details
 def insertUserDetails(InputUsername, InputPassword):
+    # Get connection and cursor
     connection, cursor = getDatabaseConnection()
 
     if connection is None or cursor is None:
@@ -291,19 +321,24 @@ def insertUserDetails(InputUsername, InputPassword):
         return [] 
     
     try: 
+        # Insert to user table
         cursor.execute(""" 
         SELECT insertUser(%s, %s)
         """, (InputUsername, InputPassword))
 
+        # Add to database
         connection.commit()
     except Exception as e:
+        # If error, rollback
         print(f"Error: {e}")
         connection.rollback()
     finally:
+        # Close connection and cursor
         closeDatabaseConnection(connection, cursor)
 
 # Retrieve user id
 def getUserID(InputUsername, InputPassword):
+    # Get connection and cursor
     connection, cursor = getDatabaseConnection()
 
     if connection is None or cursor is None:
@@ -311,11 +346,15 @@ def getUserID(InputUsername, InputPassword):
         return []
     
     try: 
+        # Get user id given username and password
         cursor.execute("SELECT * FROM getUserID(%s, %s);", (InputUsername, InputPassword,))
         userID = cursor.fetchall()
+
+        # Return user id to app.py
         return userID[0][0]
     except Exception as e:
         print(f"Error: {e}")
         return []
     finally:
+        # Close connection and cursor
         closeDatabaseConnection(connection, cursor)

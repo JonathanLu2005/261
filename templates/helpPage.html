@@ -5,8 +5,11 @@ Help Page
 {% endblock %}
 
 {% block content %}
+
+<!-- Contains information about how to use the system -->
 <div class="container my-5 p-4 rounded" style="background-color: #DEF2F1; border: 2px solid #2B7A78;">
     <h2 class="text-center">System Overview</h2>
+    <!-- Introduction to the system purpose -->
     <p id="main-text">
         Challenged by restricted resources, councils have had limited success in improving road networks. This warrants the
         creation of a system to allow users to model junctions and simulate their traffic flow to determine their effectiveness.
@@ -24,6 +27,7 @@ Help Page
 
 <div class="container text-center my-5">
     <div class="btn-group" role="group">
+        <!-- Buttons to choose and learn different points of how the system works -->
         <button class="btn btn-primary mx-2 rounded-pill" onclick="changeText('overview')">Overview</button>
         <button class="btn btn-primary mx-2 rounded-pill" onclick="changeText('interface')">Interface</button>
         <button class="btn btn-primary mx-2 rounded-pill" onclick="changeText('modelData')">Model Data</button>
@@ -33,5 +37,6 @@ Help Page
 {% endblock %}
 
 {% block scripts %}
+<!-- JS code to change the text when a button is clicked -->
 <script src="/static/javascript/helpSection.js"></script>
 {% endblock %}

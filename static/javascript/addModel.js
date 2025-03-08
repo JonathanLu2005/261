@@ -1,13 +1,16 @@
+/* For the model page */
 document.addEventListener("DOMContentLoaded", async () => {
+  /* Get HTML elements */
   const modelForm = document.getElementById("addModelForm");
   const nextButton = document.getElementById("next");
   const submitButton = document.getElementById("submitModel");
   const modelsFolder = document.getElementById("modelsFolder");
 
-  // Render models function
+  /* Render models */
   function renderModels(models) {
     modelsFolder.innerHTML = "";
     models.forEach((model) => {
+      /* Create cards for each model to frontend */
       const modelCard = document.createElement("div");
       modelCard.className = "col";
       modelCard.innerHTML = `
@@ -16,11 +19,12 @@ document.addEventListener("DOMContentLoaded", async () => {
                     <h5 class="card-title">${model.name}</h5>
                 </div>
             </div>`;
+      /* Add to where models are shown */
       modelsFolder.appendChild(modelCard);
     });
   }
 
-  // Initial fetch of models
+  /* Receive all models from backend and render it */
   try {
     const response = await fetch("/api/models");
     const models = await response.json();
@@ -190,7 +194,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Expose validation function for navigation modules if needed
   window.validateCurrentStep = validateCurrentStep;
 
-  // Handle form submission
+  /* Handle model form */
   modelForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     const valid = validateCurrentStep();
@@ -198,18 +202,24 @@ document.addEventListener("DOMContentLoaded", async () => {
       alert("Please correct the errors before submitting.");
       return;
     }
+    /* Retrieve model data */
     const modelFormData = new FormData(modelForm);
     const modelData = Object.fromEntries(modelFormData);
 
     try {
+      /* Attempts to add model data in backend */
       const response = await fetch("/addModel", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(modelData),
       });
+
       if (response.ok) {
+        /* After adding, will render models */
         const updatedModels = await response.json();
         renderModels(updatedModels);
+
+        /* Close modal */
         modelForm.reset();
         const modelModal = document.getElementById("addModelModal");
         const modalInstance = bootstrap.Modal.getInstance(modelModal);

@@ -1,4 +1,6 @@
+/* For junction page modal navigation */
 document.addEventListener("DOMContentLoaded", () => {
+    /* Junction modal, gets the buttons from the modal */
     const steps = Array.from(document.querySelectorAll(".step"));
     const prevButton = document.getElementById("prev");
     const nextButton = document.getElementById("next");
@@ -7,7 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let currentStep = 0;
 
-    // Function to update visible steps
+    /* Change step when moving back and forth on modal */
     function updateStep() {
         steps.forEach((step, index) => {
             step.classList.toggle("d-none", index !== currentStep);
@@ -18,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
         submitButton.classList.toggle("d-none", !onLastStep);
     }
 
-    // Move to the next step
+    /* Move to next part of modal */
     nextButton.addEventListener("click", () => {
         if (currentStep < steps.length - 1) {
             currentStep++;
@@ -26,7 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // Move to the previous step
+    /* Move previous part of modal */
     prevButton.addEventListener("click", () => {
         if (currentStep > 0) {
             currentStep--;
@@ -34,13 +36,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // Handle form submission
+    /* Handle form submission */
     form.addEventListener("submit", (event) => {
         event.preventDefault();
-        // Additional logic for handling form data
     });
 
-    // Initialize the step visibility
     updateStep();
 });
 

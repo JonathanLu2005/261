@@ -1,26 +1,27 @@
+/* Background for each page */
 document.addEventListener('DOMContentLoaded', function () {
     AOS.init();
 
     function initVanta() {
-        // Check if a VANTA effect is already initialized and destroy it
         if (window.vantaEffect) {
             window.vantaEffect.destroy(); 
         }
+        
+        /* Add background to full page */
+        var fullPage = document.body; 
 
-        var fullPage = document.body; // Target the entire body or a full-screen container
-
-        // Ensure dimensions are accurate before initializing VANTA
+        /* Ensure accurate dimensions */
         var width = window.innerWidth;
         var height = window.innerHeight;
 
-        // Initialize VANTA Globe effect for larger screens
+        /* Create globel effect */
         if (window.innerWidth > 576) {
             fullPage.style.backgroundColor = 'transparent';
 
-            // Use requestAnimationFrame for smooth initialization
+            /* For smooth initialisation */
             window.requestAnimationFrame(function() {
                 window.vantaEffect = VANTA.GLOBE({
-                    el: fullPage, // Target the entire page or any other container
+                    el: fullPage, 
                     mouseControls: true,
                     touchControls: true,
                     gyroControls: false,
@@ -28,29 +29,37 @@ document.addEventListener('DOMContentLoaded', function () {
                     minWidth: width,
                     scale: 1.00,
                     scaleMobile: 1.00,
-                    color: 0x2b7a78, // Set the color for the globe effect
-                    size: 1.40, // Set the size of the globe
-                    backgroundColor: 0xdef2f1 // Set the background color for the effect
+                    color: 0x2b7a78, 
+                    size: 1.40, 
+                    backgroundColor: 0xdef2f1 
                 });
             });
         } else {
-            // For smaller screens, set a default background color
-            fullPage.style.backgroundColor = '#243282';
+            /* Smaller screens, set a default background colour */
+            fullPage.style.backgroundColor = '#DEF2F1';
             if (window.vantaEffect) {
-                window.vantaEffect.destroy(); // Destroy any active effect on smaller screens
+                window.vantaEffect.destroy(); 
             }
         }
     }
 
-    initVanta(); // Initialize the VANTA effect
+    /* Run background effect */
+    initVanta(); 
 
-    // Reinitialize the VANTA effect on resize to ensure it's responsive
+    /* Reinitialise VANTA if page resizes for responsiveness */
     window.addEventListener('resize', function() {
         initVanta();
     });
 
-    // Ensure initialization when the window is fully loaded
+    /* Initialise when window is fully loaded */
     window.addEventListener('load', function() {
         initVanta();
     });
 });
+
+/*  
+Citation:
+https://www.vantajs.com/?effect=globe#(backgroundAlpha:1,backgroundColor:#def2f1,color:#2b7a78,color2:16777215,gyroControls:!f,maxDistance:20,minHeight:200,minWidth:200,mouseControls:!t,points:10,scale:1,scaleMobile:1,showDots:!t,size:1.4000000000000001,spacing:15,touchControls:!t)
+
+Found nice background here to use
+*/

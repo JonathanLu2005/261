@@ -1,23 +1,23 @@
+/* For junction page */
 document.addEventListener("DOMContentLoaded", () => {
-    // Retrieve modelId from the URL
+    /* Get junction model id */
     const urlParams = new URLSearchParams(window.location.search);
-    const modelId = urlParams.get("modelId"); // Get modelId from the query string
-    console.log("Model ID:", modelId); // Check the modelId
+    const modelId = urlParams.get("modelId"); 
 
-    // Handle form submission
+    /* Handles junction form */
     const junctionForm = document.getElementById("addJunctionForm");
     junctionForm.addEventListener("submit", async (event) => {
         event.preventDefault();
 
+        /* Get junction form data */
         const formData = new FormData(junctionForm);
         const junctionData = Object.fromEntries(formData);
 
-        // Attach modelId to the junction data
+        /* Get junction model id */
         junctionData.modelId = modelId;
 
-        console.log("Junction Data:", junctionData); // Debug print to check junction data before sending
-
         try {
+            /* Try to add junction in backend */
             const response = await fetch("/addJunction", {
                 method: "POST",
                 headers: {
@@ -29,10 +29,8 @@ document.addEventListener("DOMContentLoaded", () => {
             if (response.ok) {
                 console.log("Junction added successfully!");
 
-                // Reset the form
+                /* Close modal after adding */
                 junctionForm.reset();
-
-                // Close the modal
                 const junctionModal = document.getElementById("addJunctionModal");
                 const modalInstance = bootstrap.Modal.getInstance(junctionModal);
                 if (modalInstance) {

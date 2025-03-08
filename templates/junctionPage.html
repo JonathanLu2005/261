@@ -7,11 +7,13 @@ Your Models Junctions
 
 {% block content %}
 <div class="container mt-5">
-    <!-- Add Junction and Search Bar -->
     <div class="d-flex align-items-center mb-3">
+        <!-- Add junction and fill in the data -->
         <button class="btn btn-primary me-4" data-bs-toggle="modal" data-bs-target="#addJunctionModal">
             Add Junction
         </button>
+
+        <!-- Search junctions by names -->
         <input 
             type="text" 
             id="searchJunctionInput" 
@@ -20,25 +22,30 @@ Your Models Junctions
         />
     </div>
 
+    <!-- Dynamically show junctions the user created -->
     <div id="junctionsFolder" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4"
     data-bs-toggle="modal" data-bs-target="#junctionDetailsModal">
-        <!-- Dynamically populated -->
     </div>
 </div>
 
-<!-- Junction Details Modal -->
+<!-- Junction modal - when clicked on, will show an image of the junctions performance -->
 <div class="modal fade" id="junctionDetailsModal" tabindex="-1" aria-labelledby="junctionDetailsModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
+            <!-- Header -->
             <div class="modal-header" style="background-color: #2B7A78;">
                 <h5 class="modal-title text-white" id="junctionDetailsModalLabel">Junction Results</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
+
+            <!-- Image -->
             <div class="modal-body" style="background-color: #DEF2F1;">
                 <center>
                     <img src="static/example.jpg" class="img-fluid" alt="Junction Image">
                 </center>
             </div>
+
+            <!-- Footer -->
             <div class="modal-footer" style="background-color: #2B7A78;">
                 <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
             </div>
@@ -46,12 +53,12 @@ Your Models Junctions
     </div>
 </div>
 
-
-<!-- Modal for adding junction -->
+<!-- Adding junction modal - will open and ask for data for the user to design junctions -->
 <div class="modal fade" id="addJunctionModal" tabindex="-1" aria-labelledby="addJunctionModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <form id="addJunctionForm">
+                <!-- Header -->
                 <div class="modal-header" style="background-color: #2B7A78">
                     <h5 class="modal-title text-white" id="addJunctionModalLabel">
                         Add New Junction
@@ -61,11 +68,11 @@ Your Models Junctions
 
                 <!-- Modal Body -->
                 <div class="modal-body" style="background-color: #DEF2F1">
-                    <!-- Step 1: Junction Name and Lanes -->
+                    <!-- Step 1: Add junction name, number of lane, and junction side length -->
                     <div class="step" id="step1">
-                        <p>Please provide the simulation data</p>
+                        <p>Please provide the junction data</p>
                         <div class="mb-3">
-                            <label for="junctionName" class="form-label">Simulation Name</label>
+                            <label for="junctionName" class="form-label">Junction Name</label>
                             <input type="text" class="form-control" id="junctionName" name="junctionName" placeholder="Simulation Name" required>
                         </div>
                         <div class="mb-3">
@@ -78,7 +85,7 @@ Your Models Junctions
                         </div>
                     </div>
 
-                    <!-- Step 2: Adding pedestrian crossing -->
+                    <!-- Step 2: Add pedestrian crossing, duration of crossing, and number of crossing requests -->
                     <div class="step d-none" id="step2">
                         <div class="mb-3">
                             <label class="form-label" for="pedestrianCrossingAdded">
@@ -113,7 +120,7 @@ Your Models Junctions
                         </div>
                     </div>
 
-                    <!-- Step 3: Adding directions order -->
+                    <!-- Step 3: Add traffic light order -->
                     <div class="step d-none" id="step3">
                         <p>Please provide the traffic light ordering from each 4 directions</p>
                         <div class="mb-3">
@@ -246,9 +253,7 @@ Your Models Junctions
                     </div>
                 </div>
 
-
-
-                <!-- Modal Footer -->
+                <!-- Modal Footer - buttons to navigate and save the junction data -->
                 <div class="modal-footer" style="background-color: #2B7A78">
                     <button type="button" class="btn btn-warning d-none" id="prev">Back</button>
                     <button type="button" class="btn btn-warning" id="next">Next</button>
@@ -263,6 +268,7 @@ Your Models Junctions
 
 
 {% block scripts %}
+<!-- JS files to make the junction page work -->
 <script src="{{ url_for('static', filename='javascript/modalJunctionNavigation.js') }}"></script>
 <script src="{{ url_for('static', filename='javascript/junctionFormSent.js') }}"></script>
 <script src="{{ url_for('static', filename='javascript/addJunctions.js') }}"></script>

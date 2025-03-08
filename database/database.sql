@@ -1,11 +1,11 @@
--- User Table 
+-- User table, stores the user information
 CREATE TABLE IF NOT EXISTS users (
     userid SERIAL PRIMARY KEY,
     username VARCHAR(100) NOT NULL,
     password VARCHAR(100) NOT NULL
 );
 
--- Insert
+-- Insert any data from signed up users to the table
 CREATE OR REPLACE FUNCTION insertUser(InputUsername VARCHAR, InputPassword VARCHAR) RETURNS VOID AS $$
 BEGIN
     INSERT INTO users(username, password) 
@@ -13,7 +13,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Retrieve ID
+-- Retrieve users ID to access their models
 CREATE OR REPLACE FUNCTION getUserID(InputUsername VARCHAR, InputPassword VARCHAR) 
 RETURNS INTEGER AS $$
 DECLARE
@@ -29,7 +29,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Model Table
+-- Model Table, stores the traffic data mainly
 CREATE TABLE IF NOT EXISTS modeltrafficflow (
     -- Main model info
     modelid SERIAL PRIMARY KEY,
@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS modeltrafficflow (
     westboundnorthvph INTEGER NOT NULL,
     westboundsouthvph INTEGER NOT NULL,
 
-    -- Vehicle top speed
+    -- Vehicle speed
     vehicletopspeed INTEGER NOT NULL,
 
     -- Vehicle reaction time and stationary distance
@@ -131,6 +131,7 @@ CREATE OR REPLACE FUNCTION insertModelTrafficFlow(InputModelName VARCHAR, InputS
                                                 InputUserID INTEGER)
                                                 RETURNS VOID AS $$
 BEGIN
+    /* Model data provided by the user */
     INSERT INTO modeltrafficflow (modelname, simulationtime,
                                 northboundvphtotal, southboundvphtotal, eastboundvphtotal, westboundvphtotal,
 
@@ -152,6 +153,7 @@ BEGIN
                                 maximumwaittimeweight, averagewaittimeweight, maximumqueuelengthweight,
                                 
                                 userid)
+    /* Inserted to the model table */                            
     VALUES(InputModelName, InputSimulationTime,
 
     InputNorthboundNorth + InputNorthboundEast + InputNorthboundWest,
@@ -180,16 +182,17 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Model - Retrieve data 
+-- Model, retrieve model names to show to frontend
 CREATE OR REPLACE FUNCTION retrieveAllModelNames(InputUserID INTEGER) RETURNS TABLE(modelid INTEGER, modelname VARCHAR) AS $$
 BEGIN 
     RETURN QUERY
+    /* Only return models that belongs to the user */
     SELECT modeltrafficflow.modelid, modeltrafficflow.modelname FROM modeltrafficflow
     WHERE modeltrafficflow.userid = InputUserID;
 END;
 $$ LANGUAGE plpgsql;
 
--- Junction Configuration Table
+-- Junction Configuration Table, stores the junction design of the user
 CREATE TABLE IF NOT EXISTS junctionconfigurations (
     -- Main junction info
     junctionid SERIAL PRIMARY KEY,
@@ -236,6 +239,7 @@ CREATE OR REPLACE FUNCTION insertJunctionConfigurations(InputJunctionName VARCHA
                                                         InputModelID INTEGER)
                                                         RETURNS VOID AS $$
 BEGIN 
+    /* Retrieve junction data from the frontend */
     INSERT INTO junctionconfigurations(junctionname, numberoflanes, junctionsidelength,
                                         pedestriancrossingadded, pedestriancrossingduration, pedestriancrossingrequestsperhour,
                                         northboundorder, southboundorder, eastboundorder, westboundorder,
@@ -243,6 +247,7 @@ BEGIN
                                         leftturnlane, rightturnlane,
                                         speciallane, speciallaneratio,
                                         modelid) 
+    /* Insert into the junction table */
     VALUES(InputJunctionName, InputNumberOfLanes, InputJunctionSideLength,
     InputPedestrianCrossingAdded, InputPedestrianCrossingDuration, InputPedestrianRequestsPerHour,
     InputNorthboundOrder, InputSouthboundOrder, InputEastboundOrder, InputWestboundOrder,
@@ -258,6 +263,7 @@ CREATE OR REPLACE FUNCTION retrieveAllModelJunctions(inputmodelid INTEGER)
 RETURNS TABLE(junctionid INTEGER, junctionname VARCHAR) AS $$
 BEGIN
     RETURN QUERY
+    /* Retrieve junction data from the user */
     SELECT junctionconfigurations.junctionid, junctionconfigurations.junctionname
     FROM junctionconfigurations
     WHERE junctionconfigurations.modelid = inputmodelid;
@@ -283,6 +289,7 @@ RETURNS TABLE (modelid INTEGER, simulationtime INTEGER,
             AS $$
 BEGIN
     RETURN QUERY
+    /* Retrieve the model data based on the model id of which the junction belongs to */
     SELECT modeltrafficflow.modelid, modeltrafficflow.simulationtime,
         modeltrafficflow.northboundvphtotal, modeltrafficflow.southboundvphtotal, modeltrafficflow.eastboundvphtotal, modeltrafficflow.westboundvphtotal,
         modeltrafficflow.northboundnorthvph, modeltrafficflow.northboundeastvph, modeltrafficflow.northboundwestvph,
@@ -344,11 +351,13 @@ CREATE OR REPLACE FUNCTION insertJunctionPerformance(InputNorthMaxWait INTEGER, 
                                                     InputJunctionID INTEGER)
                                                     RETURNS VOID AS $$
 BEGIN 
+    /* Retrieve simulation results */
     INSERT INTO junctionperformance(northmaximumwaittime, northaveragewaittime, northmaximumqueuelength, northtotalvehiclespassed,
                                     southmaximumwaittime, southaveragewaittime, southmaximumqueuelength, southtotalvehiclespassed,
                                     eastmaximumwaittime, eastaveragewaittime, eastmaximumqueuelength, easttotalvehiclespassed,
                                     westmaximumwaittime, westaveragewaittime, westmaximumqueuelength, westtotalvehiclespassed,
                                     junctionid)
+    /* Insert into the junction performance table */
     VALUES(InputNorthMaxWait, InputNorthAverageWait, InputNorthMaxQueue, InputNorthTotal,
         InputSouthMaxWait, InputSouthAverageWait, InputSouthMaxQueue, InputSouthTotal,
         InputEastMaxWait, InputEastAverageWait, InputEastMaxQueue, InputEastTotal,
@@ -368,6 +377,7 @@ RETURNS TABLE (
 $$
 BEGIN
     RETURN QUERY
+    /* Return the junction performance data to be used if needed for visualisations */
     SELECT 
         northmaximumwaittime, northaveragewaittime, northmaximumqueuelength, northtotalvehiclespassed,
         southmaximumwaittime, southaveragewaittime, southmaximumqueuelength, southtotalvehiclespassed,

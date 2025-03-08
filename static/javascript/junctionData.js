@@ -1,14 +1,17 @@
+/* JS for junction page, sends model and junction id to backend for visualisations */
 document.addEventListener("DOMContentLoaded", () => {
+    /* Get junction folder */
     const junctionsFolder = document.getElementById("junctionsFolder");
 
-    // Fetch the model ID dynamically (e.g., from a hidden input, a global variable, or URL)
+    /* Get model id */
     const modelId = getModelId();
 
-    // Fetch and populate junction cards dynamically
     async function fetchJunctions() {
+        /* Fetches and render junctions on frontend */
         const response = await fetch(`/api/junctions?modelId=${modelId}`);
         const junctions = await response.json();
-
+        
+        /* Render junctions to frontend */
         junctionsFolder.innerHTML = junctions
             .map(
                 (junction) => `
@@ -31,20 +34,18 @@ document.addEventListener("DOMContentLoaded", () => {
         attachCardListeners();
     }
 
-    // Attach click event listeners to junction cards
+    /* When junction is clicked, able send its model and junction id to backend */
     function attachCardListeners() {
         const junctionCards = document.querySelectorAll(".junction-card");
         junctionCards.forEach((card) => {
             card.addEventListener("click", () => {
                 const junctionId = card.getAttribute("data-junctionid");
-
-                // Send data to backend
                 sendJunctionDataToBackend(modelId, junctionId);
             });
         });
     }
 
-    // Send the modelId and junctionId to the backend
+    /* Sends model id and junction to backend */
     async function sendJunctionDataToBackend(modelId, junctionId) {
         const response = await fetch(`/api/receiveJunctionData`, {
             method: "POST",
@@ -61,7 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Function to dynamically get the model ID
+    /* Use URL to get model id */
     function getModelId() {
         const urlParams = new URLSearchParams(window.location.search);
         const modelId = urlParams.get("modelId");

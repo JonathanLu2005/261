@@ -1,12 +1,15 @@
+/* JS for model page */
 document.addEventListener("DOMContentLoaded", async () => {
+    /* Get model folder and input */
     const modelsFolder = document.getElementById("modelsFolder");
     const searchInput = document.getElementById("searchInput");
+    let allModels = []; 
 
-    let allModels = []; // Store all models to filter dynamically
-
+    /* Render models to frontend */
     function renderModels(models) {
         modelsFolder.innerHTML = "";
 
+        /* Provide card style for each model */
         models.forEach((model) => {
             const modelCard = document.createElement("div");
             modelCard.className = "col";
@@ -20,6 +23,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     }
 
+    /* Get all models from backend to render */
     async function fetchModels() {
         try {
             const response = await fetch("/api/models");
@@ -30,6 +34,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     }
 
+    /* Get all models that have similar name to query and render the filtered models */
     function filterModels(query) {
         const filteredModels = allModels.filter((model) =>
             model.name.toLowerCase().includes(query.toLowerCase())
@@ -37,10 +42,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         renderModels(filteredModels);
     }
 
-    // Fetch models on page load
+    /* Render models when page loads */
     await fetchModels();
 
-    // Add event listener for the search input
     searchInput.addEventListener("input", (e) => {
         const query = e.target.value.trim();
         filterModels(query);

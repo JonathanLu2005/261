@@ -1,18 +1,17 @@
+/* For the junction page */
 document.addEventListener("DOMContentLoaded", async () => {
+    /* Gets the junction form */
     const junctionForm = document.getElementById("addJunctionForm");
-    const junctionsFolder = document.getElementById("junctionsFolder");
 
     document.addEventListener("DOMContentLoaded", async () => {
+      /* Get junctions folder */
       const junctionsFolder = document.getElementById("junctionsFolder");
-  
-      // Check if junctionsFolder is available
-      console.log("junctionsFolder element:", junctionsFolder);
-  
-      // Render junctions function
+
+      /* Function to show junctions in junctions folder */
       const renderJunctions = (junctions) => {
-        // Check if junctions are being passed correctly
-        console.log("Junctions to render:", junctions);
         junctionsFolder.innerHTML = "";
+
+        /* Create cards for each junction to show to frontend */
         junctions.forEach((junction) => {
           const junctionCard = document.createElement("div");
           junctionCard.className = "col";
@@ -23,20 +22,22 @@ document.addEventListener("DOMContentLoaded", async () => {
               </div>
             </div>`;
   
-          // Append card to the container
+          /* Append card to the junction folder */
           junctionsFolder.appendChild(junctionCard);
-
         });
       };
   
-      // Fetch junction data from your API
+      /* Fetch junction data from API */
       const fetchJunctions = async () => {
+        /* Use URL to get model id */
         const urlParams = new URLSearchParams(window.location.search);
         const modelId = urlParams.get("modelId");
         if (!modelId) {
           console.error("Missing modelId in URL");
           return;
         }
+
+        /* Call function in backend to get all junctions and show to frontend */
         try {
           const response = await fetch(`/api/junctions?modelId=${modelId}`);
           if (response.ok) {
@@ -50,7 +51,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       };
       
-      // Call the function
+      /* Call function */
       fetchJunctions();
     });
 
@@ -258,13 +259,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     // 6. 处理表单提交（Save 按钮）
     // ---------------------------
 
-    // Handle form submission (for adding a junction)
+    /* Handle junctions form */
     junctionForm.addEventListener("submit", async (event) => {
+      /* Get data from junction form */
       event.preventDefault();
       const formData = new FormData(junctionForm);
       const junctionData = Object.fromEntries(formData);
 
-      // Get modelId from URL
+      /* Get model id from url */
       const urlParams = new URLSearchParams(window.location.search);
       const modelId = urlParams.get("modelId");
       if (!modelId) {
@@ -275,6 +277,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       junctionData.modelId = modelId;
 
       try {
+        /* Add the junction in backend */
         const response = await fetch("/addJunction", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -282,7 +285,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
 
         if (response.ok) {
-          await fetchJunctions(); // Refresh junction list
+          /* After adding new junction, fetch the new junction, and hide the modal after adding junction */
+          await fetchJunctions(); 
           junctionForm.reset();
           const junctionModal = document.getElementById("addJunctionModal");
           const modalInstance = bootstrap.Modal.getInstance(junctionModal);

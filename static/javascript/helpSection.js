@@ -1,4 +1,6 @@
+/* For help section */
 const texts = {
+    /* Texts for different parts of help section */
     overview: `
         Challenged by restricted resources, councils have had limited success in improving road networks. This warrants the
         creation of a system to allow users to model junctions and simulate their traffic flow to determine their effectiveness.
@@ -48,6 +50,7 @@ const texts = {
     `
 };
 
+/* Changes text of help section when clicked on */
 function changeText(section) {
     document.getElementById('main-text').innerHTML = texts[section];
 }

@@ -6,11 +6,13 @@ Your Models
 
 {% block content %}
 <div class="container mt-5">
-    <!-- Add Model and Search Bar -->
     <div class="d-flex align-items-center mb-3">
+        <!-- Add model -->
         <button class="btn btn-primary me-4" data-bs-toggle="modal" data-bs-target="#addModelModal">
             Add Model
         </button>
+
+        <!-- Search by name -->
         <input 
             type="text" 
             id="searchInput" 
@@ -19,17 +21,17 @@ Your Models
         />
     </div>
 
-    <!-- Models Grid -->
+    <!-- Models dynamically appears here -->
     <div id="modelsFolder" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
-        <!-- Model cards appear here -->
     </div>
 </div>
 
-<!-- Modal for adding model -->
+<!-- Modal to add models -->
 <div class="modal fade" id="addModelModal" tabindex="-1" aria-labelledby="addModelModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <form id="addModelForm">
+                <!-- Header -->
                 <div class="modal-header" style="background-color: #2B7A78">
                     <h5 class="modal-title text-white" id="addModelModalLabel">
                         Add New Model 
@@ -39,23 +41,23 @@ Your Models
                 
                 <!-- Modal Body -->
                 <div class="modal-body" style="background-color: #DEF2F1">
-                    <!-- Step 1: name and Simulation Time -->
+                    <!-- Step 1: enter the model name and how long itll run for -->
                     <div class="step" id="step1">
                         <div class="mb-3">
                             <label for="modelName" class="form-label">
-                                Please type in the name of your Simulation
+                                Please type in the name of your Model
                             </label>
                             <input type="text" class="form-control" id="modelName" name="name" placeholder="Model Name" required>
                         </div>
                         <div class="mb-3">
                             <label for="simulationTime" class="form-label">
-                                Please provide your Simulation Time (in minutes)
+                                Please provide your Model Time (in minutes)
                             </label>
                             <input type="number" step="0.01" class="form-control" id="simulationTime" name="simulationTime" placeholder="Simulation Time" required>
                         </div>
                     </div>
 
-                    <!-- Step 2: Northbound -->
+                    <!-- Step 2: Northbound, provide vehicles per hour -->
                     <div class="step d-none" id="step2">
                         <p>Please provide the Vehicles Per Hour heading Northbound</p>
                         <div class="mb-3">
@@ -78,7 +80,7 @@ Your Models
                         </div>
                     </div>
 
-                    <!-- Step 3: Southbound -->
+                    <!-- Step 3: Southbound, provide vehicles per hour -->
                     <div class="step d-none" id="step3">
                         <p>Please provide the Vehicles Per Hour heading Southbound</p>
                         <div class="mb-3">
@@ -101,7 +103,7 @@ Your Models
                         </div>
                     </div>
 
-                    <!-- Step 4: Westbound -->
+                    <!-- Step 4: Westbound, provide vehicles per hour -->
                     <div class="step d-none" id="step4">
                         <p>Please provide the Vehicles Per Hour heading Westbound</p>
                         <div class="mb-3">
@@ -124,7 +126,7 @@ Your Models
                         </div>
                     </div>
 
-                    <!-- Step 5: Eastbound -->
+                    <!-- Step 5: Eastbound, provide vehicles per hour -->
                     <div class="step d-none" id="step5">
                         <p>Please provide the Vehicles Per Hour heading Eastbound</p>
                         <div class="mb-3">
@@ -147,12 +149,12 @@ Your Models
                         </div>
                     </div>
 
-                    <!-- Step 6: Vehicle Info 1 -->
+                    <!-- Step 6: Provide vehicle speed, reaction time, and station distance -->
                     <div class="step d-none" id="step6">
                         <p>Please provide information about the Vehicles Speed, Reaction Time, and Distance</p>
                         <div class="mb-3">
                             <label for="vehicleTopSpeed" class="form-label">
-                                Vehicle's Top Speed
+                                Vehicle's Speed
                             </label>
                             <input type="number" class="form-control" id="vehicleTopSpeed" name="vehicleTopSpeed" placeholder="Vehicle Top Speed" required>
                         </div>
@@ -170,7 +172,7 @@ Your Models
                         </div>
                     </div>
 
-                    <!-- Step 7: Vehicle Info 2 -->
+                    <!-- Step 7: Provide vehicle length and length fluctuation -->
                     <div class="step d-none" id="step7">
                         <p>Please provide information about the Vehicles Length and Length Fluctuation</p>
                         <div class="mb-3">
@@ -188,13 +190,13 @@ Your Models
                         </div>                        
                     </div>
 
-                    <!-- Step 8: Special Vehicle Info -->
+                    <!-- Step 8: Provide bus and cycle speed, length, and length fluctuation -->
                     <div class="step d-none" id="step8">
                         <p>If added, please provide information about Buses/Cycles</p>
 
                         <div class="mb-3">
                             <label for="vehicleTopSpeedSpecial" class="form-label">
-                                Buses/Cycles Top Speed
+                                Buses/Cycles Speed
                             </label>
                             <input type="number" class="form-control" id="vehicleTopSpeedSpecial" name="vehicleTopSpeedSpecial" placeholder="Vehicle Top Speed" required>
                         </div>
@@ -214,7 +216,7 @@ Your Models
                         </div>                        
                     </div>
 
-                    <!-- Step 9: Special Northbound -->
+                    <!-- Step 9: Provide bus and cycle per hour northbound -->
                     <div class="step d-none" id="step9">
                         <p>If added, please provide buses/cycles heading Northbound</p>
                         <div class="mb-3">
@@ -237,7 +239,7 @@ Your Models
                         </div>
                     </div>
 
-                    <!-- Step 10: Southbound -->
+                    <!-- Step 10: Provide bus and cycle per hour southbound -->
                     <div class="step d-none" id="step10">
                         <p>If added, please provide buses/cycles heading Southbound</p>
                         <div class="mb-3">
@@ -260,7 +262,7 @@ Your Models
                         </div>
                     </div>
 
-                    <!-- Step 11: Westbound -->
+                    <!-- Step 11: Provide bus and cycle per hour westbound -->
                     <div class="step d-none" id="step11">
                         <p>If added, please provide buses/cycles heading Westbound</p>
                         <div class="mb-3">
@@ -283,7 +285,7 @@ Your Models
                         </div>
                     </div>
 
-                    <!-- Step 12: Eastbound -->
+                    <!-- Step 12: Provide bus and cycle per hour eastbound -->
                     <div class="step d-none" id="step12">
                         <p>If added, please provide buses/cycles heading Eastbound</p>
                         <div class="mb-3">
@@ -306,7 +308,7 @@ Your Models
                         </div>
                     </div>
 
-                    <!-- Step 13: Weighting -->
+                    <!-- Step 13: Weighting to determine how much of a factor matters more than the other -->
                     <div class="step d-none" id="step13">
                         <p>
                             The junctions will be ranked by Maximum Wait Time, Average Wait Time, and Maximum Queue Length.
@@ -326,6 +328,7 @@ Your Models
 
                 <!-- Modal Footer -->
                 <div class="modal-footer" style="background-color: #2B7A78">
+                    <!-- Buttons to navigate and save the model data -->
                     <button type="button" class="btn btn-warning d-none" id="prev">Back</button>
                     <button type="button" class="btn btn-warning" id="next">Next</button>
                     <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel</button>
@@ -338,6 +341,7 @@ Your Models
 {% endblock %}
 
 {% block scripts %}
+<!-- JS code to operate the model page -->
 <script src="{{ url_for('static', filename='javascript/addModel.js') }}"></script>
 <script src="{{ url_for('static', filename='javascript/modelSearchBar.js') }}"></script>
 <script src="{{ url_for('static', filename='javascript/modelFolderNavigation.js') }}"></script>
