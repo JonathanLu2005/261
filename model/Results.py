@@ -1,4 +1,4 @@
-from .TrafficControl import TrafficControl, Direction
+from TrafficControl import TrafficControl, Direction
 import time
 
 class Results:
@@ -115,5 +115,5 @@ def runModel(sideLengthOfJunction, lengthOfSim, carSpeed, carLength, realisticLe
     specialPVH: Similar to generalVPH, except for buses/cycles instead of Cars. 
 """
 #runModel(0.1, 360, 15, 3, 0, 1, 0, 1, [[0,0,0], [0,0,0], [0,0,0], [0,0,0]], False, False, True, 10, 60, [Direction.North, Direction.East, Direction.South, Direction.West], [60,60,60,60], 3, 15, 1.5, True, 1, [[0,0,60], [0,0,60], [0,0,60], [0,0,60]])
-
+runModel(10, 360, 15, 3, 0, 1, 0, 1, [[400,400,400], [400,400,400], [400,400,400], [400,400,400]], False, False, True, 10, 60, [Direction.North, Direction.East, Direction.South, Direction.West], [0,60,60,60], 3, 15, 1.5, False, 0, [[0,0,60], [0,0,60], [0,0,60], [0,0,60]])
 # sideLengthOfJunction, lengthOfSim, simulationTimeUnit, carSpeed, carLength, realisticLengthFluctuation, carStationaryDistance, carReactionTime, numberOfGeneralLanes, generalVPH, hasLeftTurnLanes, hasRightTurnLanes,  hasPedestrianCrossings, crossingPedestrianTime, crossingRequestsPerHour, trafficLightSequence, trafficLightGreenTimes, specialLength, specialSpeed, specialRealisticLengthFluctuation, hasSpecialVehicleLane, specialVehicleRatio, specialPVH):

@@ -234,7 +234,7 @@ class TrafficControl:
                         # Signal Green for Cars, and "yield" the green light time required for the vehicles of the junction.
                         self.junctionEntrances[direction].signalGreen()
                         print(f"Signal Green to {direction} for cars at {env.now}")
-                        yield env.timeout(carGreenTime - 1) # Ensure that the car that spawns after the carGreenTime does not spawn and enter the junction immediately.
+                        yield env.timeout(carGreenTime - 1) if (carGreenTime - 1 >= 0) else env.timeout(0) # Ensure that the car that spawns after the carGreenTime does not spawn and enter the junction immediately.
                         # Signal Red for Cars, and "yield" the required amount of time to ensure that vehicles fully exit the junction before the next event happens in the simulation.
                         print(f"Signal Red to {direction} for cars at {env.now}")
                         self.junctionEntrances[direction].signalRed()
@@ -251,7 +251,7 @@ class TrafficControl:
                             specialGreenTime = remainingTime  # Adjust to prevent exceeding endTime
                         self.junctionEntrances[direction].signalSpecialGreen()
                         print(f"Signal Green to {direction} for buses/cycles at {env.now}")
-                        yield env.timeout(specialGreenTime - 1) # Ensure that the car that spawns after the carGreenTime does not spawn.
+                        yield env.timeout(specialGreenTime - 1) if (specialGreenTime - 1 >= 0)  else env.timeout(0) # Ensure that the car that spawns after the carGreenTime does not spawn.
                         print(f"Signal Red to {direction} for buses/cycles at {env.now}")
                         self.junctionEntrances[direction].signalSpecialRed()
                         yield env.timeout(1) # Ensure we still wait for that 1 that we skipped before to ensure that cars dont spawn.
@@ -266,7 +266,7 @@ class TrafficControl:
                             totalGreenTime = remainingTime # Adjust to prevent exceeding endTime
                         self.junctionEntrances[direction].signalGreen()
                         print(f"Signal Green to {direction} at {env.now}")
-                        yield env.timeout(totalGreenTime - 1) # Ensure that the car that spawns after the carGreenTime does not spawn.
+                        yield env.timeout(totalGreenTime - 1) if (totalGreenTime - 1 >= 0)  else env.timeout(0)# Ensure that the car that spawns after the carGreenTime does not spawn.
                         print(f"Signal Red to {direction} at {env.now}")
                         self.junctionEntrances[direction].signalRed()
                         yield env.timeout(1) # Ensure we still wait for that 1 that we skipped before to ensure that cars dont spawn.
