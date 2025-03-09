@@ -1,4 +1,4 @@
-from TrafficControl import TrafficControl, Direction
+from .TrafficControl import TrafficControl, Direction
 import time
 
 class Results:
