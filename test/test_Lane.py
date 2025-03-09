@@ -97,6 +97,7 @@ def test_lane_add_car():
     assert lane.numberOfCarsPresent == 2
     assert lane.leadingCar != lane.trailingCar
     assert lane.maxQueueLength == 2
+    assert lane.leadingCar.speed == TrafficControl.carSpeed
 
     print_green("test_lane_add_car: Test Passed")
 

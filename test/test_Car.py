@@ -111,8 +111,8 @@ def test_get_gap_to_car_ahead():
     junction_entrance = Direction.North
     lane = Lane(junction_entrance, False)
 
-    car_ahead = Car(10, Direction.West, env.now, None, lane)
-    car_behind = Car(0, Direction.West, env.now, car_ahead, lane)
+    car_ahead = Car(0, Direction.West, env.now, None, lane)
+    car_behind = Car(7, Direction.West, env.now, car_ahead, lane)
 
     expected_gap = car_behind.distanceFromJunctionEntrance - car_ahead.distanceFromJunctionEntrance - car_ahead.length
     assert car_behind.getGapToCarAhead() == expected_gap
