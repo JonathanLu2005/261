@@ -122,7 +122,7 @@ def plot_all_junctions(model_id, conn, metric, ylabel, title):
     else:
         print(f"No data found for model ID: {model_id}")
 
-# Here are the functions to call. Takes the model id as a parameter and produces a bar graph.
+# Functions to call to rint graphs for each parameter
 def plot_max_wait_time_current_junction(modelid):
     with get_database_connection() as conn:
         junction_id, junction_name = get_last_junction_id_and_name(modelid, conn)
@@ -154,14 +154,14 @@ def plot_max_queue_length_all_junctions(model_id):
         plot_all_junctions(model_id, conn, "maximumqueuelength", "Maximum Queue Length", "Maximum Queue Length per Direction for All Junctions")
 
 
-# Calculates the junction ranking and adds it to the database. TO DO: Improve min,max for each variable
-def calculate_junction_ranking(junctionid, avgwaittimeweight, maxwaittimeweight, maxqueuelengthweight):
+# Returns the junction ranking for each junction, calculated through normalisation
+def calculate_junction_ranking(junctionid, conn, avgwaittimeweight, maxwaittimeweight, maxqueuelengthweight):
     minAvgWaitTime = 0
-    maxAvgWaitTime = 400
+    maxAvgWaitTime = 500
     minMaxWaitTime = 0
-    maxMaxWaitTime = 600
+    maxMaxWaitTime = 1000
     minMaxQueueLength = 0
-    maxMaxQueueLength = 50
+    maxMaxQueueLength = 100
     # SQL Queries
     meanAvgWaitTimeQuery = '''
         SELECT (northaveragewaittime + southaveragewaittime + eastaveragewaittime + westaveragewaittime) / 4.0 
@@ -203,41 +203,32 @@ def calculate_junction_ranking(junctionid, avgwaittimeweight, maxwaittimeweight,
         # Weighted ranking
     junctionRanking = (normAvgWaitTime * avgwaittimeweight) +(normMaxWaitTime * maxwaittimeweight) + (normMaxQueueLength * maxqueuelengthweight)
     
-    updateRankingQuery = '''
-        UPDATE junctionperformance
-        SET junction_ranking = %s
-        WHERE junctionid = %s;
-    '''
-    # Store ranking into the database
-    cursor.execute(updateRankingQuery, (junctionRanking, junctionid))
-    conn.commit()  # Save changes
+    return junctionRanking
   
 
-def plot_junction_rankings_for_model(modelid):
-    # SQL Query to retrieve junction rankings for a given model
+def plot_junction_rankings_for_model(modelid, conn, avgwaittimeweight, maxwaittimeweight, maxqueuelengthweight):
+    # SQL Query to retrieve junction ids for a given model
     query = '''
-        SELECT jc.junctionname, jp.overalljunctionscore
-        FROM junctionconfigurations jc
-        JOIN junctionperformance jp ON jc.junctionid = jp.junctionid
-        WHERE jc.modelid = %s;
+        SELECT junctionid, junctionname FROM junctionconfigurations WHERE modelid = %s;
     '''
 
-    conn, cursor = get_database_connection()
+    with conn.cursor() as cursor:
+        # Fetches junction ids
+        cursor.execute(query, (modelid,))
+        results = cursor.fetchall()
     if not conn or not cursor:
         print("Failed to connect to the database.")
         return    
 
-        # Fetch junction rankings for the given model ID
-    cursor.execute(query, (modelid,))
-    results = cursor.fetchall()
+    junction_ids = [row[0] for row in results]
+    junction_names = [row[1] for row in results]
 
-    if not results:
-        print(f"No junction rankings found for model ID {modelid}")
-        return
-        
-        # Extract junction names and rankings
-    junction_names = [row[0] for row in results]
-    rankings = [row[1] for row in results]
+    rankings = []
+    for junction in junction_ids:
+        rankings.append(calculate_junction_ranking(junction, conn, avgwaittimeweight, maxwaittimeweight, maxqueuelengthweight))
+
+
+    
 
         # Plot the rankings
     plt.figure(figsize=(10, 5))
@@ -251,7 +242,5 @@ def plot_junction_rankings_for_model(modelid):
     # Save the plot
     plt.savefig("Junction_Rating_Graph.jpg", bbox_inches='tight', dpi=300)
     plt.close()
-
-
 
 
