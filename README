@@ -7,9 +7,31 @@ Download the project files
 Make sure Python 3.6 or later is installed on your system. You can download it from [python.org](https://www.python.org/downloads/).
 
 Run below to install all dependencies required
+
+### Setting up the virutal environment
+In a bash terminal :
+
 ```bash
-pip install pytest simpy psycopg2 flask matplotlib numpy
+python -m venv venv 
 ```
+
+- Linux/Mac/Windows(bash/powershell)
+    ```bash
+    source venv/Sripts/activate
+    ```
+- Windows(cmd prompt)
+    ```bash
+    venv/Scripts/activate
+    ```
+
+```bash
+pip install -r requirements.txt
+```
+To deactivate the virtual environment run
+```bash
+deactivate
+```
+
 
 ## Running the Application
 

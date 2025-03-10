@@ -1,0 +1,6 @@
+pytest
+simpy
+psycopg2
+flask
+matplotlib
+numpy
